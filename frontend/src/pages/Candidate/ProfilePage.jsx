@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import authApi from '@/api/authApi'
 import useAuth from '@/hooks/useAuth'
-import { LOCATIONS } from '@/utils/constants'
+import { useLocations } from '@/hooks/useCatalog'
 import { getErrorMessage } from '@/utils/formatters'
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth()
+  const locations = useLocations()
   const [form, setForm] = useState({
     fullName: user.fullName ?? '',
     phone: user.phone ?? '',
@@ -68,8 +69,8 @@ export default function ProfilePage() {
             <label htmlFor="location">Nơi làm việc mong muốn</label>
             <select id="location" className="input" value={form.location} onChange={set('location')}>
               <option value="">Chọn địa điểm</option>
-              {LOCATIONS.map((l) => (
-                <option key={l}>{l}</option>
+              {locations.map((l) => (
+                <option key={l.id}>{l.name}</option>
               ))}
             </select>
           </div>

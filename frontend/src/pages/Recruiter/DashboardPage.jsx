@@ -5,7 +5,10 @@ import EmptyState from '@/components/common/EmptyState'
 import Loading from '@/components/common/Loading'
 import useAuth from '@/hooks/useAuth'
 import useFetch from '@/hooks/useFetch'
+import { FEATURES } from '@/utils/constants'
 import { formatDate } from '@/utils/formatters'
+
+const PIPELINE = ['applied', 'screening', 'interview', 'offer', 'hired', 'rejected']
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -14,12 +17,17 @@ export default function DashboardPage() {
   if (loading) return <Loading />
   if (error) return <div className="alert alert-error">{error}</div>
 
+  const { jobs, applications, recentApplications } = stats
+  const byStatus = applications.byStatus
+  const inProgress = (byStatus.screening ?? 0) + (byStatus.interview ?? 0) + (byStatus.offer ?? 0)
   const cards = [
-    { label: 'Tin đang tuyển', value: `${stats.openJobs}/${stats.totalJobs}` },
-    { label: 'Tổng hồ sơ', value: stats.totalApplicants },
-    { label: 'Hồ sơ chờ xử lý', value: stats.pendingApplicants },
-    { label: 'Ứng viên vào vòng trong', value: stats.shortlisted },
-    { label: 'Điểm AI trung bình', value: stats.avgScore ?? '—' },
+    { label: 'Tin đang tuyển', value: `${jobs.published}/${jobs.total}`, to: '/recruiter/jobs?status=published' },
+    { label: 'Tổng hồ sơ', value: applications.total, to: '/recruiter/applicants' },
+    { label: 'Hồ sơ mới chưa xử lý', value: byStatus.applied ?? 0, to: '/recruiter/applicants?status=applied' },
+    { label: 'Đang trong quy trình', value: inProgress },
+    FEATURES.ai
+      ? { label: 'Điểm AI trung bình', value: stats.avgAiScore ?? '—' }
+      : { label: 'Đã tuyển', value: byStatus.hired ?? 0, to: '/recruiter/applicants?status=hired' },
   ]
 
   return (
@@ -38,24 +46,42 @@ export default function DashboardPage() {
         {cards.map((c) => (
           <div key={c.label} className="card stat-card">
             <span className="text-muted">{c.label}</span>
-            <strong>{c.value}</strong>
+            <strong>{c.to ? <Link to={c.to}>{c.value}</Link> : c.value}</strong>
           </div>
         ))}
       </div>
 
-      {stats.pendingApplicants > 0 && (
+      {(byStatus.applied ?? 0) > 0 && (
         <div className="alert alert-info">
-          🤖 Bạn có {stats.pendingApplicants} hồ sơ chờ xử lý.{' '}
-          <Link to="/recruiter/applicants">Dùng AI sàng lọc để tìm ứng viên tiềm năng →</Link>
+          {FEATURES.ai ? '🤖 ' : '📥 '}Bạn có {byStatus.applied} hồ sơ mới chưa xử lý
+          {applications.newLast7Days > 0 && ` (${applications.newLast7Days} hồ sơ nộp trong 7 ngày qua)`}.{' '}
+          <Link to="/recruiter/applicants?status=applied">
+            {FEATURES.ai ? 'Dùng AI sàng lọc để tìm ứng viên tiềm năng →' : 'Xem và xử lý ngay →'}
+          </Link>
         </div>
       )}
+
+      <div className="card">
+        <h2>Pipeline tuyển dụng</h2>
+        <div className="pipeline">
+          {PIPELINE.map((status) => (
+            <Link key={status} to={`/recruiter/applicants?status=${status}`} className="pipeline-step">
+              <strong>{byStatus[status] ?? 0}</strong>
+              <StatusBadge status={status} />
+            </Link>
+          ))}
+        </div>
+        <p className="text-muted small">
+          Tin: {jobs.draft} bản nháp · {jobs.paused} tạm dừng · {jobs.closed} đã đóng · {jobs.expired} hết hạn
+        </p>
+      </div>
 
       <div className="card">
         <div className="page-header">
           <h2>Hồ sơ mới nhận</h2>
           <Link to="/recruiter/applicants">Xem tất cả →</Link>
         </div>
-        {stats.recentApplications.length === 0 ? (
+        {recentApplications.length === 0 ? (
           <EmptyState title="Chưa có hồ sơ ứng tuyển" description="Đăng tin tuyển dụng để bắt đầu nhận hồ sơ." />
         ) : (
           <div className="table-wrap">
@@ -65,20 +91,25 @@ export default function DashboardPage() {
                   <th>Ứng viên</th>
                   <th>Vị trí ứng tuyển</th>
                   <th>Ngày nộp</th>
-                  <th>Điểm AI</th>
+                  {FEATURES.ai && <th>Điểm AI</th>}
                   <th>Trạng thái</th>
                   <th />
                 </tr>
               </thead>
               <tbody>
-                {stats.recentApplications.map((a) => (
+                {recentApplications.map((a) => (
                   <tr key={a.id}>
                     <td>
                       <strong>{a.candidate?.fullName}</strong>
+                      <div className="text-muted">{a.candidate?.headline}</div>
                     </td>
                     <td>{a.job?.title}</td>
                     <td>{formatDate(a.appliedAt)}</td>
-                    <td>{a.aiReview ? <strong>{a.aiReview.score}</strong> : <span className="text-muted">Chưa lọc</span>}</td>
+                    {FEATURES.ai && (
+                      <td>
+                        {a.aiReview ? <strong>{a.aiReview.score}</strong> : <span className="text-muted">Chưa lọc</span>}
+                      </td>
+                    )}
                     <td>
                       <StatusBadge status={a.status} />
                     </td>

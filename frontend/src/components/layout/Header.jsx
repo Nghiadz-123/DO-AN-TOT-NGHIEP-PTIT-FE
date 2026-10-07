@@ -40,7 +40,7 @@ export default function Header() {
         <div className="header-actions">
           {user ? (
             <>
-              <Link to={user.role === ROLES.CANDIDATE ? '/profile' : '/recruiter'} className="user-chip">
+              <Link to={user.role === ROLES.CANDIDATE ? '/profile' : '/recruiter/account'} className="user-chip">
                 <span className="avatar">{user.fullName.charAt(0)}</span>
                 <span className="user-name">{user.fullName}</span>
               </Link>

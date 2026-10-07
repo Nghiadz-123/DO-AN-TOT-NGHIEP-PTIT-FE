@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import applicationApi from '@/api/applicationApi'
 import jobApi from '@/api/jobApi'
-import Badge, { StatusBadge } from '@/components/common/Badge'
+import Badge, { JobStatusBadge, StatusBadge } from '@/components/common/Badge'
+import CompanyLogo from '@/components/common/CompanyLogo'
 import Loading from '@/components/common/Loading'
 import ApplyModal from '@/components/jobs/ApplyModal'
 import useAuth from '@/hooks/useAuth'
 import useFetch from '@/hooks/useFetch'
-import { JOB_LEVELS, JOB_TYPES, ROLES } from '@/utils/constants'
-import { formatDate, formatSalary, isExpired, labelOf } from '@/utils/formatters'
+import { FEATURES, JOB_LEVELS, JOB_TYPES, ROLES, WORK_MODES } from '@/utils/constants'
+import { formatDate, formatSalary, labelOf } from '@/utils/formatters'
 
 export default function JobDetailPage() {
   const { id } = useParams()
@@ -16,7 +17,7 @@ export default function JobDetailPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [applyOpen, setApplyOpen] = useState(false)
-  const isCandidate = user?.role === ROLES.CANDIDATE
+  const isCandidate = FEATURES.candidate && user?.role === ROLES.CANDIDATE
 
   const { data: job, loading, error } = useFetch(() => jobApi.getById(id), [id])
   const { data: myApplications, setData: setMyApplications } = useFetch(
@@ -28,11 +29,12 @@ export default function JobDetailPage() {
   if (error) return <div className="alert alert-error">{error}</div>
 
   const application = myApplications?.find((a) => a.jobId === job.id)
-  const closed = job.status !== 'open' || isExpired(job.deadline)
+  const closed = job.status !== 'published'
 
   const renderApplyButton = () => {
     if (user?.role === ROLES.RECRUITER) return null
-    if (closed) return <button className="btn btn-primary btn-lg" disabled>Đã hết hạn nhận hồ sơ</button>
+    if (closed) return <button className="btn btn-primary btn-lg" disabled>Đã ngừng nhận hồ sơ</button>
+    if (!FEATURES.candidate) return <span className="text-muted">Ứng tuyển trực tuyến sẽ sớm ra mắt</span>
     if (!user)
       return (
         <button className="btn btn-primary btn-lg" onClick={() => navigate('/login', { state: { from: location } })}>
@@ -60,16 +62,17 @@ export default function JobDetailPage() {
       </Link>
 
       <div className="card job-detail-header">
-        <div className="company-logo company-logo-lg">{job.company.charAt(0)}</div>
+        <CompanyLogo name={job.company} src={job.companyLogo} large />
         <div className="job-detail-info">
           <h1>{job.title}</h1>
           <p className="text-muted">{job.company}</p>
           <div className="job-meta">
-            <span>📍 {job.location}</span>
-            <span>💰 {formatSalary(job.salaryMin, job.salaryMax)}</span>
+            {job.location && <span>📍 {job.location}</span>}
+            <span>💰 {formatSalary(job.salaryMin, job.salaryMax, job.isSalaryNegotiable)}</span>
             <span>⏰ Hạn nộp: {formatDate(job.deadline)}</span>
             <Badge tone="info">{labelOf(JOB_TYPES, job.type)}</Badge>
             <Badge>{labelOf(JOB_LEVELS, job.level)}</Badge>
+            {closed && <JobStatusBadge status={job.status} />}
           </div>
         </div>
         <div className="job-detail-actions">{renderApplyButton()}</div>
@@ -79,7 +82,7 @@ export default function JobDetailPage() {
         <div className="card">
           <section className="job-section">
             <h2>Mô tả công việc</h2>
-            <p>{job.description}</p>
+            <p className="pre-line">{job.description}</p>
           </section>
           <section className="job-section">
             <h2>Yêu cầu ứng viên</h2>
@@ -97,6 +100,12 @@ export default function JobDetailPage() {
                   <li key={b}>{b}</li>
                 ))}
               </ul>
+            </section>
+          )}
+          {job.address && (
+            <section className="job-section">
+              <h2>Địa điểm làm việc</h2>
+              <p>{[job.address, job.location].filter(Boolean).join(', ')}</p>
             </section>
           )}
         </div>
@@ -119,13 +128,27 @@ export default function JobDetailPage() {
               <dd>{labelOf(JOB_LEVELS, job.level)}</dd>
               <dt>Hình thức</dt>
               <dd>{labelOf(JOB_TYPES, job.type)}</dd>
+              {job.workMode && (
+                <>
+                  <dt>Chế độ làm việc</dt>
+                  <dd>{labelOf(WORK_MODES, job.workMode)}</dd>
+                </>
+              )}
+              {job.headcount > 0 && (
+                <>
+                  <dt>Số lượng tuyển</dt>
+                  <dd>{job.headcount}</dd>
+                </>
+              )}
+              <dt>Kinh nghiệm</dt>
+              <dd>{job.minYearsExperience ? `Từ ${job.minYearsExperience} năm` : 'Không yêu cầu'}</dd>
               <dt>Ngày đăng</dt>
-              <dd>{formatDate(job.createdAt)}</dd>
+              <dd>{formatDate(job.publishedAt ?? job.createdAt)}</dd>
               <dt>Số hồ sơ đã nộp</dt>
               <dd>{job.applicantCount}</dd>
             </dl>
           </div>
-          {isCandidate && !application && (
+          {FEATURES.ai && isCandidate && !application && (
             <div className="card ai-box">
               <div className="ai-box-title">✨ Mẹo từ AI</div>
               <p className="text-muted">

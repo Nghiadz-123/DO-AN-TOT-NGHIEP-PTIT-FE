@@ -4,10 +4,11 @@ import jobApi from '@/api/jobApi'
 import Loading from '@/components/common/Loading'
 import JobCard from '@/components/jobs/JobCard'
 import useAuth from '@/hooks/useAuth'
+import { useLocations } from '@/hooks/useCatalog'
 import useFetch from '@/hooks/useFetch'
-import { LOCATIONS, ROLES } from '@/utils/constants'
+import { FEATURES, ROLES } from '@/utils/constants'
 
-const FEATURES = [
+const AI_FEATURES = [
   {
     icon: '📄',
     title: 'AI chấm điểm CV',
@@ -30,12 +31,21 @@ const FEATURES = [
   },
 ]
 
+// Khi backend chưa có module AI: giới thiệu các chức năng dành cho nhà tuyển dụng đã có
+const EMPLOYER_FEATURES = [
+  { icon: '📝', title: 'Đăng tin nhanh', text: 'Soạn tin, lưu nháp và đăng tin tuyển dụng chỉ trong vài phút.' },
+  { icon: '📋', title: 'Quản lý tin tập trung', text: 'Theo dõi trạng thái, hạn nộp, tạm dừng hoặc đóng tin bất kỳ lúc nào.' },
+  { icon: '👥', title: 'Pipeline ứng viên', text: 'Đưa ứng viên qua các vòng sàng lọc, phỏng vấn, đề nghị và tuyển dụng.' },
+  { icon: '🏢', title: 'Hồ sơ công ty', text: 'Xây dựng thương hiệu tuyển dụng với logo và thông tin công ty.' },
+]
+
 export default function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [keyword, setKeyword] = useState('')
   const [location, setLocation] = useState('')
-  const { data: jobs, loading } = useFetch(() => jobApi.getAll(), [])
+  const locations = useLocations()
+  const { data: jobs, loading } = useFetch(() => jobApi.getAll({ pageSize: 6 }), [])
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -48,7 +58,10 @@ export default function HomePage() {
   const cta =
     user?.role === ROLES.RECRUITER
       ? { to: '/recruiter/jobs/new', label: 'Đăng tin tuyển dụng' }
-      : { to: user ? '/cv-analysis' : '/register', label: 'Chấm điểm CV miễn phí' }
+      : FEATURES.candidate
+        ? { to: user ? '/cv-analysis' : '/register', label: 'Chấm điểm CV miễn phí' }
+        : { to: '/register', label: 'Đăng tin tuyển dụng miễn phí' }
+  const features = FEATURES.ai ? AI_FEATURES : EMPLOYER_FEATURES
 
   return (
     <>
@@ -66,8 +79,10 @@ export default function HomePage() {
           />
           <select className="input" value={location} onChange={(e) => setLocation(e.target.value)}>
             <option value="">Tất cả địa điểm</option>
-            {LOCATIONS.map((l) => (
-              <option key={l}>{l}</option>
+            {locations.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
             ))}
           </select>
           <button className="btn btn-primary">Tìm kiếm</button>
@@ -78,7 +93,7 @@ export default function HomePage() {
       </section>
 
       <section className="grid grid-4 features">
-        {FEATURES.map((f) => (
+        {features.map((f) => (
           <div key={f.title} className="card feature">
             <div className="feature-icon">{f.icon}</div>
             <h3>{f.title}</h3>
@@ -96,7 +111,7 @@ export default function HomePage() {
           <Loading />
         ) : (
           <div className="grid grid-3">
-            {jobs?.slice(0, 6).map((job) => (
+            {jobs?.results.map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
           </div>
