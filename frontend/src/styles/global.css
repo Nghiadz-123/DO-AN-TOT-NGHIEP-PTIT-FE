@@ -1353,3 +1353,176 @@ textarea.input {
     align-items: flex-start;
   }
 }
+
+/* ---------- Kết nối backend: phân trang, pipeline, lịch sử, đánh giá ---------- */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.row-busy {
+  opacity: 0.5;
+}
+
+.form-footer {
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.pre-line {
+  white-space: pre-line;
+}
+
+.company-logo-img {
+  object-fit: contain;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.logo-uploader {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.plain-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.role-option.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.pipeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+}
+
+.pipeline-step:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.pipeline-step strong {
+  font-size: 1.4rem;
+}
+
+.info-list-left dd {
+  text-align: left;
+}
+
+.candidate-summary {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.cv-viewer {
+  width: 100%;
+  height: 720px;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.cv-parsed-box {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+.rating {
+  display: flex;
+  gap: 2px;
+}
+
+.rating-star {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--border);
+  cursor: pointer;
+}
+
+.rating-star.active {
+  color: #f59e0b;
+}
+
+.rating-star:disabled {
+  cursor: wait;
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.history-item {
+  position: relative;
+  padding: 0 0 14px 18px;
+  border-left: 2px solid var(--primary-soft);
+}
+
+.history-item::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.history-item:last-child {
+  padding-bottom: 0;
+}
+
+.history-note {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .pipeline {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cv-viewer {
+    height: 480px;
+  }
+}

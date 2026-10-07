@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '@/hooks/useAuth'
-import { ROLES, USE_MOCK } from '@/utils/constants'
+import { FEATURES, ROLES, USE_MOCK } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
 
+// Khi gọi API thật, tài khoản demo có sau khi chạy `python manage.py seed_demo` ở backend
 const DEMO_ACCOUNTS = [
-  { label: 'Ứng viên demo', email: 'candidate@demo.com' },
+  FEATURES.candidate && { label: 'Ứng viên demo', email: 'candidate@demo.com' },
   { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
-]
+].filter(Boolean)
+const SHOW_DEMO = USE_MOCK || import.meta.env.DEV
 
 const homeOf = (user) => (user.role === ROLES.RECRUITER ? '/recruiter' : '/jobs')
 
@@ -64,9 +66,11 @@ export default function LoginPage() {
           {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
 
-        {USE_MOCK && (
+        {SHOW_DEMO && (
           <div className="demo-accounts">
-            <small className="text-muted">Dùng thử nhanh (mật khẩu 123456):</small>
+            <small className="text-muted">
+              {USE_MOCK ? 'Dùng thử nhanh (mật khẩu 123456):' : 'Tài khoản demo từ seed_demo (mật khẩu 123456):'}
+            </small>
             {DEMO_ACCOUNTS.map((a) => (
               <button
                 key={a.email}

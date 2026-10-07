@@ -3,20 +3,28 @@ import { Link, useSearchParams } from 'react-router-dom'
 import jobApi from '@/api/jobApi'
 import EmptyState from '@/components/common/EmptyState'
 import Loading from '@/components/common/Loading'
+import Pagination from '@/components/common/Pagination'
 import JobCard from '@/components/jobs/JobCard'
 import useAuth from '@/hooks/useAuth'
+import { useLocations } from '@/hooks/useCatalog'
 import useFetch from '@/hooks/useFetch'
-import { JOB_LEVELS, JOB_TYPES, LOCATIONS, ROLES } from '@/utils/constants'
+import { FEATURES, JOB_LEVELS, JOB_TYPES, ROLES } from '@/utils/constants'
 
 const FILTER_KEYS = ['keyword', 'location', 'type', 'level']
+const PAGE_SIZE = 12
 
 export default function JobListPage() {
   const { user } = useAuth()
+  const locations = useLocations()
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = Object.fromEntries(FILTER_KEYS.map((k) => [k, searchParams.get(k) ?? '']))
+  const page = Number(searchParams.get('page') ?? 1)
   const [keyword, setKeyword] = useState(filters.keyword)
 
-  const { data: jobs, loading, error } = useFetch(() => jobApi.getAll(filters), [searchParams.toString()])
+  const { data, loading, error } = useFetch(
+    () => jobApi.getAll({ ...filters, page, pageSize: PAGE_SIZE }),
+    [searchParams.toString()],
+  )
 
   const updateFilters = (changes) => {
     const next = { ...filters, ...changes }
@@ -51,8 +59,10 @@ export default function JobListPage() {
         />
         <select className="input" value={filters.location} onChange={(e) => updateFilters({ location: e.target.value })}>
           <option value="">Tất cả địa điểm</option>
-          {LOCATIONS.map((l) => (
-            <option key={l}>{l}</option>
+          {locations.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
           ))}
         </select>
         <select className="input" value={filters.type} onChange={(e) => updateFilters({ type: e.target.value })}>
@@ -74,7 +84,7 @@ export default function JobListPage() {
         <button className="btn btn-primary">Tìm kiếm</button>
       </form>
 
-      {user?.role === ROLES.CANDIDATE && (
+      {FEATURES.ai && user?.role === ROLES.CANDIDATE && (
         <div className="alert alert-info">
           ✨ Muốn biết công việc nào hợp với bạn nhất? <Link to="/recommended-jobs">Xem việc làm AI gợi ý theo CV</Link>
         </div>
@@ -82,12 +92,12 @@ export default function JobListPage() {
 
       {loading && <Loading />}
       {error && <div className="alert alert-error">{error}</div>}
-      {jobs && (
+      {data && !loading && (
         <>
-          <p className="text-muted">Tìm thấy {jobs.length} việc làm</p>
-          {jobs.length ? (
+          <p className="text-muted">Tìm thấy {data.count} việc làm</p>
+          {data.results.length ? (
             <div className="grid grid-3">
-              {jobs.map((job) => (
+              {data.results.map((job) => (
                 <JobCard key={job.id} job={job} />
               ))}
             </div>
@@ -102,6 +112,12 @@ export default function JobListPage() {
               }
             />
           )}
+          <Pagination
+            page={data.page}
+            totalPages={data.totalPages}
+            count={data.count}
+            onChange={(p) => setSearchParams({ ...Object.fromEntries(searchParams), page: String(p) })}
+          />
         </>
       )}
     </>

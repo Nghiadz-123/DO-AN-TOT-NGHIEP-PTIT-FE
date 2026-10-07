@@ -1,5 +1,7 @@
 // Mô phỏng các tính năng AI (bóc tách CV, chấm điểm, so khớp, sàng lọc) bằng luật đơn giản.
 // Khi có backend thật, các kết quả này sẽ do NLP/LLM phía server trả về với cùng cấu trúc.
+import { JOB_LEVELS } from '@/utils/constants'
+import { labelOf } from '@/utils/formatters'
 import { normalize } from '@/utils/text'
 
 const EDU_DEFAULT = {
@@ -62,7 +64,8 @@ const TRENDING_KEYWORDS = {
   general: ['Git', 'SQL', 'REST API', 'Docker', 'Agile'],
 }
 
-const LEVEL_YEARS = { Intern: 0, Fresher: 0, Junior: 1, Middle: 2, Senior: 4, Lead: 5 }
+const LEVEL_YEARS = { intern: 0, fresher: 0, junior: 1, middle: 2, senior: 4, lead: 5, manager: 5 }
+const levelLabel = (level) => labelOf(JOB_LEVELS, level)
 
 const TITLE_STOPWORDS = new Set(['developer', 'engineer', 'thuc', 'tap', 'sinh', 'nhan', 'vien', 'fresher', 'junior', 'senior'])
 
@@ -261,8 +264,8 @@ export function matchCVToJob(cv, job) {
   reasons.push(`Đáp ứng ${matchedSkills.length}/${job.skills.length} kỹ năng yêu cầu`)
   reasons.push(
     expRatio >= 1
-      ? `Kinh nghiệm ${years} năm phù hợp cấp độ ${job.level}`
-      : `Kinh nghiệm ${years} năm, thấp hơn mức ${requiredYears} năm của cấp độ ${job.level}`,
+      ? `Kinh nghiệm ${years} năm phù hợp cấp độ ${levelLabel(job.level)}`
+      : `Kinh nghiệm ${years} năm, thấp hơn mức ${requiredYears} năm của cấp độ ${levelLabel(job.level)}`,
   )
   if (titleMatch) reasons.push('Định hướng nghề nghiệp phù hợp với vị trí')
 
@@ -277,7 +280,7 @@ export function screenApplication(cv, job, coverLetter) {
   const strengths = []
   const concerns = []
   if (match.matchedSkills.length) strengths.push(`Có các kỹ năng: ${match.matchedSkills.join(', ')}`)
-  if (match.years >= match.requiredYears) strengths.push(`${match.years} năm kinh nghiệm, đạt yêu cầu cấp độ ${job.level}`)
+  if (match.years >= match.requiredYears) strengths.push(`${match.years} năm kinh nghiệm, đạt yêu cầu cấp độ ${levelLabel(job.level)}`)
   else concerns.push(`Kinh nghiệm ${match.years} năm, chưa đạt ${match.requiredYears} năm theo yêu cầu`)
   if (match.missingSkills.length) concerns.push(`Thiếu kỹ năng: ${match.missingSkills.join(', ')}`)
   if (cv.links?.length) strengths.push('Có sản phẩm/mã nguồn công khai để kiểm chứng')
