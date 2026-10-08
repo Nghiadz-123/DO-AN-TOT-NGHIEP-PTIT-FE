@@ -4,6 +4,7 @@ import useAuth from '@/hooks/useAuth'
 import { ROLES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
 
+// Chi cho phep dang ky candidate va recruiter, khong cho dang ky admin
 const ROLE_OPTIONS = [
   { value: ROLES.CANDIDATE, title: 'Ứng viên', text: 'Tìm việc, chấm điểm CV bằng AI' },
   { value: ROLES.RECRUITER, title: 'Nhà tuyển dụng', text: 'Đăng tin, AI sàng lọc hồ sơ' },

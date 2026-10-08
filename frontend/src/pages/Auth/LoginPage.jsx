@@ -7,9 +7,14 @@ import { getErrorMessage } from '@/utils/formatters'
 const DEMO_ACCOUNTS = [
   { label: 'Ứng viên demo', email: 'candidate@demo.com' },
   { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
+  { label: 'Admin demo', email: 'admin@demo.com' },
 ]
 
-const homeOf = (user) => (user.role === ROLES.RECRUITER ? '/recruiter' : '/jobs')
+const homeOf = (user) => {
+  if (user.role === ROLES.RECRUITER) return '/recruiter'
+  if (user.role === ROLES.ADMIN) return '/admin'
+  return '/jobs'
+}
 
 export default function LoginPage() {
   const { user, login } = useAuth()

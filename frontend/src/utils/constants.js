@@ -6,6 +6,7 @@ export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
 export const ROLES = {
   CANDIDATE: 'candidate',
   RECRUITER: 'recruiter',
+  ADMIN: 'admin',
 }
 
 export const TOKEN_KEY = 'access_token'

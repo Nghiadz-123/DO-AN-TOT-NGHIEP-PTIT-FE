@@ -1,4 +1,4 @@
-// Dữ liệu mẫu cho chế độ mock. Tài khoản demo: candidate@demo.com / recruiter@demo.com (mật khẩu 123456)
+// Dữ liệu mẫu cho chế độ mock. Tài khoản demo: candidate@demo.com / recruiter@demo.com / admin@demo.com (mật khẩu 123456)
 
 const EDU_PTIT = {
   school: 'Học viện Công nghệ Bưu chính Viễn thông',
@@ -7,6 +7,14 @@ const EDU_PTIT = {
 }
 
 const users = [
+  {
+    id: 'u-admin-1',
+    email: 'admin@demo.com',
+    password: '123456',
+    role: 'admin',
+    fullName: 'Admin Hệ Thống',
+    phone: '',
+  },
   {
     id: 'u-cand-1',
     email: 'candidate@demo.com',

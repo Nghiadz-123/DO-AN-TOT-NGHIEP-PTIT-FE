@@ -1,7 +1,7 @@
 import { getToken } from '@/utils/storage'
 import { seed } from './seed'
 
-const STORAGE_KEY = 'ats_mock_db_v1'
+const STORAGE_KEY = 'ats_mock_db_v2'
 let db = null
 
 export function getDb() {

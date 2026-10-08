@@ -12,6 +12,8 @@ const authMock = {
 
   async register({ fullName, email, password, role, companyName }) {
     await delay()
+    // Khong cho phep dang ky role admin tu form
+    if (role === 'admin') throw httpError(403, 'Không thể đăng ký tài khoản admin.')
     const db = getDb()
     const normalizedEmail = email.trim().toLowerCase()
     if (db.users.some((u) => u.email === normalizedEmail)) throw httpError(400, 'Email đã được sử dụng.')
