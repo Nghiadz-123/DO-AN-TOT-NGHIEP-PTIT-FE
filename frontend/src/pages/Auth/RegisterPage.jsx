@@ -1,20 +1,33 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import useAuth from '@/hooks/useAuth'
-import { ROLES } from '@/utils/constants'
+import { FEATURES, ROLES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
 
 // Chi cho phep dang ky candidate va recruiter, khong cho dang ky admin
 const ROLE_OPTIONS = [
-  { value: ROLES.CANDIDATE, title: 'Ứng viên', text: 'Tìm việc, chấm điểm CV bằng AI' },
-  { value: ROLES.RECRUITER, title: 'Nhà tuyển dụng', text: 'Đăng tin, AI sàng lọc hồ sơ' },
+  {
+    value: ROLES.CANDIDATE,
+    title: 'Ứng viên',
+    text: FEATURES.candidate ? 'Tìm việc, chấm điểm CV bằng AI' : 'Sắp ra mắt',
+    disabled: !FEATURES.candidate,
+  },
+  {
+    value: ROLES.RECRUITER,
+    title: 'Nhà tuyển dụng',
+    text: FEATURES.ai ? 'Đăng tin, AI sàng lọc hồ sơ' : 'Đăng tin, quản lý hồ sơ ứng viên',
+  },
 ]
+
+// Trang đích sau khi đăng ký. Dùng chung cho guard bên dưới: khi user vừa được tạo, guard render trước
+// lệnh navigate nên hai nơi phải cùng đích
+const homeOf = (user) => (user.role === ROLES.RECRUITER ? '/recruiter' : '/cv-analysis')
 
 export default function RegisterPage() {
   const { user, register } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({
-    role: ROLES.CANDIDATE,
+    role: FEATURES.candidate ? ROLES.CANDIDATE : ROLES.RECRUITER,
     fullName: '',
     email: '',
     companyName: '',
@@ -24,14 +37,14 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  if (user) return <Navigate to="/" replace />
+  if (user) return <Navigate to={homeOf(user)} replace />
 
   const isRecruiter = form.role === ROLES.RECRUITER
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (form.password.length < 6) return setError('Mật khẩu phải có ít nhất 6 ký tự.')
+    if (form.password.length < 8) return setError('Mật khẩu phải có ít nhất 8 ký tự.')
     if (form.password !== form.confirmPassword) return setError('Mật khẩu xác nhận không khớp.')
 
     setSubmitting(true)
@@ -40,7 +53,7 @@ export default function RegisterPage() {
       const { confirmPassword: _confirm, ...data } = form
       if (!isRecruiter) delete data.companyName
       const newUser = await register(data)
-      navigate(newUser.role === ROLES.RECRUITER ? '/recruiter' : '/cv-analysis', { replace: true })
+      navigate(homeOf(newUser), { replace: true })
     } catch (err) {
       setError(getErrorMessage(err))
       setSubmitting(false)
@@ -54,8 +67,18 @@ export default function RegisterPage() {
 
         <div className="role-picker">
           {ROLE_OPTIONS.map((r) => (
-            <label key={r.value} className={`role-option ${form.role === r.value ? 'selected' : ''}`}>
-              <input type="radio" name="role" value={r.value} checked={form.role === r.value} onChange={set('role')} />
+            <label
+              key={r.value}
+              className={`role-option ${form.role === r.value ? 'selected' : ''} ${r.disabled ? 'disabled' : ''}`}
+            >
+              <input
+                type="radio"
+                name="role"
+                value={r.value}
+                checked={form.role === r.value}
+                disabled={r.disabled}
+                onChange={set('role')}
+              />
               <strong>{r.title}</strong>
               <small className="text-muted">{r.text}</small>
             </label>
@@ -92,6 +115,7 @@ export default function RegisterPage() {
               type="password"
               className="input"
               required
+              autoComplete="new-password"
               value={form.password}
               onChange={set('password')}
             />
@@ -103,11 +127,13 @@ export default function RegisterPage() {
               type="password"
               className="input"
               required
+              autoComplete="new-password"
               value={form.confirmPassword}
               onChange={set('confirmPassword')}
             />
           </div>
         </div>
+        <small className="text-muted">Mật khẩu tối thiểu 8 ký tự, không quá đơn giản hoặc chỉ gồm chữ số.</small>
         <button className="btn btn-primary btn-block" disabled={submitting}>
           {submitting ? 'Đang tạo tài khoản...' : 'Đăng ký'}
         </button>

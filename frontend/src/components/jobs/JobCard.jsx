@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import Badge from '@/components/common/Badge'
+import CompanyLogo from '@/components/common/CompanyLogo'
 import ScoreCircle from '@/components/common/ScoreCircle'
-import { JOB_LEVELS, JOB_TYPES } from '@/utils/constants'
+import { JOB_LEVELS, JOB_TYPES, WORK_MODES } from '@/utils/constants'
 import { formatDate, formatSalary, labelOf } from '@/utils/formatters'
 
 export default function JobCard({ job, match }) {
@@ -10,7 +11,7 @@ export default function JobCard({ job, match }) {
   return (
     <article className="card job-card">
       <div className="job-card-head">
-        <div className="company-logo">{job.company.charAt(0)}</div>
+        <CompanyLogo name={job.company} src={job.companyLogo} />
         <div className="job-card-title">
           <Link to={`/jobs/${job.id}`}>
             <h3>{job.title}</h3>
@@ -21,9 +22,10 @@ export default function JobCard({ job, match }) {
       </div>
 
       <div className="job-meta">
-        <span>📍 {job.location}</span>
-        <span>💰 {formatSalary(job.salaryMin, job.salaryMax)}</span>
+        {job.location && <span>📍 {job.location}</span>}
+        <span>💰 {formatSalary(job.salaryMin, job.salaryMax, job.isSalaryNegotiable)}</span>
         <Badge tone="info">{labelOf(JOB_TYPES, job.type)}</Badge>
+        {job.workMode && job.workMode !== 'onsite' && <Badge tone="primary">{labelOf(WORK_MODES, job.workMode)}</Badge>}
         <Badge>{labelOf(JOB_LEVELS, job.level)}</Badge>
       </div>
 

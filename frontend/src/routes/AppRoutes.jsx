@@ -11,8 +11,10 @@ import HomePage from '@/pages/Home/HomePage'
 import JobDetailPage from '@/pages/Jobs/JobDetailPage'
 import JobListPage from '@/pages/Jobs/JobListPage'
 import NotFoundPage from '@/pages/NotFound/NotFoundPage'
+import AccountPage from '@/pages/Recruiter/AccountPage'
 import ApplicantDetailPage from '@/pages/Recruiter/ApplicantDetailPage'
 import ApplicantsPage from '@/pages/Recruiter/ApplicantsPage'
+import CompanyProfilePage from '@/pages/Recruiter/CompanyProfilePage'
 import DashboardPage from '@/pages/Recruiter/DashboardPage'
 import JobFormPage from '@/pages/Recruiter/JobFormPage'
 import ManageJobsPage from '@/pages/Recruiter/ManageJobsPage'
@@ -52,6 +54,8 @@ export default function AppRoutes() {
           <Route path="jobs/:id/edit" element={<JobFormPage />} />
           <Route path="applicants" element={<ApplicantsPage />} />
           <Route path="applicants/:id" element={<ApplicantDetailPage />} />
+          <Route path="company" element={<CompanyProfilePage />} />
+          <Route path="account" element={<AccountPage />} />
         </Route>
       </Route>
     </Routes>

@@ -35,10 +35,10 @@ export const delay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, 
 
 export const genId = (prefix) => `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
 
-// Tạo lỗi có cấu trúc giống lỗi axios để UI xử lý thống nhất
-export function httpError(status, detail) {
+// Tạo lỗi có cấu trúc giống lỗi axios / backend để UI xử lý thống nhất
+export function httpError(status, detail, code = 'error') {
   const error = new Error(detail)
-  error.response = { status, data: { detail } }
+  error.response = { status, data: { detail, code } }
   return error
 }
 
@@ -46,6 +46,11 @@ export function publicUser(user) {
   if (!user) return null
   const copy = { ...user }
   delete copy.password
+  if (user.companyId) {
+    const company = getDb().companies.find((c) => c.id === user.companyId)
+    copy.companyName = company?.name ?? ''
+    copy.companyLogo = company?.logoUrl ?? null
+  }
   return copy
 }
 
@@ -62,8 +67,31 @@ export function requireRole(role) {
   return user
 }
 
+// Nhà tuyển dụng đang đăng nhập + công ty của họ
+export function requireRecruiter() {
+  const user = requireRole('employer')
+  const company = getDb().companies.find((c) => c.id === user.companyId)
+  if (!company) throw httpError(403, 'Tài khoản nhà tuyển dụng chưa thuộc công ty nào.')
+  return { user, company }
+}
+
 export function findOr404(list, id, name = 'Dữ liệu') {
   const item = list.find((x) => x.id === id)
   if (!item) throw httpError(404, `${name} không tồn tại.`)
   return item
 }
+
+// Phân trang giống backend: { count, totalPages, page, pageSize, results }
+export function paginate(list, { page = 1, pageSize = 20 } = {}) {
+  const totalPages = Math.max(1, Math.ceil(list.length / pageSize))
+  if (page > totalPages) throw httpError(404, 'Trang không hợp lệ.', 'not_found')
+  return {
+    count: list.length,
+    totalPages,
+    page: Number(page),
+    pageSize,
+    results: list.slice((page - 1) * pageSize, page * pageSize),
+  }
+}
+
+export const isPastDate = (date) => Boolean(date) && new Date(date) < new Date(new Date().toDateString())
