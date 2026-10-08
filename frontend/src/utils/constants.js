@@ -121,6 +121,23 @@ export const SUGGESTION_PRIORITY = {
 export const CV_ACCEPT = '.pdf,.doc,.docx'
 export const CV_MAX_SIZE = 5 * 1024 * 1024
 
+export const CV_MIME_TYPES = {
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+}
+
+// Trình độ học vấn trên CV ứng viên
+export const EDUCATION_LEVELS = [
+  { value: 'high_school', label: 'Trung học phổ thông' },
+  { value: 'vocational', label: 'Trung cấp' },
+  { value: 'college', label: 'Cao đẳng' },
+  { value: 'bachelor', label: 'Đại học' },
+  { value: 'master', label: 'Thạc sĩ' },
+  { value: 'doctorate', label: 'Tiến sĩ' },
+  { value: 'other', label: 'Khác' },
+]
+
 export const LOGO_ACCEPT = '.jpg,.jpeg,.png,.webp'
 export const LOGO_MAX_SIZE = 2 * 1024 * 1024
 

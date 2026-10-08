@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import applicationApi from '@/api/applicationApi'
 import cvApi from '@/api/cvApi'
+import Badge from '@/components/common/Badge'
 import EmptyState from '@/components/common/EmptyState'
 import Loading from '@/components/common/Loading'
 import Modal from '@/components/common/Modal'
@@ -17,7 +18,8 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const selectedCvId = cvId || cvs?.[0]?.id || ''
+  // Mặc định chọn CV chính
+  const selectedCvId = cvId || (cvs?.find((cv) => cv.isDefault) ?? cvs?.[0])?.id || ''
 
   // AI đánh giá nhanh mức độ phù hợp của CV đang chọn với công việc
   useEffect(() => {
@@ -74,7 +76,7 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
           title="Bạn chưa có CV nào"
           description="Hãy tải CV lên để ứng tuyển và nhận đánh giá từ AI."
           action={
-            <Link to="/cv-analysis" className="btn btn-primary">
+            <Link to={`/cv/new?redirect=/jobs/${job.id}`} className="btn btn-primary">
               Tải CV lên
             </Link>
           }
@@ -94,12 +96,15 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
                     onChange={() => setCvId(cv.id)}
                   />
                   <span>
-                    <strong>{cv.fileName}</strong>
-                    <small className="text-muted"> · Tải lên {formatDate(cv.uploadedAt)}</small>
+                    <strong>{cv.title || cv.fileName}</strong> {cv.isDefault && <Badge tone="primary">CV chính</Badge>}
+                    <small className="text-muted"> · Cập nhật {formatDate(cv.updatedAt ?? cv.uploadedAt)}</small>
                   </span>
                 </label>
               ))}
             </div>
+            <Link to={`/cv/new?redirect=/jobs/${job.id}`} className="small">
+              + Tải CV khác
+            </Link>
           </div>
 
           <div className="ai-box">

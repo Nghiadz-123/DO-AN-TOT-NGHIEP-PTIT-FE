@@ -1,13 +1,15 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import useAuth from '@/hooks/useAuth'
-import { ROLES } from '@/utils/constants'
+import { FEATURES, ROLES } from '@/utils/constants'
 
+// ai: chỉ hiện khi backend đã có module AI (FEATURES.ai)
 const CANDIDATE_LINKS = [
   { to: '/jobs', label: 'Tìm việc' },
-  { to: '/cv-analysis', label: 'CV & AI chấm điểm' },
-  { to: '/recommended-jobs', label: 'Việc làm phù hợp' },
+  { to: '/cv', label: 'CV của tôi' },
+  { to: '/cv-analysis', label: 'AI chấm điểm CV', ai: true },
+  { to: '/recommended-jobs', label: 'Việc làm phù hợp', ai: true },
   { to: '/my-applications', label: 'Đơn ứng tuyển' },
-]
+].filter((link) => !link.ai || FEATURES.ai)
 
 const RECRUITER_LINKS = [
   { to: '/jobs', label: 'Việc làm' },

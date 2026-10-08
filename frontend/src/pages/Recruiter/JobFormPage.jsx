@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import catalogApi from '@/api/catalogApi'
 import jobApi from '@/api/jobApi'
 import { JobStatusBadge } from '@/components/common/Badge'
 import Loading from '@/components/common/Loading'
+import SkillInput from '@/components/common/SkillInput'
 import { useLocations } from '@/hooks/useCatalog'
 import useFetch from '@/hooks/useFetch'
 import { FEATURES, JOB_LEVELS, JOB_TYPES, WORK_MODES } from '@/utils/constants'
@@ -50,67 +50,6 @@ const toForm = (job) => ({
   requirements: job.requirements.join('\n'),
   benefits: (job.benefits ?? []).join('\n'),
 })
-
-function SkillInput({ value, onChange }) {
-  const [text, setText] = useState('')
-  const [suggestions, setSuggestions] = useState([])
-
-  // Gợi ý từ danh mục kỹ năng chuẩn hóa (backend gom "ReactJS", "React.js" về "React")
-  useEffect(() => {
-    const keyword = text.trim()
-    if (!keyword) return undefined
-    const timer = setTimeout(() => {
-      catalogApi
-        .searchSkills(keyword)
-        .then((items) => setSuggestions(items.map((s) => s.name)))
-        .catch(() => setSuggestions([]))
-    }, 250)
-    return () => clearTimeout(timer)
-  }, [text])
-
-  const add = () => {
-    const skills = text
-      .split(',')
-      .map((s) => s.trim())
-      .filter((s) => s && !value.some((v) => v.toLowerCase() === s.toLowerCase()))
-    if (skills.length) onChange([...value, ...skills])
-    setText('')
-  }
-
-  return (
-    <div className="skill-input">
-      <div className="tags">
-        {value.map((s) => (
-          <span key={s} className="tag">
-            {s}
-            <button type="button" onClick={() => onChange(value.filter((x) => x !== s))} aria-label={`Xóa ${s}`}>
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
-      <input
-        className="input"
-        list="skill-suggestions"
-        placeholder="Nhập kỹ năng rồi nhấn Enter (VD: React, Python)"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            add()
-          }
-        }}
-        onBlur={add}
-      />
-      <datalist id="skill-suggestions">
-        {suggestions.map((s) => (
-          <option key={s} value={s} />
-        ))}
-      </datalist>
-    </div>
-  )
-}
 
 function JobForm({ initial, job }) {
   const navigate = useNavigate()

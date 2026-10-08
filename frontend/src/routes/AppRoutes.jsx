@@ -4,6 +4,8 @@ import RecruiterLayout from '@/layouts/RecruiterLayout'
 import LoginPage from '@/pages/Auth/LoginPage'
 import RegisterPage from '@/pages/Auth/RegisterPage'
 import CVAnalysisPage from '@/pages/Candidate/CVAnalysisPage'
+import CVFormPage from '@/pages/Candidate/CVFormPage'
+import ManageCVsPage from '@/pages/Candidate/ManageCVsPage'
 import MyApplicationsPage from '@/pages/Candidate/MyApplicationsPage'
 import ProfilePage from '@/pages/Candidate/ProfilePage'
 import RecommendedJobsPage from '@/pages/Candidate/RecommendedJobsPage'
@@ -33,6 +35,9 @@ export default function AppRoutes() {
 
         <Route element={<ProtectedRoute role={ROLES.CANDIDATE} />}>
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/cv" element={<ManageCVsPage />} />
+          <Route path="/cv/new" element={<CVFormPage />} />
+          <Route path="/cv/:id/edit" element={<CVFormPage />} />
           <Route path="/cv-analysis" element={<CVAnalysisPage />} />
           <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />
           <Route path="/my-applications" element={<MyApplicationsPage />} />

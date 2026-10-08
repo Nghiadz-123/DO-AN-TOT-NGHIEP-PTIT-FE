@@ -13,6 +13,7 @@ import {
   requireRole,
   saveDb,
 } from '../db'
+import { getFile } from '../fileStore'
 import { effectiveStatus, jobView } from './jobMock'
 
 // View-model của một hồ sơ (cùng cấu trúc với adapters.toApplication khi gọi API thật)
@@ -29,13 +30,13 @@ export function expandApplication(app) {
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
-      headline: cv?.parsed?.title ?? user.title,
-      yearsOfExperience: cv?.parsed?.yearsOfExperience,
-      level: null,
+      headline: cv?.desiredPosition || (cv?.parsed?.title ?? user.title),
+      yearsOfExperience: cv?.yearsOfExperience ?? cv?.parsed?.yearsOfExperience,
+      level: cv?.level || null,
       location: user.location,
-      summary: cv?.parsed?.summary ?? user.about ?? '',
+      summary: cv?.summary || (cv?.parsed?.summary ?? user.about ?? ''),
     },
-    cv: cv && { ...cv, title: cv.fileName, mimeType: 'application/pdf' },
+    cv: cv && { ...cv, title: cv.title || cv.fileName, mimeType: cv.mimeType ?? 'application/pdf' },
     allowedTransitions: APPLICATION_TRANSITIONS[app.status] ?? [],
   }
 }
@@ -153,10 +154,12 @@ const applicationMock = {
     return expandApplication(app)
   },
 
-  // Chế độ mock không có file CV thật: trả về bản tóm tắt dạng text
+  // File CV ứng viên đã tải lên (IndexedDB); CV mẫu không có file thật thì trả bản tóm tắt dạng text
   async downloadCv(id) {
     await delay(300)
     const app = expandApplication(ownApplication(id))
+    const file = await getFile(app.cvId)
+    if (file) return { blob: file, fileName: app.cv.fileName }
     const parsed = app.cv?.parsed ?? {}
     const content = [
       `${parsed.fullName ?? app.candidate.fullName} - ${parsed.title ?? ''}`,
