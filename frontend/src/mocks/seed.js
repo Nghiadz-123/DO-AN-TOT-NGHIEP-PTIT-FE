@@ -1,9 +1,4 @@
-// Dữ liệu mẫu cho chế độ mock (giống lệnh `python manage.py seed_demo` của backend).
-// Tài khoản demo: candidate@demo.com / recruiter@demo.com (mật khẩu 123456)
-
-const DAY = 24 * 60 * 60 * 1000
-const daysAgo = (n) => new Date(Date.now() - n * DAY).toISOString()
-const daysFromNow = (n) => new Date(Date.now() + n * DAY).toISOString().slice(0, 10)
+// Dữ liệu mẫu cho chế độ mock. Tài khoản demo: candidate@demo.com / recruiter@demo.com / admin@demo.com (mật khẩu 123456)
 
 const EDU_PTIT = {
   school: 'Học viện Công nghệ Bưu chính Viễn thông',
@@ -12,6 +7,14 @@ const EDU_PTIT = {
 }
 
 const users = [
+  {
+    id: 'u-admin-1',
+    email: 'admin@demo.com',
+    password: '123456',
+    role: 'admin',
+    fullName: 'Admin Hệ Thống',
+    phone: '',
+  },
   {
     id: 'u-cand-1',
     email: 'candidate@demo.com',

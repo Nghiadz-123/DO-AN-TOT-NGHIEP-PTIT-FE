@@ -18,6 +18,7 @@ import CompanyProfilePage from '@/pages/Recruiter/CompanyProfilePage'
 import DashboardPage from '@/pages/Recruiter/DashboardPage'
 import JobFormPage from '@/pages/Recruiter/JobFormPage'
 import ManageJobsPage from '@/pages/Recruiter/ManageJobsPage'
+import AdminPage from '@/pages/Admin/AdminPage'
 import { ROLES } from '@/utils/constants'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -38,6 +39,10 @@ export default function AppRoutes() {
           <Route path="/my-applications" element={<MyApplicationsPage />} />
         </Route>
 
+        <Route element={<ProtectedRoute role={ROLES.ADMIN} />}>
+          <Route path="/admin" element={<AdminPage />} />
+        </Route>
+
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
@@ -56,3 +61,4 @@ export default function AppRoutes() {
     </Routes>
   )
 }
+
