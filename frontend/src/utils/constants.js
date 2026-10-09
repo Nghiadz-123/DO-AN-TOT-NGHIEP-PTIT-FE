@@ -14,7 +14,7 @@ export const FEATURES = {
 
 export const ROLES = {
   CANDIDATE: 'candidate',
-  RECRUITER: 'recruiter',
+  RECRUITER: 'employer',
   ADMIN: 'admin',
 }
 
