@@ -182,3 +182,56 @@ export const toDashboard = (dto) => ({
   recentApplications: dto.recent_applications.map(toApplication),
   avgAiScore: null,
 })
+
+// ---------------------------------------------------------------- CV ứng viên
+export const toCV = (dto) => ({
+  id: dto.id,
+  title: dto.title ?? '',
+  fileName: dto.original_filename,
+  fileSize: dto.file_size,
+  mimeType: dto.mime_type,
+  desiredPosition: dto.desired_position ?? '',
+  type: dto.job_type ?? '',
+  workMode: dto.work_mode ?? '',
+  level: dto.current_level ?? '',
+  locationId: dto.desired_location?.id ?? '',
+  location: dto.desired_location?.name ?? '',
+  yearsOfExperience: dto.years_of_experience ?? 0,
+  educationLevel: dto.education_level ?? '',
+  salaryMin: toMillion(dto.expected_salary_min),
+  salaryMax: toMillion(dto.expected_salary_max),
+  isSalaryNegotiable: Boolean(dto.is_salary_negotiable),
+  skills: (dto.skills ?? []).map((s) => s.name),
+  summary: dto.summary ?? '',
+  isDefault: Boolean(dto.is_default),
+  applicationCount: dto.application_count ?? 0,
+  uploadedAt: dto.created_at,
+  updatedAt: dto.updated_at ?? dto.created_at,
+  parsed: dto.parsed_data ?? null, // AI bóc tách (giai đoạn sau)
+  analysis: dto.analysis ?? null,
+})
+
+// multipart/form-data: file (bắt buộc khi tạo, tùy chọn khi sửa) + thông tin CV.
+// Giá trị rỗng gửi "" (DRF hiểu là null với field allow_null); skills gửi lặp lại từng tên.
+export function toCVFormData(form, file) {
+  const data = new FormData()
+  if (file) data.append('file', file)
+  const fields = {
+    title: form.title.trim(),
+    desired_position: form.desiredPosition.trim(),
+    job_type: form.type,
+    work_mode: form.workMode,
+    current_level: form.level,
+    desired_location_id: form.locationId,
+    years_of_experience: Number(form.yearsOfExperience) || 0,
+    education_level: form.educationLevel,
+    expected_salary_min: toVnd(form.salaryMin),
+    expected_salary_max: toVnd(form.salaryMax),
+    is_salary_negotiable: form.isSalaryNegotiable,
+    summary: form.summary,
+    is_default: form.isDefault,
+  }
+  Object.entries(fields).forEach(([key, value]) => data.append(key, value ?? ''))
+  form.skills.forEach((name) => data.append('skills', name))
+  return data
+}

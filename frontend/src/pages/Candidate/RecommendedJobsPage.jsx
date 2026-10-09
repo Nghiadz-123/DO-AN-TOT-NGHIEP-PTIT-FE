@@ -18,7 +18,7 @@ export default function RecommendedJobsPage() {
   const [minScore, setMinScore] = useState(0)
   const { data: cvs, loading: loadingCvs } = useFetch(() => cvApi.getMine(), [])
 
-  const cvId = searchParams.get('cvId') || cvs?.[0]?.id
+  const cvId = searchParams.get('cvId') || (cvs?.find((cv) => cv.isDefault) ?? cvs?.[0])?.id
   const { data: recommendations, loading, error } = useFetch(
     () => (cvId ? jobApi.getRecommended(cvId) : Promise.resolve([])),
     [cvId],
@@ -32,7 +32,7 @@ export default function RecommendedJobsPage() {
         title="Bạn chưa có CV"
         description="Tải CV lên để AI phân tích kỹ năng, kinh nghiệm và gợi ý những công việc phù hợp nhất."
         action={
-          <Link to="/cv-analysis" className="btn btn-primary">
+          <Link to="/cv/new?redirect=/recommended-jobs" className="btn btn-primary">
             Tải CV lên
           </Link>
         }
@@ -59,7 +59,7 @@ export default function RecommendedJobsPage() {
           <select className="input" value={cvId} onChange={(e) => setSearchParams({ cvId: e.target.value })}>
             {cvs.map((cv) => (
               <option key={cv.id} value={cv.id}>
-                {cv.fileName}
+                {cv.title || cv.fileName}
               </option>
             ))}
           </select>

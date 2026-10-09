@@ -7,20 +7,14 @@ import ScoreCircle from '@/components/common/ScoreCircle'
 import CVAnalysisResult from '@/components/cv/CVAnalysisResult'
 import CVParsedInfo from '@/components/cv/CVParsedInfo'
 import useFetch from '@/hooks/useFetch'
-import { CV_ACCEPT, CV_MAX_SIZE } from '@/utils/constants'
+import { CV_ACCEPT } from '@/utils/constants'
+import { validateCvFile } from '@/utils/file'
 import { formatDate, formatFileSize, getErrorMessage } from '@/utils/formatters'
 
 const TABS = [
   { key: 'analysis', label: '✨ AI chấm điểm & gợi ý' },
   { key: 'parsed', label: '📄 Thông tin trích xuất' },
 ]
-
-function validateFile(file) {
-  const ext = file.name.split('.').pop().toLowerCase()
-  if (!['pdf', 'doc', 'docx'].includes(ext)) return 'Chỉ hỗ trợ file PDF, DOC hoặc DOCX.'
-  if (file.size > CV_MAX_SIZE) return 'Dung lượng file tối đa 5MB.'
-  return null
-}
 
 export default function CVAnalysisPage() {
   const { data: cvs, loading, error, setData: setCvs } = useFetch(() => cvApi.getMine(), [])
@@ -46,7 +40,7 @@ export default function CVAnalysisPage() {
   }
 
   const handleFile = async (file) => {
-    const invalid = validateFile(file)
+    const invalid = validateCvFile(file)
     if (invalid) return setActionError(invalid)
 
     setUploading(true)
@@ -155,6 +149,9 @@ export default function CVAnalysisPage() {
                   <p className="text-muted">Tải lên ngày {formatDate(selected.uploadedAt)}</p>
                 </div>
                 <div className="actions">
+                  <Link to={`/cv/${selected.id}/edit`} className="btn btn-ghost">
+                    Sửa thông tin
+                  </Link>
                   <button
                     className="btn btn-outline"
                     onClick={() => runAnalysis(selected.id)}
@@ -176,7 +173,14 @@ export default function CVAnalysisPage() {
                 ))}
               </div>
 
-              {tab === 'parsed' && <CVParsedInfo parsed={selected.parsed} />}
+              {tab === 'parsed' &&
+                (selected.parsed ? (
+                  <CVParsedInfo parsed={selected.parsed} />
+                ) : (
+                  <div className="empty-state">
+                    <p className="text-muted">CV chưa được bóc tách nội dung.</p>
+                  </div>
+                ))}
               {tab === 'analysis' &&
                 (analyzing ? (
                   <Loading text="AI đang chấm điểm và phân tích CV của bạn..." />
