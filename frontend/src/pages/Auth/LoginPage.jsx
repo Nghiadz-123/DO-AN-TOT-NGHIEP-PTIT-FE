@@ -9,7 +9,8 @@ const DEMO_ACCOUNTS = [
   FEATURES.candidate && { label: 'Ứng viên demo', email: 'candidate@demo.com' },
   { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
   { label: 'Admin demo', email: 'admin@demo.com' },
-]
+].filter(Boolean)
+const SHOW_DEMO = USE_MOCK || import.meta.env.DEV
 
 const homeOf = (user) => {
   if (user.role === ROLES.RECRUITER) return '/recruiter'
