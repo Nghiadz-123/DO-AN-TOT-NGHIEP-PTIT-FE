@@ -16,10 +16,30 @@ const RECRUITER_LINKS = [
   { to: '/recruiter', label: 'Trang tuyển dụng' },
 ]
 
+const ADMIN_LINKS = [
+  { to: '/admin', label: 'Trang quản trị' },
+]
+
 export default function Header() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const links = user?.role === ROLES.RECRUITER ? RECRUITER_LINKS : user ? CANDIDATE_LINKS : [{ to: '/jobs', label: 'Tìm việc' }]
+
+  const links =
+    user?.role === ROLES.ADMIN
+      ? ADMIN_LINKS
+      : user?.role === ROLES.RECRUITER
+      ? RECRUITER_LINKS
+      : user
+      ? CANDIDATE_LINKS
+      : [{ to: '/jobs', label: 'Tìm việc' }]
+
+  const getUserProfilePath = () => {
+    if (user?.role === ROLES.ADMIN) return '/admin'
+    if (user?.role === ROLES.RECRUITER) return '/recruiter'
+    return '/profile'
+  }
+
+  const name = user?.fullName || user?.full_name || 'User'
 
   const handleLogout = () => {
     logout()
@@ -42,9 +62,9 @@ export default function Header() {
         <div className="header-actions">
           {user ? (
             <>
-              <Link to={user.role === ROLES.CANDIDATE ? '/profile' : '/recruiter/account'} className="user-chip">
-                <span className="avatar">{user.fullName.charAt(0)}</span>
-                <span className="user-name">{user.fullName}</span>
+              <Link to={getUserProfilePath()} className="user-chip">
+                <span className="avatar">{name.charAt(0)}</span>
+                <span className="user-name">{name}</span>
               </Link>
               <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
                 Đăng xuất
@@ -65,3 +85,4 @@ export default function Header() {
     </header>
   )
 }
+

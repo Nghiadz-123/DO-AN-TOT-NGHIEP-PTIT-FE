@@ -4,6 +4,7 @@ import useAuth from '@/hooks/useAuth'
 import { FEATURES, ROLES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
 
+// Chi cho phep dang ky candidate va recruiter, khong cho dang ky admin
 const ROLE_OPTIONS = [
   {
     value: ROLES.CANDIDATE,

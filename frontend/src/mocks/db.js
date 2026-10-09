@@ -1,7 +1,6 @@
 import { getToken } from '@/utils/storage'
 import { seed } from './seed'
 
-// v2: dữ liệu theo enum mới của backend (đổi key để bỏ qua dữ liệu v1 cũ trong localStorage)
 const STORAGE_KEY = 'ats_mock_db_v2'
 let db = null
 

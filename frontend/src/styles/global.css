@@ -1354,176 +1354,81 @@ textarea.input {
   }
 }
 
-/* ---------- Kết nối backend: phân trang, pipeline, lịch sử, đánh giá ---------- */
-.pagination {
+/* ---------- Admin Page ---------- */
+.admin-page {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.btn-danger {
-  background: var(--danger);
-  color: #fff;
+
+.admin-welcome h2 {
+  margin-bottom: 4px;
 }
 
-.btn-danger:hover:not(:disabled) {
-  background: #b91c1c;
-}
-
-.row-busy {
-  opacity: 0.5;
-}
-
-.form-footer {
-  justify-content: flex-end;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
-
-.pre-line {
-  white-space: pre-line;
-}
-
-.company-logo-img {
-  object-fit: contain;
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-.logo-uploader {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
-.plain-fieldset {
-  border: none;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-
-.role-option.disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.pipeline {
+.admin-stats {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  margin: 8px 0 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
-.pipeline-step {
+.admin-stat-card {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 24px 16px;
   gap: 6px;
-  padding: 12px 8px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
+  text-align: center;
 }
 
-.pipeline-step:hover {
-  border-color: var(--primary);
-  background: var(--primary-soft);
-}
-
-.pipeline-step strong {
-  font-size: 1.4rem;
-}
-
-.info-list-left dd {
-  text-align: left;
-}
-
-.candidate-summary {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.cv-viewer {
-  width: 100%;
-  height: 720px;
-  margin-top: 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg);
-}
-
-.cv-parsed-box {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--border);
-}
-
-.rating {
-  display: flex;
-  gap: 2px;
-}
-
-.rating-star {
-  border: none;
-  background: none;
-  padding: 0 2px;
-  font-size: 1.6rem;
+.admin-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
   line-height: 1;
-  color: var(--border);
-  cursor: pointer;
 }
 
-.rating-star.active {
-  color: #f59e0b;
+.admin-stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
-.rating-star:disabled {
-  cursor: wait;
+.admin-info-card {
+  padding: 20px 24px;
 }
 
-.history {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.admin-info-card h3 {
+  margin-bottom: 12px;
 }
 
-.history-item {
-  position: relative;
-  padding: 0 0 14px 18px;
-  border-left: 2px solid var(--primary-soft);
-}
-
-.history-item::before {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 4px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--primary);
-}
-
-.history-item:last-child {
-  padding-bottom: 0;
-}
-
-.history-note {
-  margin: 4px 0 0;
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 0.9rem;
 }
 
-@media (max-width: 768px) {
-  .pipeline {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.admin-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
 
-  .cv-viewer {
-    height: 480px;
+.admin-table td:first-child {
+  width: 160px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.admin-feature-list {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
