@@ -1,15 +1,9 @@
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1'
 
-// Dùng dữ liệu giả lập (mock) khi backend chưa sẵn sàng. Đặt VITE_USE_MOCK=false để gọi API thật.
-export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
-
-const flag = (value, fallback) => (value === undefined || value === '' ? fallback : value === 'true')
-
-// Nhóm chức năng backend chưa có ở giai đoạn 1 (chỉ Nhà tuyển dụng). Chế độ mock bật tất cả để demo;
-// khi gọi API thật thì ẩn đi, bật lại bằng VITE_FEATURE_AI / VITE_FEATURE_CANDIDATE khi backend hỗ trợ.
+// Module AI (chấm điểm CV, gợi ý việc làm, sàng lọc hồ sơ) chưa có ở backend nên mặc định ẩn.
+// Bật bằng VITE_FEATURE_AI=true khi backend đã có các API AI.
 export const FEATURES = {
-  ai: flag(import.meta.env.VITE_FEATURE_AI, USE_MOCK),
-  candidate: flag(import.meta.env.VITE_FEATURE_CANDIDATE, USE_MOCK),
+  ai: import.meta.env.VITE_FEATURE_AI === 'true',
 }
 
 export const ROLES = {
@@ -36,14 +30,23 @@ export const WORK_MODES = [
   { value: 'hybrid', label: 'Linh hoạt (hybrid)' },
 ]
 
+// Cấp bậc dùng chung cho mọi ngành nghề
 export const JOB_LEVELS = [
   { value: 'intern', label: 'Thực tập sinh' },
-  { value: 'fresher', label: 'Fresher' },
-  { value: 'junior', label: 'Junior' },
-  { value: 'middle', label: 'Middle' },
-  { value: 'senior', label: 'Senior' },
-  { value: 'lead', label: 'Trưởng nhóm' },
-  { value: 'manager', label: 'Quản lý' },
+  { value: 'fresher', label: 'Mới tốt nghiệp' },
+  { value: 'staff', label: 'Nhân viên' },
+  { value: 'supervisor', label: 'Trưởng nhóm / Giám sát' },
+  { value: 'manager', label: 'Trưởng / Phó phòng' },
+  { value: 'director', label: 'Giám đốc / Cấp cao' },
+]
+
+// Lọc tin theo thời gian đăng (số ngày), khớp backend jobs/filters.py POSTED_WITHIN_CHOICES
+export const POSTED_WITHIN = [
+  { value: '1', label: '24 giờ qua' },
+  { value: '3', label: '3 ngày qua' },
+  { value: '7', label: '7 ngày qua' },
+  { value: '14', label: '14 ngày qua' },
+  { value: '30', label: '30 ngày qua' },
 ]
 
 export const JOB_STATUS = {
@@ -69,18 +72,6 @@ export const APPLICATION_STATUS = {
   hired: { label: 'Đã tuyển', tone: 'success' },
   rejected: { label: 'Từ chối', tone: 'danger' },
   withdrawn: { label: 'Ứng viên đã rút', tone: 'neutral' },
-}
-
-// Pipeline ATS, giống backend (apps/applications/workflow.py). API thật trả sẵn allowed_transitions;
-// bảng này dùng cho chế độ mock.
-export const APPLICATION_TRANSITIONS = {
-  applied: ['screening', 'interview', 'rejected'],
-  screening: ['interview', 'rejected'],
-  interview: ['offer', 'rejected'],
-  offer: ['hired', 'rejected'],
-  rejected: ['screening'],
-  hired: [],
-  withdrawn: [],
 }
 
 // Nhãn nút chuyển trạng thái hồ sơ
@@ -119,23 +110,21 @@ export const SUGGESTION_PRIORITY = {
   low: { label: 'Gợi ý thêm', tone: 'info' },
 }
 
-export const CV_ACCEPT = '.pdf,.doc,.docx'
+// Backend chỉ nhận PDF và DOCX (kiểm tra theo nội dung file, .doc cũ bị từ chối)
+export const CV_ACCEPT = '.pdf,.docx'
 export const CV_MAX_SIZE = 5 * 1024 * 1024
 
-export const CV_MIME_TYPES = {
-  pdf: 'application/pdf',
-  doc: 'application/msword',
-  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+// Trạng thái bóc tách văn bản CV (backend cvs.CVParseStatus)
+export const CV_PARSE_STATUS = {
+  pending: { label: 'Chờ xử lý', tone: 'neutral' },
+  processing: { label: 'Đang đọc CV', tone: 'info' },
+  completed: { label: 'Đã đọc nội dung', tone: 'success' },
+  failed: { label: 'Không đọc được', tone: 'danger' },
 }
 
-// Trình độ học vấn trên CV ứng viên
-export const EDUCATION_LEVELS = [
-  { value: 'high_school', label: 'Trung học phổ thông' },
-  { value: 'vocational', label: 'Trung cấp' },
-  { value: 'college', label: 'Cao đẳng' },
-  { value: 'bachelor', label: 'Đại học' },
-  { value: 'master', label: 'Thạc sĩ' },
-  { value: 'doctorate', label: 'Tiến sĩ' },
+export const GENDERS = [
+  { value: 'male', label: 'Nam' },
+  { value: 'female', label: 'Nữ' },
   { value: 'other', label: 'Khác' },
 ]
 

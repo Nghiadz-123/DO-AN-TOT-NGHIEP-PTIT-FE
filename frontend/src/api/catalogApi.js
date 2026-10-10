@@ -1,5 +1,3 @@
-import catalogMock from '@/mocks/api/catalogMock'
-import { USE_MOCK } from '@/utils/constants'
 import axiosClient from './axiosClient'
 
 // Danh mục dùng chung: tỉnh/thành, ngành nghề, gợi ý kỹ năng
@@ -9,4 +7,4 @@ const catalogApi = {
   searchSkills: (search) => axiosClient.get('/catalog/skills/', { params: { search } }),
 }
 
-export default USE_MOCK ? catalogMock : catalogApi
+export default catalogApi

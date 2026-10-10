@@ -1,5 +1,3 @@
-import employerMock from '@/mocks/api/employerMock'
-import { USE_MOCK } from '@/utils/constants'
 import { fromCompanyForm, toCompany, toRecruiterProfile } from './adapters'
 import axiosClient from './axiosClient'
 
@@ -25,4 +23,4 @@ const employerApi = {
     toRecruiterProfile(await axiosClient.patch('/employer/profile/', { full_name: fullName, phone, position })),
 }
 
-export default USE_MOCK ? employerMock : employerApi
+export default employerApi

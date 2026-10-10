@@ -1,14 +1,11 @@
 import useAuth from '@/hooks/useAuth'
+import { API_URL } from '@/utils/constants'
+
+// Backend chưa có API quản trị: xác minh công ty, duyệt kỹ năng... làm trong Django Admin
+const DJANGO_ADMIN_URL = `${new URL(API_URL).origin}/admin/`
 
 export default function AdminPage() {
   const { user } = useAuth()
-
-  const stats = [
-    { label: 'Tổng người dùng', value: '9' },
-    { label: 'Ứng viên', value: '7' },
-    { label: 'Nhà tuyển dụng', value: '2' },
-    { label: 'Tin tuyển dụng', value: '9' },
-  ]
 
   const name = user?.fullName || user?.full_name || 'Admin'
 
@@ -19,13 +16,14 @@ export default function AdminPage() {
         <p className="text-muted">Xin chào, {name} (Admin)</p>
       </div>
 
-      <div className="admin-stats">
-        {stats.map((s) => (
-          <div key={s.label} className="admin-stat-card card">
-            <span className="admin-stat-value">{s.value}</span>
-            <span className="admin-stat-label">{s.label}</span>
-          </div>
-        ))}
+      <div className="card admin-info-card">
+        <h3>Trang quản trị Django</h3>
+        <p className="text-muted">
+          Xác minh công ty, duyệt kỹ năng mới, quản lý người dùng và tin tuyển dụng (đăng nhập bằng tài khoản superuser).
+        </p>
+        <a href={DJANGO_ADMIN_URL} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
+          Mở Django Admin
+        </a>
       </div>
 
       <div className="card admin-info-card">

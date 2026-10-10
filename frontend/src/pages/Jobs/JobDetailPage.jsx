@@ -4,6 +4,7 @@ import applicationApi from '@/api/applicationApi'
 import jobApi from '@/api/jobApi'
 import Badge, { JobStatusBadge, StatusBadge } from '@/components/common/Badge'
 import CompanyLogo from '@/components/common/CompanyLogo'
+import FavoriteButton from '@/components/common/FavoriteButton'
 import Loading from '@/components/common/Loading'
 import ApplyModal from '@/components/jobs/ApplyModal'
 import useAuth from '@/hooks/useAuth'
@@ -17,7 +18,7 @@ export default function JobDetailPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [applyOpen, setApplyOpen] = useState(false)
-  const isCandidate = FEATURES.candidate && user?.role === ROLES.CANDIDATE
+  const isCandidate = user?.role === ROLES.CANDIDATE
 
   const { data: job, loading, error } = useFetch(() => jobApi.getById(id), [id])
   const { data: myApplications, setData: setMyApplications } = useFetch(
@@ -32,9 +33,8 @@ export default function JobDetailPage() {
   const closed = job.status !== 'published'
 
   const renderApplyButton = () => {
-    if (user?.role === ROLES.RECRUITER) return null
+    if (user && !isCandidate) return null
     if (closed) return <button className="btn btn-primary btn-lg" disabled>Đã ngừng nhận hồ sơ</button>
-    if (!FEATURES.candidate) return <span className="text-muted">Ứng tuyển trực tuyến sẽ sớm ra mắt</span>
     if (!user)
       return (
         <button className="btn btn-primary btn-lg" onClick={() => navigate('/login', { state: { from: location } })}>
@@ -65,7 +65,11 @@ export default function JobDetailPage() {
         <CompanyLogo name={job.company} src={job.companyLogo} large />
         <div className="job-detail-info">
           <h1>{job.title}</h1>
-          <p className="text-muted">{job.company}</p>
+          <p className="text-muted">
+            <Link to={`/companies/${job.companyId}`} className="company-link">
+              {job.company}
+            </Link>
+          </p>
           <div className="job-meta">
             {job.location && <span>📍 {job.location}</span>}
             <span>💰 {formatSalary(job.salaryMin, job.salaryMax, job.isSalaryNegotiable)}</span>
@@ -75,7 +79,10 @@ export default function JobDetailPage() {
             {closed && <JobStatusBadge status={job.status} />}
           </div>
         </div>
-        <div className="job-detail-actions">{renderApplyButton()}</div>
+        <div className="job-detail-actions">
+          <FavoriteButton type="job" id={job.id} withLabel />
+          {renderApplyButton()}
+        </div>
       </div>
 
       <div className="layout-sidebar">
@@ -124,6 +131,14 @@ export default function JobDetailPage() {
           <div className="card">
             <h3>Thông tin chung</h3>
             <dl className="info-list">
+              {job.industry && (
+                <>
+                  <dt>Ngành nghề</dt>
+                  <dd>
+                    <Link to={`/jobs?industry=${job.industryId}`}>{job.industry}</Link>
+                  </dd>
+                </>
+              )}
               <dt>Cấp bậc</dt>
               <dd>{labelOf(JOB_LEVELS, job.level)}</dd>
               <dt>Hình thức</dt>

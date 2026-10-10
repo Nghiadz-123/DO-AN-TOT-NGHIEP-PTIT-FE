@@ -9,8 +9,7 @@ const ROLE_OPTIONS = [
   {
     value: ROLES.CANDIDATE,
     title: 'Ứng viên',
-    text: FEATURES.candidate ? 'Tìm việc, chấm điểm CV bằng AI' : 'Sắp ra mắt',
-    disabled: !FEATURES.candidate,
+    text: FEATURES.ai ? 'Tìm việc, chấm điểm CV bằng AI' : 'Tải CV, tìm việc và ứng tuyển',
   },
   {
     value: ROLES.RECRUITER,
@@ -21,13 +20,14 @@ const ROLE_OPTIONS = [
 
 // Trang đích sau khi đăng ký. Dùng chung cho guard bên dưới: khi user vừa được tạo, guard render trước
 // lệnh navigate nên hai nơi phải cùng đích
-const homeOf = (user) => (user.role === ROLES.RECRUITER ? '/recruiter' : '/cv-analysis')
+// Ứng viên mới chưa có CV -> trang tải CV
+const homeOf = (user) => (user.role === ROLES.RECRUITER ? '/recruiter' : FEATURES.ai ? '/cv-analysis' : '/cv/new')
 
 export default function RegisterPage() {
   const { user, register } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({
-    role: FEATURES.candidate ? ROLES.CANDIDATE : ROLES.RECRUITER,
+    role: ROLES.CANDIDATE,
     fullName: '',
     email: '',
     companyName: '',
