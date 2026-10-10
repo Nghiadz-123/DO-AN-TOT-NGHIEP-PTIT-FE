@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '@/hooks/useAuth'
-import { FEATURES, ROLES, USE_MOCK } from '@/utils/constants'
+import { ROLES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
 
-// Khi gọi API thật, tài khoản demo có sau khi chạy `python manage.py seed_demo` ở backend
+// Tài khoản demo có sau khi chạy `python manage.py seed_demo` ở backend; chỉ hiện khi chạy dev.
+// Admin: tạo bằng `python manage.py createsuperuser`.
 const DEMO_ACCOUNTS = [
-  FEATURES.candidate && { label: 'Ứng viên demo', email: 'candidate@demo.com' },
+  { label: 'Ứng viên demo', email: 'candidate@demo.com' },
   { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
-  { label: 'Admin demo', email: 'admin@demo.com' },
-].filter(Boolean)
-const SHOW_DEMO = USE_MOCK || import.meta.env.DEV
+]
+const SHOW_DEMO = import.meta.env.DEV
 
 const homeOf = (user) => {
   if (user.role === ROLES.RECRUITER) return '/recruiter'
@@ -74,7 +74,7 @@ export default function LoginPage() {
         {SHOW_DEMO && (
           <div className="demo-accounts">
             <small className="text-muted">
-              {USE_MOCK ? 'Dùng thử nhanh (mật khẩu 123456):' : 'Tài khoản demo từ seed_demo (mật khẩu 123456):'}
+              Tài khoản demo từ seed_demo (mật khẩu 123456):
             </small>
             {DEMO_ACCOUNTS.map((a) => (
               <button

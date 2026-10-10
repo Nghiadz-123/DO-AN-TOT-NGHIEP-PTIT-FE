@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import Badge from '@/components/common/Badge'
+import Badge, { JobStatusBadge } from '@/components/common/Badge'
 import CompanyLogo from '@/components/common/CompanyLogo'
+import FavoriteButton from '@/components/common/FavoriteButton'
 import ScoreCircle from '@/components/common/ScoreCircle'
 import { JOB_LEVELS, JOB_TYPES, WORK_MODES } from '@/utils/constants'
 import { formatDate, formatSalary, labelOf } from '@/utils/formatters'
@@ -16,12 +17,24 @@ export default function JobCard({ job, match }) {
           <Link to={`/jobs/${job.id}`}>
             <h3>{job.title}</h3>
           </Link>
-          <p className="text-muted">{job.company}</p>
+          <p className="text-muted">
+            {job.companyId ? (
+              <Link to={`/companies/${job.companyId}`} className="company-link">
+                {job.company}
+              </Link>
+            ) : (
+              job.company
+            )}
+          </p>
         </div>
         {match && <ScoreCircle score={match.score} size={56} showLabel={false} />}
+        <FavoriteButton type="job" id={job.id} />
       </div>
 
       <div className="job-meta">
+        {/* Danh sách công khai chỉ có tin đang tuyển; danh sách yêu thích có thể có tin đã đóng / hết hạn */}
+        {job.status && job.status !== 'published' && <JobStatusBadge status={job.status} />}
+        {job.industry && <span>🗂️ {job.industry}</span>}
         {job.location && <span>📍 {job.location}</span>}
         <span>💰 {formatSalary(job.salaryMin, job.salaryMax, job.isSalaryNegotiable)}</span>
         <Badge tone="info">{labelOf(JOB_TYPES, job.type)}</Badge>

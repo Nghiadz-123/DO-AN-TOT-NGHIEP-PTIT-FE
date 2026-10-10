@@ -1,15 +1,26 @@
-import applicationMock from '@/mocks/api/applicationMock'
-import { USE_MOCK } from '@/utils/constants'
-import { cleanParams, toApplication, toPage } from './adapters'
+import { cleanParams, toApplication, toMyApplication, toPage } from './adapters'
 import axiosClient, { fetchFile } from './axiosClient'
 
 const toQuery = ({ jobId, status, keyword, ordering, page, pageSize } = {}) =>
   cleanParams({ job: jobId, status: [].concat(status ?? []).join(','), q: keyword, ordering, page, page_size: pageSize })
 
+// Số đơn tối đa lấy một lần cho trang "Đơn ứng tuyển" (backend giới hạn page_size <= 100)
+const MY_APPLICATIONS_LIMIT = 100
+
 const applicationApi = {
-  // Ứng viên (giai đoạn sau)
-  apply: (data) => axiosClient.post('/applications/', data),
-  getMine: () => axiosClient.get('/applications/me/'),
+  // Ứng viên. cvId bỏ trống thì backend dùng CV mặc định
+  apply: async ({ jobId, cvId, coverLetter = '' }) =>
+    toMyApplication(
+      await axiosClient.post('/candidate/applications/', { job_id: jobId, cv_id: cvId || null, cover_letter: coverLetter }),
+    ),
+  // Trả về mảng, mới nộp trước
+  getMine: async () => {
+    const data = await axiosClient.get('/candidate/applications/', { params: { page_size: MY_APPLICATIONS_LIMIT } })
+    return data.results.map(toMyApplication)
+  },
+  getMineById: async (id) => toMyApplication(await axiosClient.get(`/candidate/applications/${id}/`)),
+  withdraw: async (id, reason = '') =>
+    toMyApplication(await axiosClient.post(`/candidate/applications/${id}/withdraw/`, { reason })),
 
   // Nhà tuyển dụng: params = { jobId, status, keyword, ordering, page, pageSize }
   list: async (params) =>
@@ -24,9 +35,9 @@ const applicationApi = {
   // Trả về { blob, fileName }
   downloadCv: (id) => fetchFile(`/employer/applications/${id}/cv/`),
 
-  // AI sàng lọc hồ sơ (giai đoạn sau)
+  // AI sàng lọc hồ sơ: backend chưa có, chỉ gọi khi FEATURES.ai bật
   screenByJob: (jobId) => axiosClient.post(`/jobs/${jobId}/applications/ai-screen/`),
   screen: (id) => axiosClient.post(`/applications/${id}/ai-screen/`),
 }
 
-export default USE_MOCK ? applicationMock : applicationApi
+export default applicationApi

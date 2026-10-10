@@ -1,105 +1,83 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import jobApi from '@/api/jobApi'
+import HoverSelect from '@/components/common/HoverSelect'
 import Loading from '@/components/common/Loading'
 import JobCard from '@/components/jobs/JobCard'
 import useAuth from '@/hooks/useAuth'
-import { useLocations } from '@/hooks/useCatalog'
+import { useIndustries, useLocations } from '@/hooks/useCatalog'
 import useFetch from '@/hooks/useFetch'
-import { FEATURES, ROLES } from '@/utils/constants'
-
-const AI_FEATURES = [
-  {
-    icon: '📄',
-    title: 'AI chấm điểm CV',
-    text: 'Tải CV lên, AI bóc tách thông tin, chấm điểm từng phần và chỉ ra điểm mạnh, điểm yếu.',
-  },
-  {
-    icon: '💡',
-    title: 'Gợi ý cải thiện CV',
-    text: 'Nhận gợi ý cụ thể kèm ví dụ để CV thu hút nhà tuyển dụng và vượt qua hệ thống ATS.',
-  },
-  {
-    icon: '🎯',
-    title: 'Việc làm phù hợp',
-    text: 'AI so khớp kỹ năng, kinh nghiệm trong CV với yêu cầu tuyển dụng để đề xuất công việc.',
-  },
-  {
-    icon: '🤖',
-    title: 'AI sàng lọc ứng viên',
-    text: 'Nhà tuyển dụng chấm điểm, xếp hạng hàng loạt hồ sơ và lọc ra ứng viên tiềm năng.',
-  },
-]
-
-// Khi backend chưa có module AI: giới thiệu các chức năng dành cho nhà tuyển dụng đã có
-const EMPLOYER_FEATURES = [
-  { icon: '📝', title: 'Đăng tin nhanh', text: 'Soạn tin, lưu nháp và đăng tin tuyển dụng chỉ trong vài phút.' },
-  { icon: '📋', title: 'Quản lý tin tập trung', text: 'Theo dõi trạng thái, hạn nộp, tạm dừng hoặc đóng tin bất kỳ lúc nào.' },
-  { icon: '👥', title: 'Pipeline ứng viên', text: 'Đưa ứng viên qua các vòng sàng lọc, phỏng vấn, đề nghị và tuyển dụng.' },
-  { icon: '🏢', title: 'Hồ sơ công ty', text: 'Xây dựng thương hiệu tuyển dụng với logo và thông tin công ty.' },
-]
+import { FEATURES, JOB_LEVELS, POSTED_WITHIN, ROLES } from '@/utils/constants'
 
 export default function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [keyword, setKeyword] = useState('')
-  const [location, setLocation] = useState('')
+  // Bộ lọc gửi sang trang /jobs: industry, location, level, posted (cùng tên tham số URL của trang đó)
+  const [filters, setFilters] = useState({ industry: '', location: '', level: '', posted: '' })
+  const industries = useIndustries()
   const locations = useLocations()
   const { data: jobs, loading } = useFetch(() => jobApi.getAll({ pageSize: 6 }), [])
 
   const handleSearch = (e) => {
     e.preventDefault()
-    const params = new URLSearchParams()
-    if (keyword) params.set('keyword', keyword)
-    if (location) params.set('location', location)
+    const params = new URLSearchParams(Object.entries({ keyword: keyword.trim(), ...filters }).filter(([, v]) => v))
     navigate(`/jobs?${params}`)
   }
 
   const cta =
     user?.role === ROLES.RECRUITER
       ? { to: '/recruiter/jobs/new', label: 'Đăng tin tuyển dụng' }
-      : FEATURES.candidate
+      : FEATURES.ai
         ? { to: user ? '/cv-analysis' : '/register', label: 'Chấm điểm CV miễn phí' }
-        : { to: '/register', label: 'Đăng tin tuyển dụng miễn phí' }
-  const features = FEATURES.ai ? AI_FEATURES : EMPLOYER_FEATURES
+        : { to: user ? '/cv' : '/register', label: user ? 'Quản lý CV của tôi' : 'Tạo tài khoản miễn phí' }
 
   return (
     <>
       <section className="hero">
         <h1>
-          Tìm việc thông minh hơn với <span className="text-primary">AI</span>
+          Việc làm cho <span className="text-primary">mọi ngành nghề</span>
         </h1>
-        <p>Nền tảng tuyển dụng tích hợp AI: chấm điểm CV, gợi ý việc làm và sàng lọc ứng viên tự động.</p>
+        <p>
+          Kết nối ứng viên và nhà tuyển dụng trong kinh doanh, kế toán, sản xuất, y tế, giáo dục, dịch vụ, công nghệ...
+          {FEATURES.ai && ' Tích hợp AI chấm điểm CV, gợi ý việc làm và sàng lọc ứng viên.'}
+        </p>
         <form className="search-bar" onSubmit={handleSearch}>
           <input
             className="input"
-            placeholder="Vị trí, kỹ năng, công ty..."
+            placeholder="Vị trí, kỹ năng, công ty (VD: kế toán, lái xe, giáo viên)..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
           />
-          <select className="input" value={location} onChange={(e) => setLocation(e.target.value)}>
-            <option value="">Tất cả địa điểm</option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
+          <HoverSelect
+            placeholder="Tất cả ngành nghề"
+            value={filters.industry}
+            options={industries.map((i) => ({ value: i.id, label: i.name }))}
+            onChange={(industry) => setFilters({ ...filters, industry })}
+          />
+          <HoverSelect
+            placeholder="Tất cả địa điểm"
+            value={filters.location}
+            options={locations.map((l) => ({ value: l.id, label: l.name }))}
+            onChange={(location) => setFilters({ ...filters, location })}
+          />
+          <HoverSelect
+            placeholder="Tất cả cấp bậc"
+            value={filters.level}
+            options={JOB_LEVELS}
+            onChange={(level) => setFilters({ ...filters, level })}
+          />
+          <HoverSelect
+            placeholder="Đăng bất kỳ lúc nào"
+            value={filters.posted}
+            options={POSTED_WITHIN}
+            onChange={(posted) => setFilters({ ...filters, posted })}
+          />
           <button className="btn btn-primary">Tìm kiếm</button>
         </form>
         <Link to={cta.to} className="btn btn-outline">
           {cta.label}
         </Link>
-      </section>
-
-      <section className="grid grid-4 features">
-        {features.map((f) => (
-          <div key={f.title} className="card feature">
-            <div className="feature-icon">{f.icon}</div>
-            <h3>{f.title}</h3>
-            <p className="text-muted">{f.text}</p>
-          </div>
-        ))}
       </section>
 
       <section>

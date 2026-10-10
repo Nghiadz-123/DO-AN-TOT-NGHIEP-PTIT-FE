@@ -824,26 +824,110 @@ textarea.input {
 
 .search-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   width: 100%;
-  max-width: 720px;
+  max-width: 960px;
   padding: 8px;
   background: var(--surface);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
 }
 
-.search-bar .input:first-child {
-  flex: 2;
+.search-bar > .input:first-child {
+  flex: 2 1 280px;
 }
 
-.search-bar select.input {
-  flex: 1;
+.search-bar .hover-select {
+  flex: 1 1 150px;
 }
 
-.feature-icon {
-  font-size: 2rem;
-  margin-bottom: 8px;
+/* ---------- Ô chọn mở khi rê chuột (HoverSelect) ---------- */
+.hover-select {
+  position: relative;
+  min-width: 160px;
+  text-align: left;
+}
+
+.hover-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.hover-select > .hover-select-trigger {
+  width: 100%;
+}
+
+.hover-select-trigger.has-value {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.hover-select:hover .hover-select-trigger,
+.hover-select-trigger[aria-expanded='true'] {
+  border-color: var(--primary);
+}
+
+.hover-select-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hover-select-caret {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+/* padding-top thay cho khoảng cách: chuột đi từ ô xuống danh sách không bị đóng giữa chừng */
+.hover-select-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  min-width: 100%;
+  padding-top: 4px;
+}
+
+.hover-select-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.hover-select-menu button {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.hover-select-menu button:hover,
+.hover-select-menu button:focus-visible {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.hover-select-menu button.active {
+  color: var(--primary);
+  font-weight: 600;
 }
 
 /* ---------- Jobs ---------- */
@@ -913,6 +997,49 @@ textarea.input {
 .match-reasons {
   font-size: 0.88rem;
   color: var(--text-muted);
+}
+
+/* Tên công ty trên thẻ / trang việc làm dẫn tới trang công ty */
+.company-link {
+  color: inherit;
+}
+
+.company-link:hover {
+  color: var(--primary);
+}
+
+/* Nút ♥ yêu thích (việc làm, công ty) */
+.btn-favorite {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0 2px;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.btn-favorite:hover,
+.btn-favorite.active,
+.btn-favorite-label.active {
+  color: var(--danger);
+}
+
+.btn-favorite-label.active {
+  border-color: var(--danger);
+}
+
+.btn-favorite:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.job-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 .back-link {

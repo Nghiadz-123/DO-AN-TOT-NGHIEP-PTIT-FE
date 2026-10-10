@@ -5,7 +5,7 @@ import { clearTokens, getRefreshToken, getToken, setTokens } from '@/utils/stora
 // Phát khi phiên đăng nhập hết hạn hẳn (refresh token cũng hết hạn) để AuthProvider đăng xuất
 export const SESSION_EXPIRED_EVENT = 'auth:session-expired'
 
-const AUTH_ENDPOINTS = ['/auth/login/', '/auth/token/refresh/', '/auth/logout/', '/employer/register/']
+const AUTH_ENDPOINTS = ['/auth/login/', '/auth/token/refresh/', '/auth/logout/', '/employer/register/', '/candidate/register/']
 
 const axiosClient = axios.create({
   baseURL: API_URL,

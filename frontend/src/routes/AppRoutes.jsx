@@ -5,10 +5,13 @@ import LoginPage from '@/pages/Auth/LoginPage'
 import RegisterPage from '@/pages/Auth/RegisterPage'
 import CVAnalysisPage from '@/pages/Candidate/CVAnalysisPage'
 import CVFormPage from '@/pages/Candidate/CVFormPage'
+import FavoritesPage from '@/pages/Candidate/FavoritesPage'
 import ManageCVsPage from '@/pages/Candidate/ManageCVsPage'
 import MyApplicationsPage from '@/pages/Candidate/MyApplicationsPage'
 import ProfilePage from '@/pages/Candidate/ProfilePage'
 import RecommendedJobsPage from '@/pages/Candidate/RecommendedJobsPage'
+import CompanyDetailPage from '@/pages/Companies/CompanyDetailPage'
+import CompanyListPage from '@/pages/Companies/CompanyListPage'
 import HomePage from '@/pages/Home/HomePage'
 import JobDetailPage from '@/pages/Jobs/JobDetailPage'
 import JobListPage from '@/pages/Jobs/JobListPage'
@@ -21,7 +24,7 @@ import DashboardPage from '@/pages/Recruiter/DashboardPage'
 import JobFormPage from '@/pages/Recruiter/JobFormPage'
 import ManageJobsPage from '@/pages/Recruiter/ManageJobsPage'
 import AdminPage from '@/pages/Admin/AdminPage'
-import { ROLES } from '@/utils/constants'
+import { FEATURES, ROLES } from '@/utils/constants'
 import ProtectedRoute from './ProtectedRoute'
 
 export default function AppRoutes() {
@@ -33,15 +36,19 @@ export default function AppRoutes() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/jobs" element={<JobListPage />} />
         <Route path="/jobs/:id" element={<JobDetailPage />} />
+        <Route path="/companies" element={<CompanyListPage />} />
+        <Route path="/companies/:id" element={<CompanyDetailPage />} />
 
         <Route element={<ProtectedRoute role={ROLES.CANDIDATE} />}>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/cv" element={<ManageCVsPage />} />
           <Route path="/cv/new" element={<CVFormPage />} />
           <Route path="/cv/:id/edit" element={<CVFormPage />} />
-          <Route path="/cv-analysis" element={<CVAnalysisPage />} />
-          <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />
+          {/* Trang AI: chỉ có khi backend đã có module AI */}
+          {FEATURES.ai && <Route path="/cv-analysis" element={<CVAnalysisPage />} />}
+          {FEATURES.ai && <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />}
           <Route path="/my-applications" element={<MyApplicationsPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
         </Route>
 
         <Route element={<ProtectedRoute role={ROLES.ADMIN} />}>

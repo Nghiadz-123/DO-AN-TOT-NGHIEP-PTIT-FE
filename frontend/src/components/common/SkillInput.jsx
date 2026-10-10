@@ -2,7 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import catalogApi from '@/api/catalogApi'
 
 // Nhập kỹ năng dạng tag, dùng chung cho form đăng tin (nhà tuyển dụng) và form CV (ứng viên)
-export default function SkillInput({ value, onChange, placeholder = 'Nhập kỹ năng rồi nhấn Enter (VD: React, Python)' }) {
+export default function SkillInput({ value, onChange, placeholder = 'Nhập kỹ năng rồi nhấn Enter (VD: Bán hàng, Excel, Tiếng Anh)' }) {
   const listId = useId()
   const [text, setText] = useState('')
   const [suggestions, setSuggestions] = useState([])

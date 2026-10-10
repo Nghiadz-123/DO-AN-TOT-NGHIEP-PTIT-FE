@@ -8,6 +8,7 @@ import Loading from '@/components/common/Loading'
 import Modal from '@/components/common/Modal'
 import ScoreCircle from '@/components/common/ScoreCircle'
 import useFetch from '@/hooks/useFetch'
+import { FEATURES } from '@/utils/constants'
 import { formatDate, getErrorMessage } from '@/utils/formatters'
 
 export default function ApplyModal({ job, open, onClose, onApplied }) {
@@ -21,9 +22,9 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
   // Mặc định chọn CV chính
   const selectedCvId = cvId || (cvs?.find((cv) => cv.isDefault) ?? cvs?.[0])?.id || ''
 
-  // AI đánh giá nhanh mức độ phù hợp của CV đang chọn với công việc
+  // AI đánh giá nhanh mức độ phù hợp của CV đang chọn với công việc (khi backend có module AI)
   useEffect(() => {
-    if (!open || !selectedCvId) return
+    if (!FEATURES.ai || !open || !selectedCvId) return
     let active = true
     cvApi
       .matchJob(selectedCvId, job.id)
@@ -74,7 +75,7 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
       {!loading && !hasCVs && (
         <EmptyState
           title="Bạn chưa có CV nào"
-          description="Hãy tải CV lên để ứng tuyển và nhận đánh giá từ AI."
+          description="Hãy tải CV lên để ứng tuyển."
           action={
             <Link to={`/cv/new?redirect=/jobs/${job.id}`} className="btn btn-primary">
               Tải CV lên
@@ -107,28 +108,30 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
             </Link>
           </div>
 
-          <div className="ai-box">
-            <div className="ai-box-title">✨ AI đánh giá mức độ phù hợp</div>
-            {currentMatch?.failed ? (
-              <p className="text-muted">Không thể đánh giá lúc này, bạn vẫn có thể nộp hồ sơ.</p>
-            ) : currentMatch ? (
-              <div className="match-summary">
-                <ScoreCircle score={currentMatch.score} size={72} />
-                <div>
-                  <ul className="match-reasons">
-                    {currentMatch.reasons.map((r) => (
-                      <li key={r}>{r}</li>
-                    ))}
-                  </ul>
-                  {currentMatch.missingSkills.length > 0 && (
-                    <p className="text-muted">Còn thiếu: {currentMatch.missingSkills.join(', ')}</p>
-                  )}
+          {FEATURES.ai && (
+            <div className="ai-box">
+              <div className="ai-box-title">✨ AI đánh giá mức độ phù hợp</div>
+              {currentMatch?.failed ? (
+                <p className="text-muted">Không thể đánh giá lúc này, bạn vẫn có thể nộp hồ sơ.</p>
+              ) : currentMatch ? (
+                <div className="match-summary">
+                  <ScoreCircle score={currentMatch.score} size={72} />
+                  <div>
+                    <ul className="match-reasons">
+                      {currentMatch.reasons.map((r) => (
+                        <li key={r}>{r}</li>
+                      ))}
+                    </ul>
+                    {currentMatch.missingSkills.length > 0 && (
+                      <p className="text-muted">Còn thiếu: {currentMatch.missingSkills.join(', ')}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <Loading text="Đang phân tích..." />
-            )}
-          </div>
+              ) : (
+                <Loading text="Đang phân tích..." />
+              )}
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="coverLetter">Thư giới thiệu (không bắt buộc)</label>

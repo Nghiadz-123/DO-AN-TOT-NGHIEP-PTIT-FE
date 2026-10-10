@@ -4,7 +4,7 @@ import jobApi from '@/api/jobApi'
 import { JobStatusBadge } from '@/components/common/Badge'
 import Loading from '@/components/common/Loading'
 import SkillInput from '@/components/common/SkillInput'
-import { useLocations } from '@/hooks/useCatalog'
+import { useIndustries, useLocations } from '@/hooks/useCatalog'
 import useFetch from '@/hooks/useFetch'
 import { FEATURES, JOB_LEVELS, JOB_TYPES, WORK_MODES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
@@ -14,11 +14,12 @@ const inDays = (days) => new Date(Date.now() + days * 86400000).toISOString().sl
 
 const EMPTY_FORM = {
   title: '',
+  industryId: '',
   locationId: '',
   address: '',
   type: 'full_time',
   workMode: 'onsite',
-  level: 'junior',
+  level: 'staff',
   minYearsExperience: 0,
   headcount: 1,
   salaryMin: '',
@@ -34,6 +35,7 @@ const EMPTY_FORM = {
 const toForm = (job) => ({
   ...EMPTY_FORM,
   title: job.title,
+  industryId: job.industryId ?? '',
   locationId: job.locationId ?? '',
   address: job.address ?? '',
   type: job.type,
@@ -54,6 +56,7 @@ const toForm = (job) => ({
 function JobForm({ initial, job }) {
   const navigate = useNavigate()
   const locations = useLocations()
+  const industries = useIndustries()
   const [form, setForm] = useState(initial)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -101,17 +104,30 @@ function JobForm({ initial, job }) {
     <form className="card" onSubmit={handleSubmit}>
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div className="form-group">
-        <label htmlFor="title">Tiêu đề công việc *</label>
-        <input
-          id="title"
-          className="input"
-          required
-          maxLength={255}
-          placeholder="VD: Frontend Developer (ReactJS)"
-          value={form.title}
-          onChange={set('title')}
-        />
+      <div className="form-row">
+        <div className="form-group">
+          <label htmlFor="title">Tiêu đề công việc *</label>
+          <input
+            id="title"
+            className="input"
+            required
+            maxLength={255}
+            placeholder="VD: Nhân viên kinh doanh, Kế toán tổng hợp, Điều dưỡng..."
+            value={form.title}
+            onChange={set('title')}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="industryId">Ngành nghề *</label>
+          <select id="industryId" className="input" required value={form.industryId} onChange={set('industryId')}>
+            <option value="">Chọn ngành nghề</option>
+            {industries.map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="form-row form-row-3">

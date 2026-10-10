@@ -5,11 +5,18 @@ import { FEATURES, ROLES } from '@/utils/constants'
 // ai: chỉ hiện khi backend đã có module AI (FEATURES.ai)
 const CANDIDATE_LINKS = [
   { to: '/jobs', label: 'Tìm việc' },
+  { to: '/companies', label: 'Công ty' },
   { to: '/cv', label: 'CV của tôi' },
   { to: '/cv-analysis', label: 'AI chấm điểm CV', ai: true },
   { to: '/recommended-jobs', label: 'Việc làm phù hợp', ai: true },
   { to: '/my-applications', label: 'Đơn ứng tuyển' },
+  { to: '/favorites', label: '♥ Yêu thích' },
 ].filter((link) => !link.ai || FEATURES.ai)
+
+const GUEST_LINKS = [
+  { to: '/jobs', label: 'Tìm việc' },
+  { to: '/companies', label: 'Công ty' },
+]
 
 const RECRUITER_LINKS = [
   { to: '/jobs', label: 'Việc làm' },
@@ -31,7 +38,7 @@ export default function Header() {
       ? RECRUITER_LINKS
       : user
       ? CANDIDATE_LINKS
-      : [{ to: '/jobs', label: 'Tìm việc' }]
+      : GUEST_LINKS
 
   const getUserProfilePath = () => {
     if (user?.role === ROLES.ADMIN) return '/admin'

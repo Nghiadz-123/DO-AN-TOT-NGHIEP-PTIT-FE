@@ -6,11 +6,10 @@ import EmptyState from '@/components/common/EmptyState'
 import Loading from '@/components/common/Loading'
 import ScoreCircle from '@/components/common/ScoreCircle'
 import useFetch from '@/hooks/useFetch'
-import { FEATURES, JOB_LEVELS } from '@/utils/constants'
-import { formatDate, formatFileSize, formatSalary, getErrorMessage, labelOf, saveBlob } from '@/utils/formatters'
+import { CV_PARSE_STATUS, FEATURES } from '@/utils/constants'
+import { formatDate, formatFileSize, getErrorMessage, saveBlob } from '@/utils/formatters'
 
-const VIEWABLE_TYPES = ['application/pdf', 'text/plain']
-const MAX_SKILLS_SHOWN = 4
+const VIEWABLE_TYPES = ['application/pdf']
 
 const scrollBehavior = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth')
 
@@ -49,8 +48,9 @@ export default function ManageCVsPage() {
 
   const openFile = (cv, { download = false } = {}) =>
     run(cv, async () => {
-      const { blob, fileName } = await cvApi.download(cv.id)
-      if (download || !VIEWABLE_TYPES.includes(blob.type.split(';')[0])) return saveBlob(blob, fileName)
+      const viewable = !download && VIEWABLE_TYPES.includes(cv.mimeType)
+      const { blob, fileName } = await (viewable ? cvApi.view(cv.id) : cvApi.download(cv.id))
+      if (!viewable) return saveBlob(blob, fileName)
       setPreview({ cv, url: URL.createObjectURL(blob) })
     })
 
@@ -103,8 +103,7 @@ export default function ManageCVsPage() {
               <thead>
                 <tr>
                   <th>CV</th>
-                  <th>Vị trí mong muốn</th>
-                  <th>Kỹ năng</th>
+                  <th>Nội dung</th>
                   {FEATURES.ai && <th>Điểm AI</th>}
                   <th>Cập nhật</th>
                   <th>Ứng tuyển</th>
@@ -126,23 +125,10 @@ export default function ManageCVsPage() {
                       </div>
                     </td>
                     <td>
-                      {cv.desiredPosition}
-                      <div className="text-muted">
-                        {[cv.location, cv.level && labelOf(JOB_LEVELS, cv.level)].filter(Boolean).join(' · ')}
-                      </div>
-                      <div className="text-muted">Lương: {formatSalary(cv.salaryMin, cv.salaryMax, cv.isSalaryNegotiable)}</div>
-                    </td>
-                    <td>
-                      <div className="tags">
-                        {cv.skills.slice(0, MAX_SKILLS_SHOWN).map((s) => (
-                          <span key={s} className="tag">
-                            {s}
-                          </span>
-                        ))}
-                        {cv.skills.length > MAX_SKILLS_SHOWN && (
-                          <span className="tag tag-muted">+{cv.skills.length - MAX_SKILLS_SHOWN}</span>
-                        )}
-                      </div>
+                      {CV_PARSE_STATUS[cv.parseStatus] && (
+                        <Badge tone={CV_PARSE_STATUS[cv.parseStatus].tone}>{CV_PARSE_STATUS[cv.parseStatus].label}</Badge>
+                      )}
+                      {cv.parseError && <div className="text-danger small">{cv.parseError}</div>}
                     </td>
                     {FEATURES.ai && (
                       <td className="nowrap">

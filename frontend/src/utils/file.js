@@ -14,7 +14,7 @@ export const fileTitle = (name = '') =>
 
 // Kiểm tra file CV trước khi tải lên; trả về thông điệp lỗi hoặc null
 export function validateCvFile(file) {
-  if (!CV_EXTENSIONS.includes(fileExtension(file.name))) return 'Chỉ hỗ trợ file PDF, DOC hoặc DOCX.'
+  if (!CV_EXTENSIONS.includes(fileExtension(file.name))) return 'Chỉ hỗ trợ file PDF hoặc DOCX.'
   if (file.size === 0) return 'File rỗng, vui lòng chọn file khác.'
   if (file.size > CV_MAX_SIZE) return `Dung lượng file tối đa ${CV_MAX_SIZE / 1024 / 1024}MB.`
   return null

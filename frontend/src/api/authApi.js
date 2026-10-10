@@ -1,17 +1,17 @@
-import authMock from '@/mocks/api/authMock'
-import { ROLES, USE_MOCK } from '@/utils/constants'
+import { ROLES } from '@/utils/constants'
 import { toSession, toUser } from './adapters'
 import axiosClient from './axiosClient'
 
 const authApi = {
   login: async ({ email, password }) => toSession(await axiosClient.post('/auth/login/', { email, password })),
 
-  // Giai đoạn 1 backend chỉ hỗ trợ đăng ký nhà tuyển dụng
   register: async ({ role, fullName, email, password, companyName }) => {
-    if (role !== ROLES.RECRUITER) throw new Error('Đăng ký tài khoản ứng viên sẽ được hỗ trợ ở giai đoạn sau.')
-    return toSession(
-      await axiosClient.post('/employer/register/', { full_name: fullName, email, password, company_name: companyName }),
-    )
+    if (role === ROLES.RECRUITER) {
+      return toSession(
+        await axiosClient.post('/employer/register/', { full_name: fullName, email, password, company_name: companyName }),
+      )
+    }
+    return toSession(await axiosClient.post('/candidate/register/', { full_name: fullName, email, password }))
   },
 
   getMe: async () => toUser(await axiosClient.get('/auth/me/')),
@@ -25,4 +25,4 @@ const authApi = {
   logout: (refresh) => axiosClient.post('/auth/logout/', { refresh }),
 }
 
-export default USE_MOCK ? authMock : authApi
+export default authApi
