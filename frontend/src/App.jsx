@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from '@/context/AuthProvider'
 import { FavoritesProvider } from '@/context/FavoritesProvider'
+import { InboxProvider } from '@/context/InboxProvider'
 import AppRoutes from '@/routes/AppRoutes'
 
 export default function App() {
@@ -8,7 +9,9 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <FavoritesProvider>
-          <AppRoutes />
+          <InboxProvider>
+            <AppRoutes />
+          </InboxProvider>
         </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>

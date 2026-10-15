@@ -12,9 +12,11 @@ import ProfilePage from '@/pages/Candidate/ProfilePage'
 import RecommendedJobsPage from '@/pages/Candidate/RecommendedJobsPage'
 import CompanyDetailPage from '@/pages/Companies/CompanyDetailPage'
 import CompanyListPage from '@/pages/Companies/CompanyListPage'
+import ConnectionsPage from '@/pages/Connections/ConnectionsPage'
 import HomePage from '@/pages/Home/HomePage'
 import JobDetailPage from '@/pages/Jobs/JobDetailPage'
 import JobListPage from '@/pages/Jobs/JobListPage'
+import MessagesPage from '@/pages/Messages/MessagesPage'
 import NotFoundPage from '@/pages/NotFound/NotFoundPage'
 import AccountPage from '@/pages/Recruiter/AccountPage'
 import ApplicantDetailPage from '@/pages/Recruiter/ApplicantDetailPage'
@@ -23,6 +25,7 @@ import CompanyProfilePage from '@/pages/Recruiter/CompanyProfilePage'
 import DashboardPage from '@/pages/Recruiter/DashboardPage'
 import JobFormPage from '@/pages/Recruiter/JobFormPage'
 import ManageJobsPage from '@/pages/Recruiter/ManageJobsPage'
+import TalentsPage from '@/pages/Recruiter/TalentsPage'
 import AdminPage from '@/pages/Admin/AdminPage'
 import { FEATURES, ROLES } from '@/utils/constants'
 import ProtectedRoute from './ProtectedRoute'
@@ -49,6 +52,9 @@ export default function AppRoutes() {
           {FEATURES.ai && <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />}
           <Route path="/my-applications" element={<MyApplicationsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/connections" element={<ConnectionsPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/messages/:conversationId" element={<MessagesPage />} />
         </Route>
 
         <Route element={<ProtectedRoute role={ROLES.ADMIN} />}>
@@ -66,6 +72,10 @@ export default function AppRoutes() {
           <Route path="jobs/:id/edit" element={<JobFormPage />} />
           <Route path="applicants" element={<ApplicantsPage />} />
           <Route path="applicants/:id" element={<ApplicantDetailPage />} />
+          <Route path="talents" element={<TalentsPage />} />
+          <Route path="connections" element={<ConnectionsPage />} />
+          <Route path="messages" element={<MessagesPage />} />
+          <Route path="messages/:conversationId" element={<MessagesPage />} />
           <Route path="company" element={<CompanyProfilePage />} />
           <Route path="account" element={<AccountPage />} />
         </Route>
