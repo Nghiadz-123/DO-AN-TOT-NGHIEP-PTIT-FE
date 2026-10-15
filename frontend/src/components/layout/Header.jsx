@@ -9,6 +9,7 @@ const CANDIDATE_LINKS = [
   { to: '/jobs', label: 'Tìm việc' },
   { to: '/companies', label: 'Công ty' },
   { to: '/cv', label: 'CV của tôi' },
+  { to: '/create-cv', label: 'Tạo CV' },
   { to: '/cv-analysis', label: 'AI chấm điểm CV', ai: true },
   { to: '/recommended-jobs', label: 'Việc làm phù hợp', ai: true },
   { to: '/my-applications', label: 'Đơn ứng tuyển' },

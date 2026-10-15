@@ -23,10 +23,13 @@ import ApplicantDetailPage from '@/pages/Recruiter/ApplicantDetailPage'
 import ApplicantsPage from '@/pages/Recruiter/ApplicantsPage'
 import CompanyProfilePage from '@/pages/Recruiter/CompanyProfilePage'
 import DashboardPage from '@/pages/Recruiter/DashboardPage'
+import AdminLayout from '@/layouts/AdminLayout'
+import AdminDashboardPage from '@/pages/Admin/AdminDashboardPage'
+import AdminManagePage from '@/pages/Admin/AdminManagePage'
+import CVBuilderPage from '@/pages/Candidate/CVBuilderPage'
 import JobFormPage from '@/pages/Recruiter/JobFormPage'
 import ManageJobsPage from '@/pages/Recruiter/ManageJobsPage'
 import TalentsPage from '@/pages/Recruiter/TalentsPage'
-import AdminPage from '@/pages/Admin/AdminPage'
 import { FEATURES, ROLES } from '@/utils/constants'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -47,6 +50,7 @@ export default function AppRoutes() {
           <Route path="/cv" element={<ManageCVsPage />} />
           <Route path="/cv/new" element={<CVFormPage />} />
           <Route path="/cv/:id/edit" element={<CVFormPage />} />
+          <Route path="/create-cv" element={<CVBuilderPage />} />
           {/* Trang AI: chỉ có khi backend đã có module AI */}
           {FEATURES.ai && <Route path="/cv-analysis" element={<CVAnalysisPage />} />}
           {FEATURES.ai && <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />}
@@ -57,11 +61,16 @@ export default function AppRoutes() {
           <Route path="/messages/:conversationId" element={<MessagesPage />} />
         </Route>
 
-        <Route element={<ProtectedRoute role={ROLES.ADMIN} />}>
-          <Route path="/admin" element={<AdminPage />} />
-        </Route>
-
         <Route path="*" element={<NotFoundPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute role={ROLES.ADMIN} />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="users" element={<AdminManagePage type="users" />} />
+          <Route path="companies" element={<AdminManagePage type="companies" />} />
+          <Route path="jobs" element={<AdminManagePage type="jobs" />} />
+        </Route>
       </Route>
 
       <Route element={<ProtectedRoute role={ROLES.RECRUITER} />}>
