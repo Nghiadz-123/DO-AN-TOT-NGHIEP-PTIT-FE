@@ -1,5 +1,7 @@
 // Dữ liệu mẫu cho chế độ mock. Tài khoản demo: candidate@demo.com / recruiter@demo.com / admin@demo.com (mật khẩu 123456)
 
+const daysAgo = (days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+
 const EDU_PTIT = {
   school: 'Học viện Công nghệ Bưu chính Viễn thông',
   degree: 'Kỹ sư Công nghệ thông tin',
