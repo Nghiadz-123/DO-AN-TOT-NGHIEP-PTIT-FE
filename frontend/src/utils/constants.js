@@ -128,6 +128,20 @@ export const GENDERS = [
   { value: 'other', label: 'Khác' },
 ]
 
+// Kết bạn giữa nhà tuyển dụng và ứng viên (backend connections.ConnectionStatus)
+export const CONNECTION_STATUS = {
+  pending: { label: 'Chờ phản hồi', tone: 'warning' },
+  accepted: { label: 'Đã kết bạn', tone: 'success' },
+  declined: { label: 'Đã từ chối', tone: 'neutral' },
+}
+
+// Vai trò dùng được kết bạn & tin nhắn
+export const CHAT_ROLES = [ROLES.CANDIDATE, ROLES.RECRUITER]
+
+// Trang tin nhắn của từng vai trò (nhà tuyển dụng nằm trong RecruiterLayout)
+export const messagesPath = (role, conversationId) =>
+  `${role === ROLES.RECRUITER ? '/recruiter/messages' : '/messages'}${conversationId ? `/${conversationId}` : ''}`
+
 export const LOGO_ACCEPT = '.jpg,.jpeg,.png,.webp'
 export const LOGO_MAX_SIZE = 2 * 1024 * 1024
 

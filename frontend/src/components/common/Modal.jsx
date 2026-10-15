@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
-export default function Modal({ open, title, onClose, children, footer }) {
+// size="lg": hộp rộng (xem CV)
+export default function Modal({ open, title, onClose, children, footer, size }) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -12,7 +13,12 @@ export default function Modal({ open, title, onClose, children, footer }) {
 
   return (
     <div className="modal-backdrop" onMouseDown={onClose}>
-      <div className="modal" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()}>
+      <div
+        className={`modal ${size ? `modal-${size}` : ''}`}
+        role="dialog"
+        aria-modal="true"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h2>{title}</h2>
           <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Đóng">

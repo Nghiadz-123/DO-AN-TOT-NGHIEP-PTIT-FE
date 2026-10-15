@@ -1,8 +1,10 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import CountBadge from '@/components/common/CountBadge'
 import useAuth from '@/hooks/useAuth'
+import useInbox from '@/hooks/useInbox'
 import { FEATURES, ROLES } from '@/utils/constants'
 
-// ai: chỉ hiện khi backend đã có module AI (FEATURES.ai)
+// ai: chỉ hiện khi backend đã có module AI (FEATURES.ai); badge: khóa số đếm trong useInbox().summary
 const CANDIDATE_LINKS = [
   { to: '/jobs', label: 'Tìm việc' },
   { to: '/companies', label: 'Công ty' },
@@ -11,6 +13,8 @@ const CANDIDATE_LINKS = [
   { to: '/recommended-jobs', label: 'Việc làm phù hợp', ai: true },
   { to: '/my-applications', label: 'Đơn ứng tuyển' },
   { to: '/favorites', label: '♥ Yêu thích' },
+  { to: '/connections', label: '🤝 Kết nối', badge: 'pendingRequests', badgeLabel: 'lời mời kết bạn đang chờ' },
+  { to: '/messages', label: '💬 Tin nhắn', badge: 'unreadMessages', badgeLabel: 'tin nhắn chưa đọc' },
 ].filter((link) => !link.ai || FEATURES.ai)
 
 const GUEST_LINKS = [
@@ -21,6 +25,7 @@ const GUEST_LINKS = [
 const RECRUITER_LINKS = [
   { to: '/jobs', label: 'Việc làm' },
   { to: '/recruiter', label: 'Trang tuyển dụng' },
+  { to: '/recruiter/messages', label: '💬 Tin nhắn', badge: 'unreadMessages', badgeLabel: 'tin nhắn chưa đọc' },
 ]
 
 const ADMIN_LINKS = [
@@ -29,6 +34,7 @@ const ADMIN_LINKS = [
 
 export default function Header() {
   const { user, logout } = useAuth()
+  const { summary } = useInbox()
   const navigate = useNavigate()
 
   const links =
@@ -63,6 +69,7 @@ export default function Header() {
           {links.map((l) => (
             <NavLink key={l.to} to={l.to}>
               {l.label}
+              {l.badge && <CountBadge count={summary[l.badge]} label={l.badgeLabel} />}
             </NavLink>
           ))}
         </nav>

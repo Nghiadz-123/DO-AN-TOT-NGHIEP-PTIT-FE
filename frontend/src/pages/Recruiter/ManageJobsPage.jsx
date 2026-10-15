@@ -162,6 +162,9 @@ export default function ManageJobsPage() {
                         <Link to={`/recruiter/applicants?jobId=${job.id}`} className="btn btn-outline btn-sm">
                           {FEATURES.ai ? '🤖 Lọc hồ sơ' : 'Xem hồ sơ'}
                         </Link>
+                        <Link to={`/recruiter/talents?jobId=${job.id}`} className="btn btn-ghost btn-sm">
+                          🎯 Ứng viên phù hợp
+                        </Link>
                         <Link to={`/recruiter/jobs/${job.id}/edit`} className="btn btn-ghost btn-sm">
                           Sửa
                         </Link>

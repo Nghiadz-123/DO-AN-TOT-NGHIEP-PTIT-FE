@@ -153,6 +153,16 @@ function ProfileForm({ initial }) {
           Đang tìm việc
         </label>
       </div>
+      <div className="form-group">
+        <label className="checkbox">
+          <input type="checkbox" checked={form.isPublic} onChange={(e) => setForm({ ...form, isPublic: e.target.checked })} />
+          Cho phép nhà tuyển dụng tìm thấy hồ sơ
+        </label>
+        <small className="text-muted">
+          Nhà tuyển dụng có tin phù hợp sẽ xem được hồ sơ và CV chính của bạn, và có thể gửi lời mời kết bạn để nhắn tin
+          trực tiếp. Công ty bạn đã ứng tuyển luôn xem được hồ sơ bạn đã nộp.
+        </small>
+      </div>
 
       <button className="btn btn-primary" disabled={saving}>
         {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
