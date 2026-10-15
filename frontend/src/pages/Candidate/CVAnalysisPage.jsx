@@ -83,6 +83,7 @@ export default function CVAnalysisPage() {
             Tải CV lên để AI bóc tách thông tin, chấm điểm và đưa ra gợi ý giúp CV của bạn nổi bật hơn.
           </p>
         </div>
+        <Link to="/create-cv" className="btn btn-primary">Tạo CV mới</Link>
       </div>
 
       {actionError && <div className="alert alert-error">{actionError}</div>}
