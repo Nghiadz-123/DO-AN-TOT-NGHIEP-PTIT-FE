@@ -7,6 +7,7 @@ import Loading from '@/components/common/Loading'
 import Modal from '@/components/common/Modal'
 import ScoreCircle from '@/components/common/ScoreCircle'
 import useFetch from '@/hooks/useFetch'
+import { FEATURES } from '@/utils/constants'
 import { formatDate, getErrorMessage } from '@/utils/formatters'
 
 export default function ApplyModal({ job, open, onClose, onApplied }) {
@@ -21,7 +22,7 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
 
   // AI đánh giá nhanh mức độ phù hợp của CV đang chọn với công việc
   useEffect(() => {
-    if (!open || !selectedCvId) return
+    if (!FEATURES.ai || !open || !selectedCvId) return
     let active = true
     cvApi
       .matchJob(selectedCvId, job.id)
@@ -102,7 +103,7 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
             </div>
           </div>
 
-          <div className="ai-box">
+          {FEATURES.ai && <div className="ai-box">
             <div className="ai-box-title">✨ AI đánh giá mức độ phù hợp</div>
             {currentMatch?.failed ? (
               <p className="text-muted">Không thể đánh giá lúc này, bạn vẫn có thể nộp hồ sơ.</p>
@@ -123,7 +124,7 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
             ) : (
               <Loading text="Đang phân tích..." />
             )}
-          </div>
+          </div>}
 
           <div className="form-group">
             <label htmlFor="coverLetter">Thư giới thiệu (không bắt buộc)</label>

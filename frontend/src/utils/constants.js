@@ -8,7 +8,7 @@ const flag = (value, fallback) => (value === undefined || value === '' ? fallbac
 // Nhóm chức năng backend chưa có ở giai đoạn 1 (chỉ Nhà tuyển dụng). Chế độ mock bật tất cả để demo;
 // khi gọi API thật thì ẩn đi, bật lại bằng VITE_FEATURE_AI / VITE_FEATURE_CANDIDATE khi backend hỗ trợ.
 export const FEATURES = {
-  ai: flag(import.meta.env.VITE_FEATURE_AI, USE_MOCK),
+  ai: USE_MOCK && flag(import.meta.env.VITE_FEATURE_AI, USE_MOCK),
   candidate: flag(import.meta.env.VITE_FEATURE_CANDIDATE, USE_MOCK),
 }
 

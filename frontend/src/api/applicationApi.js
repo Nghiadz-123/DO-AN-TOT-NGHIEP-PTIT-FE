@@ -1,15 +1,23 @@
 import applicationMock from '@/mocks/api/applicationMock'
 import { USE_MOCK } from '@/utils/constants'
-import { cleanParams, toApplication, toPage } from './adapters'
+import { cleanParams, toApplication, toCandidateApplication, toPage } from './adapters'
 import axiosClient, { fetchFile } from './axiosClient'
 
 const toQuery = ({ jobId, status, keyword, ordering, page, pageSize } = {}) =>
   cleanParams({ job: jobId, status: [].concat(status ?? []).join(','), q: keyword, ordering, page, page_size: pageSize })
 
 const applicationApi = {
-  // Ứng viên (giai đoạn sau)
-  apply: (data) => axiosClient.post('/applications/', data),
-  getMine: () => axiosClient.get('/applications/me/'),
+  // Ứng viên
+  apply: async ({ jobId, cvId, coverLetter = '' }) =>
+    toCandidateApplication(await axiosClient.post('/candidate/applications/', {
+      job_id: jobId,
+      cv_id: cvId,
+      cover_letter: coverLetter,
+    })),
+  getMine: async () => {
+    const page = await axiosClient.get('/candidate/applications/', { params: { page_size: 100 } })
+    return (page.results ?? []).map(toCandidateApplication)
+  },
 
   // Nhà tuyển dụng: params = { jobId, status, keyword, ordering, page, pageSize }
   list: async (params) =>
@@ -24,9 +32,9 @@ const applicationApi = {
   // Trả về { blob, fileName }
   downloadCv: (id) => fetchFile(`/employer/applications/${id}/cv/`),
 
-  // AI sàng lọc hồ sơ (giai đoạn sau)
-  screenByJob: (jobId) => axiosClient.post(`/jobs/${jobId}/applications/ai-screen/`),
-  screen: (id) => axiosClient.post(`/applications/${id}/ai-screen/`),
+  // AI sàng lọc chưa có endpoint ở backend hiện tại.
+  screenByJob: async () => { throw new Error('Tính năng AI sàng lọc chưa được backend hỗ trợ.') },
+  screen: async () => { throw new Error('Tính năng AI sàng lọc chưa được backend hỗ trợ.') },
 }
 
 export default USE_MOCK ? applicationMock : applicationApi

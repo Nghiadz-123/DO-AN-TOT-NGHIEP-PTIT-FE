@@ -1,10 +1,10 @@
 import jobMock from '@/mocks/api/jobMock'
 import { USE_MOCK } from '@/utils/constants'
-import { cleanParams, fromJobForm, toDashboard, toJob, toPage } from './adapters'
+import { cleanParams, fromJobForm, toDashboard, toJob, toPage, toPublicCompany } from './adapters'
 import axiosClient from './axiosClient'
 
-const toPublicQuery = ({ keyword, location, type, level, page, pageSize } = {}) =>
-  cleanParams({ q: keyword, location, job_type: type, level, page, page_size: pageSize })
+const toPublicQuery = ({ keyword, location, type, level, industry, company, page, pageSize } = {}) =>
+  cleanParams({ q: keyword, location, job_type: type, level, industry, company, page, page_size: pageSize })
 
 const toEmployerQuery = ({ status, keyword, ordering, page, pageSize } = {}) =>
   cleanParams({ status, q: keyword, ordering, page, page_size: pageSize })
@@ -12,6 +12,8 @@ const toEmployerQuery = ({ status, keyword, ordering, page, pageSize } = {}) =>
 const jobApi = {
   // Công khai: tìm kiếm tin đang tuyển, params = { keyword, location, type, level, page, pageSize }
   getAll: async (params) => toPage(await axiosClient.get('/jobs/', { params: toPublicQuery(params) }), toJob),
+  getCompanies: async ({ page = 1, pageSize = 8 } = {}) =>
+    toPage(await axiosClient.get('/companies/', { params: cleanParams({ page, page_size: pageSize, ordering: '-open_job_count' }) }), toPublicCompany),
   getById: async (id) => toJob(await axiosClient.get(`/jobs/${id}/`)),
 
   // Nhà tuyển dụng: params = { status, keyword, ordering, page, pageSize }

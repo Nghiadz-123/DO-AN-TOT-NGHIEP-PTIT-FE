@@ -65,6 +65,14 @@ export const toCompany = (dto) => ({
   verificationStatus: dto.verification_status,
 })
 
+export const toPublicCompany = (dto) => ({
+  id: dto.id,
+  name: dto.name,
+  logoUrl: dto.logo_url ?? null,
+  industry: dto.industry?.name ?? 'Đa ngành',
+  openJobCount: dto.open_job_count ?? 0,
+})
+
 export const fromCompanyForm = (form) => ({
   name: form.name,
   tax_code: form.taxCode,
@@ -83,8 +91,11 @@ export const fromCompanyForm = (form) => ({
 export const toJob = (dto) => ({
   id: dto.id,
   title: dto.title,
+  companyId: dto.company?.id ?? '',
   company: dto.company?.name ?? '',
   companyLogo: dto.company?.logo_url ?? null,
+  industryId: dto.industry?.id ?? '',
+  industry: dto.industry?.name ?? '',
   location: dto.location?.name ?? '',
   locationId: dto.location?.id ?? '',
   type: dto.job_type,
@@ -170,6 +181,27 @@ export const toApplication = (dto) => ({
     createdAt: h.created_at,
   })),
   aiReview: null, // module AI chưa có ở backend giai đoạn này
+})
+
+export const toCandidateApplication = (dto) => ({
+  id: dto.id,
+  jobId: dto.job?.id,
+  job: dto.job ? {
+    id: dto.job.id,
+    title: dto.job.title,
+    company: dto.job.company?.name ?? '',
+    location: dto.job.location?.name ?? '',
+    salaryMin: null,
+    salaryMax: null,
+    status: dto.job.status,
+  } : null,
+  cv: dto.cv ? { id: dto.cv.id, fileName: dto.cv.original_filename || dto.cv.title, title: dto.cv.title } : null,
+  status: dto.status,
+  appliedAt: dto.applied_at,
+  statusChangedAt: dto.status_changed_at,
+  canWithdraw: dto.can_withdraw,
+  coverLetter: dto.cover_letter ?? '',
+  history: dto.status_history ?? [],
 })
 
 export const toDashboard = (dto) => ({

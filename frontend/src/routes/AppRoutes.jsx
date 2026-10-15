@@ -1,9 +1,11 @@
 import { Route, Routes } from 'react-router-dom'
 import MainLayout from '@/layouts/MainLayout'
 import RecruiterLayout from '@/layouts/RecruiterLayout'
+import AdminLayout from '@/layouts/AdminLayout'
 import LoginPage from '@/pages/Auth/LoginPage'
 import RegisterPage from '@/pages/Auth/RegisterPage'
 import CVAnalysisPage from '@/pages/Candidate/CVAnalysisPage'
+import CVBuilderPage from '@/pages/Candidate/CVBuilderPage'
 import MyApplicationsPage from '@/pages/Candidate/MyApplicationsPage'
 import ProfilePage from '@/pages/Candidate/ProfilePage'
 import RecommendedJobsPage from '@/pages/Candidate/RecommendedJobsPage'
@@ -16,6 +18,8 @@ import ApplicantDetailPage from '@/pages/Recruiter/ApplicantDetailPage'
 import ApplicantsPage from '@/pages/Recruiter/ApplicantsPage'
 import CompanyProfilePage from '@/pages/Recruiter/CompanyProfilePage'
 import DashboardPage from '@/pages/Recruiter/DashboardPage'
+import AdminDashboardPage from '@/pages/Admin/AdminDashboardPage'
+import AdminManagePage from '@/pages/Admin/AdminManagePage'
 import JobFormPage from '@/pages/Recruiter/JobFormPage'
 import ManageJobsPage from '@/pages/Recruiter/ManageJobsPage'
 import AdminPage from '@/pages/Admin/AdminPage'
@@ -35,6 +39,7 @@ export default function AppRoutes() {
         <Route element={<ProtectedRoute role={ROLES.CANDIDATE} />}>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/cv-analysis" element={<CVAnalysisPage />} />
+          <Route path="/create-cv" element={<CVBuilderPage />} />
           <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />
           <Route path="/my-applications" element={<MyApplicationsPage />} />
         </Route>
@@ -56,6 +61,15 @@ export default function AppRoutes() {
           <Route path="applicants/:id" element={<ApplicantDetailPage />} />
           <Route path="company" element={<CompanyProfilePage />} />
           <Route path="account" element={<AccountPage />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute role={ROLES.ADMIN} />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="users" element={<AdminManagePage type="users" />} />
+          <Route path="companies" element={<AdminManagePage type="companies" />} />
+          <Route path="jobs" element={<AdminManagePage type="jobs" />} />
         </Route>
       </Route>
     </Routes>

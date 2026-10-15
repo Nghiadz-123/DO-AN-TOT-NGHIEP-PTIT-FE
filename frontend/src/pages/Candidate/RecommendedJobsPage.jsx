@@ -6,6 +6,7 @@ import EmptyState from '@/components/common/EmptyState'
 import Loading from '@/components/common/Loading'
 import JobCard from '@/components/jobs/JobCard'
 import useFetch from '@/hooks/useFetch'
+import { FEATURES } from '@/utils/constants'
 
 const SCORE_FILTERS = [
   { value: 0, label: 'Tất cả' },
@@ -16,15 +17,17 @@ const SCORE_FILTERS = [
 export default function RecommendedJobsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [minScore, setMinScore] = useState(0)
-  const { data: cvs, loading: loadingCvs } = useFetch(() => cvApi.getMine(), [])
+  const { data: cvs, loading: loadingCvs } = useFetch(() => (FEATURES.ai ? cvApi.getMine() : Promise.resolve([])), [])
 
   const cvId = searchParams.get('cvId') || cvs?.[0]?.id
   const { data: recommendations, loading, error } = useFetch(
-    () => (cvId ? jobApi.getRecommended(cvId) : Promise.resolve([])),
+    () => (FEATURES.ai && cvId ? jobApi.getRecommended(cvId) : Promise.resolve([])),
     [cvId],
   )
 
   if (loadingCvs) return <Loading />
+
+  if (!FEATURES.ai) return <div className="card"><h1>Gợi ý việc làm chưa khả dụng</h1><p className="text-muted">Backend hiện chưa cung cấp dịch vụ AI gợi ý việc làm. Bạn có thể tìm tin tuyển dụng đang mở tại mục Tìm việc.</p><Link to="/jobs" className="btn btn-primary">Tìm việc làm</Link></div>
 
   if (!cvs?.length) {
     return (

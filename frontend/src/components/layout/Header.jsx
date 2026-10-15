@@ -1,11 +1,12 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import useAuth from '@/hooks/useAuth'
-import { ROLES } from '@/utils/constants'
+import { FEATURES, ROLES } from '@/utils/constants'
 
 const CANDIDATE_LINKS = [
   { to: '/jobs', label: 'Tìm việc' },
-  { to: '/cv-analysis', label: 'CV & AI chấm điểm' },
-  { to: '/recommended-jobs', label: 'Việc làm phù hợp' },
+  { to: '/cv-analysis', label: FEATURES.ai ? 'CV & AI chấm điểm' : 'CV của tôi' },
+  { to: '/create-cv', label: 'Tạo CV' },
+  ...(FEATURES.ai ? [{ to: '/recommended-jobs', label: 'Việc làm phù hợp' }] : []),
   { to: '/my-applications', label: 'Đơn ứng tuyển' },
 ]
 
@@ -51,11 +52,17 @@ export default function Header() {
           Smart<span>ATS</span>
         </Link>
         <nav className="nav">
-          {links.map((l) => (
-            <NavLink key={l.to} to={l.to}>
-              {l.label}
-            </NavLink>
-          ))}
+          {links.map((l) =>
+            l.href ? (
+              <a key={l.href} href={l.href} target="_blank" rel="noreferrer">
+                {l.label}
+              </a>
+            ) : (
+              <NavLink key={l.to} to={l.to}>
+                {l.label}
+              </NavLink>
+            ),
+          )}
         </nav>
         <div className="header-actions">
           {user ? (

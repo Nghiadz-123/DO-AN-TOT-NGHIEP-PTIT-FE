@@ -6,16 +6,17 @@ import Loading from '@/components/common/Loading'
 import Pagination from '@/components/common/Pagination'
 import JobCard from '@/components/jobs/JobCard'
 import useAuth from '@/hooks/useAuth'
-import { useLocations } from '@/hooks/useCatalog'
+import { useIndustries, useLocations } from '@/hooks/useCatalog'
 import useFetch from '@/hooks/useFetch'
 import { FEATURES, JOB_LEVELS, JOB_TYPES, ROLES } from '@/utils/constants'
 
-const FILTER_KEYS = ['keyword', 'location', 'type', 'level']
+const FILTER_KEYS = ['keyword', 'location', 'type', 'level', 'industry', 'company']
 const PAGE_SIZE = 12
 
 export default function JobListPage() {
   const { user } = useAuth()
   const locations = useLocations()
+  const industries = useIndustries()
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = Object.fromEntries(FILTER_KEYS.map((k) => [k, searchParams.get(k) ?? '']))
   const page = Number(searchParams.get('page') ?? 1)
@@ -80,6 +81,10 @@ export default function JobListPage() {
               {l.label}
             </option>
           ))}
+        </select>
+        <select className="input" value={filters.industry} onChange={(e) => updateFilters({ industry: e.target.value })}>
+          <option value="">Tất cả ngành nghề</option>
+          {industries.map((industry) => <option key={industry.id} value={industry.id}>{industry.name}</option>)}
         </select>
         <button className="btn btn-primary">Tìm kiếm</button>
       </form>

@@ -1,6 +1,6 @@
 import { normalize } from '@/utils/text'
 import { matchCVToJob } from '../ai'
-import { locationName } from '../catalogData'
+import { INDUSTRIES, locationName } from '../catalogData'
 import {
   delay,
   findOr404,
@@ -37,8 +37,11 @@ export function jobView(job) {
   const actions = Object.keys(ACTION_SOURCES).filter((action) => ACTION_SOURCES[action].includes(status))
   return {
     ...job,
+    companyId: company?.id ?? '',
     company: company?.name ?? '',
     companyLogo: company?.logoUrl ?? null,
+    industryId: company?.industryId ?? '',
+    industry: INDUSTRIES.find((industry) => industry.id === Number(company?.industryId))?.name ?? '',
     location: locationName(job.locationId),
     status,
     applicantCount: apps.length,
@@ -106,7 +109,7 @@ function applyAction(job, action) {
 
 const jobMock = {
   // ---------------------------------------------------------------- công khai
-  async getAll({ keyword = '', location = '', type = '', level = '', page = 1, pageSize = 20 } = {}) {
+  async getAll({ keyword = '', location = '', type = '', level = '', industry = '', company = '', page = 1, pageSize = 20 } = {}) {
     await delay()
     const kw = normalize(keyword)
     const list = getDb()
@@ -116,8 +119,29 @@ const jobMock = {
       .filter((j) => !location || j.locationId === Number(location))
       .filter((j) => !type || j.type === type)
       .filter((j) => !level || j.level === level)
+      .filter((j) => !industry || String(j.industryId) === String(industry))
+      .filter((j) => !company || String(j.companyId) === String(company))
       .sort(byNewest)
     return paginate(list, { page, pageSize })
+  },
+
+  async getCompanies({ page = 1, pageSize = 8 } = {}) {
+    await delay()
+    const db = getDb()
+    const counts = db.jobs
+      .filter((job) => effectiveStatus(job) === 'published')
+      .reduce((total, job) => ({ ...total, [job.companyId]: (total[job.companyId] ?? 0) + 1 }), {})
+    const companies = db.companies
+      .map((company) => ({
+        id: company.id,
+        name: company.name,
+        logoUrl: company.logoUrl,
+        industry: INDUSTRIES.find((industry) => industry.id === Number(company.industryId))?.name ?? 'Đa ngành',
+        openJobCount: counts[company.id] ?? 0,
+      }))
+      .filter((company) => company.openJobCount > 0)
+      .sort((a, b) => b.openJobCount - a.openJobCount)
+    return paginate(companies, { page, pageSize })
   },
 
   async getById(id) {

@@ -8,13 +8,13 @@ import { getErrorMessage } from '@/utils/formatters'
 const DEMO_ACCOUNTS = [
   FEATURES.candidate && { label: 'Ứng viên demo', email: 'candidate@demo.com' },
   { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
-  { label: 'Admin demo', email: 'admin@demo.com' },
-]
+  { label: 'Quản trị viên demo', email: 'admin@demo.com' },
+].filter(Boolean)
+const SHOW_DEMO = USE_MOCK || import.meta.env.DEV
 
 const homeOf = (user) => {
-  if (user.role === ROLES.RECRUITER) return '/recruiter'
   if (user.role === ROLES.ADMIN) return '/admin'
-  return '/jobs'
+  return user.role === ROLES.RECRUITER ? '/recruiter' : '/jobs'
 }
 
 export default function LoginPage() {

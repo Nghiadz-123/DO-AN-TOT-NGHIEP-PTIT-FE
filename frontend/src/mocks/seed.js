@@ -27,6 +27,14 @@ const users = [
     about: 'Lập trình viên frontend, yêu thích ReactJS và thiết kế giao diện.',
   },
   {
+    id: 'u-admin-1',
+    email: 'admin@demo.com',
+    password: '123456',
+    role: 'admin',
+    fullName: 'Administrator',
+    phone: '0900 000 000',
+  },
+  {
     id: 'u-rec-1',
     email: 'recruiter@demo.com',
     password: '123456',

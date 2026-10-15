@@ -7,7 +7,7 @@ import ScoreCircle from '@/components/common/ScoreCircle'
 import CVAnalysisResult from '@/components/cv/CVAnalysisResult'
 import CVParsedInfo from '@/components/cv/CVParsedInfo'
 import useFetch from '@/hooks/useFetch'
-import { CV_ACCEPT, CV_MAX_SIZE } from '@/utils/constants'
+import { CV_ACCEPT, CV_MAX_SIZE, USE_MOCK } from '@/utils/constants'
 import { formatDate, formatFileSize, getErrorMessage } from '@/utils/formatters'
 
 const TABS = [
@@ -17,7 +17,7 @@ const TABS = [
 
 function validateFile(file) {
   const ext = file.name.split('.').pop().toLowerCase()
-  if (!['pdf', 'doc', 'docx'].includes(ext)) return 'Chỉ hỗ trợ file PDF, DOC hoặc DOCX.'
+  if (!(USE_MOCK ? ['pdf', 'doc', 'docx'] : ['pdf', 'docx']).includes(ext)) return 'Chỉ hỗ trợ file PDF hoặc DOCX.'
   if (file.size > CV_MAX_SIZE) return 'Dung lượng file tối đa 5MB.'
   return null
 }
@@ -25,7 +25,7 @@ function validateFile(file) {
 export default function CVAnalysisPage() {
   const { data: cvs, loading, error, setData: setCvs } = useFetch(() => cvApi.getMine(), [])
   const [selectedId, setSelectedId] = useState(null)
-  const [tab, setTab] = useState('analysis')
+  const [tab, setTab] = useState(USE_MOCK ? 'analysis' : 'parsed')
   const [uploading, setUploading] = useState(false)
   const [analyzingId, setAnalyzingId] = useState(null)
   const [actionError, setActionError] = useState('')
@@ -55,7 +55,7 @@ export default function CVAnalysisPage() {
       const cv = await cvApi.upload(file)
       setCvs((list) => [cv, ...list])
       setSelectedId(cv.id)
-      setTab('analysis')
+      setTab(USE_MOCK ? 'analysis' : 'parsed')
       setUploading(false)
       await runAnalysis(cv.id) // tự động chấm điểm ngay sau khi tải lên
     } catch (err) {
@@ -84,11 +84,12 @@ export default function CVAnalysisPage() {
     <>
       <div className="page-header">
         <div>
-          <h1>CV của tôi & AI chấm điểm</h1>
+          <h1>{USE_MOCK ? 'CV của tôi & AI chấm điểm' : 'CV của tôi & thông tin trích xuất'}</h1>
           <p className="text-muted">
-            Tải CV lên để AI bóc tách thông tin, chấm điểm và đưa ra gợi ý giúp CV của bạn nổi bật hơn.
+            {USE_MOCK ? 'Tải CV lên để AI bóc tách thông tin, chấm điểm và đưa ra gợi ý giúp CV của bạn nổi bật hơn.' : 'Tải CV lên để trích xuất thông tin liên hệ và xem nội dung văn bản đọc được từ hồ sơ.'}
           </p>
         </div>
+        <Link to="/create-cv" className="btn btn-primary">Tạo CV mới</Link>
       </div>
 
       {actionError && <div className="alert alert-error">{actionError}</div>}
@@ -100,7 +101,7 @@ export default function CVAnalysisPage() {
             {uploading ? (
               <Loading text="AI đang đọc và bóc tách CV..." />
             ) : (
-              <FileDropzone accept={CV_ACCEPT} onFile={handleFile} hint="PDF, DOC, DOCX · tối đa 5MB" />
+              <FileDropzone accept={USE_MOCK ? CV_ACCEPT : '.pdf,.docx'} onFile={handleFile} hint={USE_MOCK ? 'PDF, DOC, DOCX · tối đa 5MB' : 'PDF, DOCX · tối đa 5MB'} />
             )}
           </div>
 
@@ -120,12 +121,12 @@ export default function CVAnalysisPage() {
                       {formatFileSize(cv.fileSize)} · {formatDate(cv.uploadedAt)}
                     </small>
                   </div>
-                  {cv.analysis ? (
+                  {USE_MOCK && cv.analysis ? (
                     <ScoreCircle score={cv.analysis.overallScore} size={40} showLabel={false} />
                   ) : (
-                    <small className="text-muted">Chưa chấm</small>
+                    <small className="text-muted">{USE_MOCK ? 'Chưa chấm' : ({ completed: 'Đã bóc tách', processing: 'Đang xử lý', failed: 'Lỗi bóc tách' }[cv.parseStatus] || 'Chưa bóc tách')}</small>
                   )}
-                  <button
+                  {USE_MOCK && <button
                     className="btn btn-ghost btn-sm"
                     title="Xóa CV"
                     onClick={(e) => {
@@ -134,7 +135,7 @@ export default function CVAnalysisPage() {
                     }}
                   >
                     🗑
-                  </button>
+                  </button>}
                 </li>
               ))}
             </ul>
@@ -155,29 +156,29 @@ export default function CVAnalysisPage() {
                   <p className="text-muted">Tải lên ngày {formatDate(selected.uploadedAt)}</p>
                 </div>
                 <div className="actions">
-                  <button
+                  {USE_MOCK && <button
                     className="btn btn-outline"
                     onClick={() => runAnalysis(selected.id)}
                     disabled={Boolean(analyzingId)}
                   >
                     {selected.analysis ? '↻ Chấm điểm lại' : '✨ Chấm điểm bằng AI'}
-                  </button>
-                  <Link to={`/recommended-jobs?cvId=${selected.id}`} className="btn btn-primary">
+                  </button>}
+                  {USE_MOCK && <Link to={`/recommended-jobs?cvId=${selected.id}`} className="btn btn-primary">
                     Xem việc làm phù hợp
-                  </Link>
+                  </Link>}
                 </div>
               </div>
 
               <div className="tabs">
-                {TABS.map((t) => (
+                {TABS.filter((t) => USE_MOCK || t.key === 'parsed').map((t) => (
                   <button key={t.key} className={`tab ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
                     {t.label}
                   </button>
                 ))}
               </div>
 
-              {tab === 'parsed' && <CVParsedInfo parsed={selected.parsed} />}
-              {tab === 'analysis' &&
+              {tab === 'parsed' && (selected.parsed ? <CVParsedInfo parsed={selected.parsed} /> : <div className="empty-state"><h3>Chưa có dữ liệu bóc tách</h3><p className="text-muted">{selected.parseError || 'Hãy tải lên CV PDF hoặc DOCX có thể đọc được.'}</p></div>)}
+              {USE_MOCK && tab === 'analysis' &&
                 (analyzing ? (
                   <Loading text="AI đang chấm điểm và phân tích CV của bạn..." />
                 ) : selected.analysis ? (
