@@ -1,22 +1,36 @@
+import { Link } from 'react-router-dom'
 import Badge from '@/components/common/Badge'
 import ScoreCircle, { ProgressBar } from '@/components/common/ScoreCircle'
 import { SUGGESTION_PRIORITY } from '@/utils/constants'
-import { formatDate } from '@/utils/formatters'
+import { formatDateTime } from '@/utils/formatters'
 
-export default function CVAnalysisResult({ analysis }) {
+function TextList({ items }) {
+  if (!items.length) return <p className="text-muted">Không có.</p>
+  return (
+    <ul>
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  )
+}
+
+// AI chấm điểm CV: tổng điểm 0-100, điểm từng tiêu chí (trên điểm tối đa), điểm mạnh / điểm cần cải thiện
+export function CVScoreResult({ score }) {
   return (
     <div className="analysis">
       <div className="analysis-overview">
-        <ScoreCircle score={analysis.overallScore} size={120} />
+        <ScoreCircle score={score.total} size={120} />
         <div className="analysis-sections">
-          {analysis.sections.map((s) => (
+          {score.sections.map((s) => (
             <div key={s.key} className="analysis-section">
               <div className="analysis-section-head">
                 <span>{s.name}</span>
-                <strong>{s.score}</strong>
+                <strong>
+                  {s.score}/{s.max}
+                </strong>
               </div>
-              <ProgressBar value={s.score} />
-              <small className="text-muted">{s.comment}</small>
+              <ProgressBar value={s.max ? Math.round((s.score * 100) / s.max) : 0} />
             </div>
           ))}
         </div>
@@ -25,57 +39,94 @@ export default function CVAnalysisResult({ analysis }) {
       <div className="grid grid-2">
         <div className="card card-flat">
           <h4 className="text-success">✔ Điểm mạnh</h4>
-          <ul>
-            {analysis.strengths.map((s) => (
-              <li key={s}>{s}</li>
-            ))}
-          </ul>
+          <TextList items={score.strengths} />
         </div>
         <div className="card card-flat">
           <h4 className="text-danger">✖ Điểm cần cải thiện</h4>
-          <ul>
-            {analysis.weaknesses.map((s) => (
-              <li key={s}>{s}</li>
-            ))}
-          </ul>
+          <TextList items={score.weaknesses} />
         </div>
       </div>
+      <p className="text-muted small">Chấm điểm lúc {formatDateTime(score.scoredAt)}</p>
+    </div>
+  )
+}
 
-      <h3>✨ Gợi ý cải thiện CV từ AI</h3>
+// AI gợi ý sửa CV, kèm tin tuyển dụng làm căn cứ cho từng gợi ý
+export function CVSuggestionList({ suggestions }) {
+  const jobs = Object.fromEntries(suggestions.referenceJobs.map((job) => [job.id, job]))
+
+  return (
+    <div className="analysis">
+      {suggestions.referenceJobs.length > 0 && (
+        <details className="reference-jobs">
+          <summary className="text-muted small">Tin tuyển dụng đã đối chiếu ({suggestions.referenceJobs.length})</summary>
+          <ol className="small">
+            {suggestions.referenceJobs.map((job) => (
+              <li key={job.id}>
+                <Link to={`/jobs/${job.id}`}>{job.title}</Link>
+                <span className="text-muted">
+                  {' '}
+                  · {job.company}
+                  {job.score != null && ` · ${job.score} điểm`}
+                  {job.isTarget && ' · tin mục tiêu'}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+
       <div className="suggestions">
-        {analysis.suggestions.map((s) => {
-          const priority = SUGGESTION_PRIORITY[s.priority]
+        {suggestions.items.map((s, index) => {
+          const priority = SUGGESTION_PRIORITY[s.priority] ?? SUGGESTION_PRIORITY.medium
+          const refs = s.jobIds.filter((id) => jobs[id])
           return (
-            <div key={s.issue} className={`suggestion suggestion-${priority.tone}`}>
+            <div key={index} className={`suggestion suggestion-${priority.tone}`}>
               <div className="suggestion-head">
                 <Badge tone={priority.tone}>{priority.label}</Badge>
                 <span className="text-muted">{s.section}</span>
               </div>
-              <strong>{s.issue}</strong>
+              {s.issue && <strong>{s.issue}</strong>}
               <p>{s.suggestion}</p>
-              {s.example && (
-                <div className="suggestion-example">
-                  <small>Ví dụ:</small> {s.example}
+              {s.before && (
+                <div className="suggestion-example suggestion-before">
+                  <small>Hiện tại:</small> {s.before}
                 </div>
+              )}
+              {s.after && (
+                <div className="suggestion-example">
+                  <small>Nên sửa thành:</small> {s.after}
+                </div>
+              )}
+              {refs.length > 0 && (
+                <p className="text-muted small">
+                  Căn cứ:{' '}
+                  {refs.map((id, i) => (
+                    <span key={id}>
+                      {i > 0 && ', '}
+                      <Link to={`/jobs/${id}`}>{jobs[id].title}</Link>
+                    </span>
+                  ))}
+                </p>
               )}
             </div>
           )
         })}
       </div>
 
-      {analysis.missingKeywords.length > 0 && (
-        <>
-          <h4>Từ khóa nên bổ sung</h4>
+      {suggestions.missingKeywords.length > 0 && (
+        <div>
+          <h4>Từ khóa trong tin tuyển dụng mà CV chưa có</h4>
           <div className="tags">
-            {analysis.missingKeywords.map((k) => (
+            {suggestions.missingKeywords.map((k) => (
               <span key={k} className="tag tag-warning">
                 + {k}
               </span>
             ))}
           </div>
-        </>
+        </div>
       )}
-      <p className="text-muted small">Phân tích lúc {formatDate(analysis.analyzedAt)}</p>
+      <p className="text-muted small">Gợi ý lúc {formatDateTime(suggestions.suggestedAt)}</p>
     </div>
   )
 }

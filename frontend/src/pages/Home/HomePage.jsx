@@ -28,7 +28,7 @@ export default function HomePage() {
   const cta =
     user?.role === ROLES.RECRUITER
       ? { to: '/recruiter/jobs/new', label: 'Đăng tin tuyển dụng' }
-      : FEATURES.ai
+      : FEATURES.candidateAi
         ? { to: user ? '/cv-analysis' : '/register', label: 'Chấm điểm CV miễn phí' }
         : { to: user ? '/cv' : '/register', label: user ? 'Quản lý CV của tôi' : 'Tạo tài khoản miễn phí' }
 
@@ -40,7 +40,7 @@ export default function HomePage() {
         </h1>
         <p>
           Kết nối ứng viên và nhà tuyển dụng trong kinh doanh, kế toán, sản xuất, y tế, giáo dục, dịch vụ, công nghệ...
-          {FEATURES.ai && ' Tích hợp AI chấm điểm CV, gợi ý việc làm và sàng lọc ứng viên.'}
+          {FEATURES.candidateAi && ' Tích hợp AI chấm điểm CV, gợi ý sửa CV và gợi ý việc làm phù hợp.'}
         </p>
         <form className="search-bar" onSubmit={handleSearch}>
           <input

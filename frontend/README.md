@@ -15,7 +15,7 @@ Các lệnh khác: `npm run build`, `npm run preview`, `npm run lint`.
 ```text
 src/
 ├── api/            # Gọi REST API (axiosClient, adapters + từng module: auth, employer, candidate, job, company,
-│                   #   application, cv, favorite, catalog)
+│                   #   application, cv, favorite, catalog, ai)
 ├── assets/         # Ảnh, icon tĩnh
 ├── components/
 │   ├── common/     # Component dùng chung (Loading, Modal, FavoriteButton...)
@@ -27,7 +27,7 @@ src/
 ├── layouts/        # Bố cục trang: MainLayout, RecruiterLayout
 ├── pages/          # Mỗi màn hình một thư mục
 │   ├── Auth/       # Đăng nhập, đăng ký
-│   ├── Candidate/  # Hồ sơ, quản lý & tải CV, đơn ứng tuyển, yêu thích (+ trang AI đang ẩn)
+│   ├── Candidate/  # Hồ sơ, quản lý & tải CV, AI chấm điểm / gợi ý sửa CV, việc làm phù hợp, đơn ứng tuyển, yêu thích
 │   ├── Companies/  # Danh bạ công ty, hồ sơ công ty
 │   ├── Home/
 │   ├── Jobs/       # Danh sách, chi tiết việc làm
@@ -61,8 +61,9 @@ VITE_API_URL=http://localhost:8000/api/v1
 
 - `src/api/adapters.js` chuyển dữ liệu backend (snake_case, lương VND) sang dạng giao diện dùng (camelCase, lương "triệu").
 - `src/api/axiosClient.js` gắn JWT, tự refresh access token khi hết hạn; refresh token hết hạn thì đăng xuất.
-- Backend chưa có module AI nên các phần AI (chấm điểm CV, gợi ý việc làm, sàng lọc hồ sơ) được ẩn
-  (`FEATURES.ai` trong `src/utils/constants.js`). Bật bằng `VITE_FEATURE_AI=true` khi backend có các API này.
+- AI cho ứng viên (chấm điểm CV, gợi ý sửa CV, gợi ý việc làm) gọi module `apps.ai` của backend (Gemini, cần
+  `GEMINI_API_KEY` trong `backend/.env`); cờ `FEATURES.candidateAi` trong `src/utils/constants.js`, ẩn bằng
+  `VITE_FEATURE_AI=false`. Phần AI của nhà tuyển dụng (sàng lọc, xếp hạng hồ sơ) backend chưa có nên vẫn ẩn (`FEATURES.ai`).
 - Admin: tài khoản tạo bằng `python manage.py createsuperuser`; chức năng quản trị nằm ở Django Admin (`/admin/` của backend).
 
 ## Các trang
@@ -74,8 +75,8 @@ VITE_API_URL=http://localhost:8000/api/v1
 | Ứng viên | `/favorites` | Việc làm và công ty yêu thích (bấm ♡ trên thẻ việc làm, công ty hoặc trang chi tiết) |
 | Ứng viên | `/cv` | Quản lý CV: xem PDF, tải về, đổi tên, đặt CV chính, xóa (CV đã dùng ứng tuyển thì không xóa được) |
 | Ứng viên | `/cv/new`, `/cv/:id/edit` | Tải CV (PDF/DOCX ≤ 5MB), đổi tên, xem kết quả đọc nội dung CV |
-| Ứng viên | `/cv-analysis` | (AI, đang ẩn) Chấm điểm và gợi ý cải thiện CV |
-| Ứng viên | `/recommended-jobs` | (AI, đang ẩn) Gợi ý việc làm phù hợp theo CV |
+| Ứng viên | `/cv-analysis` | AI chấm điểm CV (5 tiêu chí), gợi ý sửa CV (theo tin mục tiêu `?jobId=` hoặc các tin gần CV nhất), thông tin AI trích xuất |
+| Ứng viên | `/recommended-jobs` | Việc làm phù hợp theo CV (điểm, kỹ năng đã có / còn thiếu); AI đánh giá chi tiết từng tin |
 | Ứng viên | `/my-applications` | Theo dõi trạng thái đơn ứng tuyển, rút hồ sơ |
 | Ứng viên | `/profile` | Hồ sơ cá nhân và mong muốn công việc (vị trí, nơi làm việc, cấp bậc, lương) |
 | Nhà tuyển dụng | `/recruiter` | Tổng quan, thống kê hồ sơ, pipeline tuyển dụng |
@@ -96,3 +97,4 @@ Chi tiết xem `DO-AN-TOT-NGHIEP-PTIT-BE/docs/candidate-api.md` (hoặc Swagger 
 | `applicationApi` | `candidate/applications/...` (ứng tuyển, danh sách, rút hồ sơ) |
 | `favoriteApi` | `candidate/favorites/ids/`, `candidate/favorites/jobs/...`, `candidate/favorites/companies/...` |
 | `companyApi` | `companies/`, `companies/{id}/` (công khai); tin của công ty: `jobs/?company={id}` |
+| `aiApi` | `candidate/cv-analyses/`, `candidate/cvs/{id}/analysis/score/`, `.../analysis/suggestions/`, `candidate/cvs/{id}/recommended-jobs/...` (xem `docs/ai-api.md` của backend) |

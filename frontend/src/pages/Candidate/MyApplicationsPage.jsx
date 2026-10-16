@@ -53,8 +53,8 @@ export default function MyApplicationsPage() {
         <EmptyState
           title="Bạn chưa ứng tuyển công việc nào"
           action={
-            <Link to={FEATURES.ai ? '/recommended-jobs' : '/jobs'} className="btn btn-primary">
-              {FEATURES.ai ? 'Xem việc làm phù hợp' : 'Tìm việc làm'}
+            <Link to={FEATURES.candidateAi ? '/recommended-jobs' : '/jobs'} className="btn btn-primary">
+              {FEATURES.candidateAi ? 'Xem việc làm phù hợp' : 'Tìm việc làm'}
             </Link>
           }
         />

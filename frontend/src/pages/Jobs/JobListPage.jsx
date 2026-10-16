@@ -92,7 +92,7 @@ export default function JobListPage() {
         <button className="btn btn-primary">Tìm kiếm</button>
       </form>
 
-      {FEATURES.ai && user?.role === ROLES.CANDIDATE && (
+      {FEATURES.candidateAi && user?.role === ROLES.CANDIDATE && (
         <div className="alert alert-info">
           ✨ Muốn biết công việc nào hợp với bạn nhất? <Link to="/recommended-jobs">Xem việc làm AI gợi ý theo CV</Link>
         </div>

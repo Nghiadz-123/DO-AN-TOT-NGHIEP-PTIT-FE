@@ -1231,6 +1231,34 @@ textarea.input {
   gap: 20px;
 }
 
+/* Dòng mô tả + nút thao tác ở đầu mỗi tab AI */
+.ai-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ai-panel-head p {
+  margin: 0;
+}
+
+.ai-panel-head > button {
+  margin-left: auto;
+}
+
+/* Danh sách tin AI dùng làm căn cứ khi gợi ý sửa CV */
+.reference-jobs summary {
+  cursor: pointer;
+}
+
+.reference-jobs ol {
+  margin: 8px 0 0;
+  padding-left: 22px;
+}
+
 .analysis-overview {
   display: flex;
   gap: 32px;
@@ -1305,12 +1333,27 @@ textarea.input {
   background: var(--success-soft);
   border-radius: 6px;
   font-style: italic;
+  white-space: pre-line;
 }
 
 .suggestion-example small {
   font-style: normal;
   font-weight: 700;
   color: var(--success);
+}
+
+/* Đoạn CV hiện tại (trước khi sửa) trong gợi ý của AI */
+.suggestion-before {
+  background: var(--neutral-soft);
+  font-style: normal;
+}
+
+.suggestion-before small {
+  color: var(--text-muted);
+}
+
+.pre-line {
+  white-space: pre-line;
 }
 
 /* ---------- Recruiter ---------- */

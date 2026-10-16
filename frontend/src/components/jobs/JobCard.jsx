@@ -6,7 +6,9 @@ import ScoreCircle from '@/components/common/ScoreCircle'
 import { JOB_LEVELS, JOB_TYPES, WORK_MODES } from '@/utils/constants'
 import { formatDate, formatSalary, labelOf } from '@/utils/formatters'
 
-export default function JobCard({ job, match }) {
+// match (không bắt buộc): { score, matchedSkills, reasons } khi thẻ nằm trong danh sách gợi ý việc làm;
+// children: nội dung thêm hiển thị trên phần chân thẻ (vd. kết quả AI đánh giá)
+export default function JobCard({ job, match, children }) {
   const matched = new Set(match?.matchedSkills ?? [])
 
   return (
@@ -57,6 +59,8 @@ export default function JobCard({ job, match }) {
           ))}
         </ul>
       )}
+
+      {children}
 
       <div className="job-card-foot text-muted">
         <span>Hạn nộp: {formatDate(job.deadline)}</span>

@@ -269,7 +269,90 @@ export const toCV = (dto) => ({
   updatedAt: dto.updated_at ?? dto.created_at,
   rawText: dto.raw_text ?? '', // chỉ có ở API chi tiết
   parsed: dto.parsed_data ?? null, // { stats, contact } do parser bóc tách (không dùng AI)
-  analysis: null, // module AI chưa có ở backend
+})
+
+// ---------------------------------------------------------------- AI cho ứng viên (backend apps/ai)
+const joinRange = (start, end) => [start, end].filter(Boolean).join(' - ')
+
+// Thông tin AI bóc tách từ CV, theo dạng component CVParsedInfo hiển thị
+const toCVProfile = (dto) => ({
+  fullName: dto.full_name ?? '',
+  title: dto.title ?? '',
+  email: dto.email ?? '',
+  phone: dto.phone ?? '',
+  location: dto.location ?? '',
+  summary: dto.summary ?? '',
+  yearsOfExperience: dto.years_of_experience ?? null,
+  skills: dto.skills ?? [],
+  experience: (dto.experiences ?? []).map((e) => ({
+    role: e.position ?? '',
+    company: e.company ?? '',
+    duration: joinRange(e.start, e.end),
+    description: e.description ?? '',
+  })),
+  education: (dto.educations ?? []).map((e) => ({
+    school: e.school ?? '',
+    degree: [e.degree, e.major].filter(Boolean).join(' - '),
+    year: joinRange(e.start, e.end),
+  })),
+  projects: (dto.projects ?? []).map((p) => ({ name: p.name ?? '', tech: p.tech ?? [], description: p.description ?? '' })),
+  certifications: dto.certifications ?? [],
+  languages: dto.languages ?? [],
+})
+
+// Kết quả AI của một CV; chức năng chưa chạy thì score / suggestions / profile là null
+export const toCVAnalysis = (dto) => ({
+  cvId: dto.cv_id,
+  profile: dto.profile ? toCVProfile(dto.profile) : null,
+  score: dto.score && {
+    total: dto.score.total,
+    sections: dto.score.breakdown.map((c) => ({ key: c.key, name: c.label, score: c.score, max: c.max })),
+    strengths: dto.score.strengths,
+    weaknesses: dto.score.weaknesses,
+    scoredAt: dto.score.scored_at,
+  },
+  suggestions: dto.suggestions && {
+    items: dto.suggestions.items.map((s) => ({
+      section: s.section,
+      issue: s.issue,
+      suggestion: s.suggestion,
+      before: s.example_before,
+      after: s.example_after,
+      priority: s.priority,
+      jobIds: s.job_ids ?? [],
+    })),
+    missingKeywords: dto.suggestions.missing_keywords ?? [],
+    // Tin mục tiêu (nếu có) + các việc làm được gợi ý cho CV, đã gửi kèm cho AI làm căn cứ
+    referenceJobs: (dto.suggestions.reference_jobs ?? []).map((j) => ({
+      id: j.id,
+      title: j.title,
+      company: j.company,
+      score: j.score ?? null,
+      isTarget: Boolean(j.is_target),
+    })),
+    targetJobId: dto.suggestions.target_job_id,
+    suggestedAt: dto.suggestions.suggested_at,
+  },
+})
+
+// Một việc làm được gợi ý: { job, match } (match theo dạng JobCard hiển thị)
+export const toJobRecommendation = (dto) => ({
+  job: toJob(dto.job),
+  match: {
+    score: dto.score,
+    similarity: dto.similarity,
+    skillOverlap: dto.skill_overlap,
+    matchedSkills: dto.matched_skills ?? [],
+    missingSkills: dto.missing_skills ?? [],
+    reasons: dto.reasons ?? [],
+    aiEvaluation: dto.ai_evaluation && {
+      score: dto.ai_evaluation.score,
+      matchedSkills: dto.ai_evaluation.matched_skills ?? [],
+      missingSkills: dto.ai_evaluation.missing_skills ?? [],
+      reason: dto.ai_evaluation.reason ?? '',
+      evaluatedAt: dto.ai_evaluation.evaluated_at,
+    },
+  },
 })
 
 // ---------------------------------------------------------------- đơn ứng tuyển (phía ứng viên)
