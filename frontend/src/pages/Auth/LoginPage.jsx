@@ -9,6 +9,7 @@ import { getErrorMessage } from '@/utils/formatters'
 const DEMO_ACCOUNTS = [
   { label: 'Ứng viên demo', email: 'candidate@demo.com' },
   { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
+  { label: 'Quản trị viên demo', email: 'admin@demo.com' },
 ]
 const SHOW_DEMO = import.meta.env.DEV
 

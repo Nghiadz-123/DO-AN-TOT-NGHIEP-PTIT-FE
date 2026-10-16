@@ -1,17 +1,27 @@
 // Hiển thị thông tin được AI bóc tách từ file CV
 export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
   const highlight = new Set(highlightSkills)
+  const skills = parsed.skills ?? []
+  const experience = parsed.experience ?? []
+  const education = parsed.education ?? []
 
   return (
     <div className="cv-parsed">
       <div className="cv-parsed-head">
-        <h3>{parsed.fullName}</h3>
-        <p className="text-primary">{parsed.title}</p>
+        {parsed.fullName && <h3>{parsed.fullName}</h3>}
+        {parsed.title && <p className="text-primary">{parsed.title}</p>}
         <p className="text-muted">
           {[parsed.email, parsed.phone, parsed.location].filter(Boolean).join(' · ')}
         </p>
         {parsed.links?.length > 0 && <p className="text-muted">🔗 {parsed.links.join(' · ')}</p>}
       </div>
+
+      {parsed.stats && (
+        <div className="tags">
+          {parsed.stats.pages != null && <span className="tag">{parsed.stats.pages} trang</span>}
+          <span className="tag">{parsed.stats.words ?? 0} từ</span>
+        </div>
+      )}
 
       {parsed.summary && (
         <section>
@@ -20,21 +30,21 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
         </section>
       )}
 
-      <section>
-        <h4>Kỹ năng ({parsed.skills.length})</h4>
+      {skills.length > 0 && <section>
+        <h4>Kỹ năng ({skills.length})</h4>
         <div className="tags">
-          {parsed.skills.map((s) => (
+          {skills.map((s) => (
             <span key={s} className={`tag ${highlight.has(s) ? 'tag-success' : ''}`}>
               {s}
             </span>
           ))}
         </div>
-      </section>
+      </section>}
 
       <section>
         <h4>Kinh nghiệm{parsed.yearsOfExperience != null && ` · ${parsed.yearsOfExperience} năm`}</h4>
-        {parsed.experience.length === 0 && <p className="text-muted">Không có.</p>}
-        {parsed.experience.map((e, index) => (
+        {experience.length === 0 && <p className="text-muted">Không có.</p>}
+        {experience.map((e, index) => (
           <div key={`${e.company}-${e.duration}-${index}`} className="timeline-item">
             <strong>{e.role}</strong>
             {e.company && ` — ${e.company}`}
@@ -44,10 +54,10 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
         ))}
       </section>
 
-      {parsed.education?.length > 0 && (
+      {education.length > 0 && (
         <section>
           <h4>Học vấn</h4>
-          {parsed.education.map((e, index) => (
+          {education.map((e, index) => (
             <div key={`${e.school}-${index}`} className="timeline-item">
               <strong>{e.degree}</strong>
               {e.school && ` — ${e.school}`}
@@ -63,7 +73,7 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
           {parsed.projects.map((p, index) => (
             <div key={`${p.name}-${index}`} className="timeline-item">
               <strong>{p.name}</strong>
-              {p.tech.length > 0 && <div className="text-muted">{p.tech.join(', ')}</div>}
+              {p.tech?.length > 0 && <div className="text-muted">{p.tech.join(', ')}</div>}
               {p.description && <p className="pre-line">{p.description}</p>}
             </div>
           ))}
@@ -85,3 +95,4 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
     </div>
   )
 }
+

@@ -110,6 +110,7 @@ export default function CVAnalysisPage() {
             AI đọc CV, chấm điểm theo 5 tiêu chí và gợi ý cách sửa dựa trên yêu cầu của các tin tuyển dụng thật.
           </p>
         </div>
+        <Link to="/create-cv" className="btn btn-primary">Tạo CV mới</Link>
       </div>
 
       {actionError && <div className="alert alert-error">{actionError}</div>}

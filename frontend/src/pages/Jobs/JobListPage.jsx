@@ -11,7 +11,7 @@ import { useIndustries, useLocations } from '@/hooks/useCatalog'
 import useFetch from '@/hooks/useFetch'
 import { FEATURES, JOB_LEVELS, JOB_TYPES, POSTED_WITHIN, ROLES } from '@/utils/constants'
 
-const FILTER_KEYS = ['keyword', 'industry', 'location', 'type', 'level', 'posted']
+const FILTER_KEYS = ['keyword', 'industry', 'location', 'type', 'level', 'posted', 'company']
 const PAGE_SIZE = 12
 
 export default function JobListPage() {
