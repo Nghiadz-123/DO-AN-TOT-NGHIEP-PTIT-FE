@@ -50,6 +50,9 @@ export default function AppRoutes() {
           <Route path="/cv" element={<ManageCVsPage />} />
           <Route path="/cv/new" element={<CVFormPage />} />
           <Route path="/cv/:id/edit" element={<CVFormPage />} />
+          {/* AI cho ứng viên (backend apps/ai): chấm điểm & gợi ý sửa CV, gợi ý việc làm */}
+          {FEATURES.candidateAi && <Route path="/cv-analysis" element={<CVAnalysisPage />} />}
+          {FEATURES.candidateAi && <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />}
           <Route path="/create-cv" element={<CVBuilderPage />} />
           {/* Trang AI: chỉ có khi backend đã có module AI */}
           {FEATURES.ai && <Route path="/cv-analysis" element={<CVAnalysisPage />} />}

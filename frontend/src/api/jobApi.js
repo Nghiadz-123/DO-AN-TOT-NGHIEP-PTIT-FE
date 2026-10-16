@@ -25,9 +25,6 @@ const jobApi = {
   // action: publish (đăng / tiếp tục / mở lại) | pause | close
   changeStatus: async (id, action) => toJob(await axiosClient.post(`/employer/jobs/${id}/${action}/`)),
   getRecruiterStats: async () => toDashboard(await axiosClient.get('/employer/dashboard/')),
-
-  // AI gợi ý việc làm theo CV (giai đoạn sau): trả về [{ job, match }]
-  getRecommended: (cvId) => axiosClient.get('/jobs/recommended/', { params: { cv_id: cvId } }),
 }
 
 export default jobApi

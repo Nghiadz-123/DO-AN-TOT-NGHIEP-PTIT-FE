@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import aiApi from '@/api/aiApi'
 import cvApi from '@/api/cvApi'
 import Badge from '@/components/common/Badge'
 import EmptyState from '@/components/common/EmptyState'
@@ -23,6 +24,12 @@ export default function ManageCVsPage() {
   const previewRef = useRef(null)
 
   const { data: cvs, loading, error, reload } = useFetch(() => cvApi.getMine(), [])
+  // Điểm AI đã chấm của từng CV (chỉ đọc kết quả đã lưu, không gọi AI); lỗi thì coi như chưa chấm
+  const { data: analyses } = useFetch(
+    () => (FEATURES.candidateAi ? aiApi.getAnalyses().catch(() => []) : Promise.resolve([])),
+    [],
+  )
+  const scores = Object.fromEntries((analyses ?? []).map((a) => [a.cvId, a.score?.total]))
 
   // Thông báo sau khi lưu chỉ hiện một lần: xóa state để tải lại trang không hiện lại
   useEffect(() => {
@@ -104,7 +111,7 @@ export default function ManageCVsPage() {
                 <tr>
                   <th>CV</th>
                   <th>Nội dung</th>
-                  {FEATURES.ai && <th>Điểm AI</th>}
+                  {FEATURES.candidateAi && <th>Điểm AI</th>}
                   <th>Cập nhật</th>
                   <th>Ứng tuyển</th>
                   <th>Thao tác</th>
@@ -130,12 +137,14 @@ export default function ManageCVsPage() {
                       )}
                       {cv.parseError && <div className="text-danger small">{cv.parseError}</div>}
                     </td>
-                    {FEATURES.ai && (
+                    {FEATURES.candidateAi && (
                       <td className="nowrap">
-                        {cv.analysis ? (
-                          <ScoreCircle score={cv.analysis.overallScore} size={40} showLabel={false} />
+                        {scores[cv.id] != null ? (
+                          <Link to={`/cv-analysis?cvId=${cv.id}`} title="Xem kết quả AI chấm điểm">
+                            <ScoreCircle score={scores[cv.id]} size={40} showLabel={false} />
+                          </Link>
                         ) : (
-                          <Link to="/cv-analysis" className="text-muted">
+                          <Link to={`/cv-analysis?cvId=${cv.id}`} className="text-muted">
                             Chưa chấm
                           </Link>
                         )}

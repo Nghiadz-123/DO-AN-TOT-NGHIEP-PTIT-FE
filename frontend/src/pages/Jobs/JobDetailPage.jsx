@@ -163,14 +163,14 @@ export default function JobDetailPage() {
               <dd>{job.applicantCount}</dd>
             </dl>
           </div>
-          {FEATURES.ai && isCandidate && !application && (
+          {FEATURES.candidateAi && isCandidate && !application && (
             <div className="card ai-box">
               <div className="ai-box-title">✨ Mẹo từ AI</div>
               <p className="text-muted">
-                Kiểm tra điểm CV và gợi ý cải thiện trước khi ứng tuyển để tăng cơ hội được chọn.
+                Nhờ AI đối chiếu CV với yêu cầu của tin này và gợi ý cần sửa gì trước khi ứng tuyển.
               </p>
-              <Link to="/cv-analysis" className="btn btn-outline btn-sm">
-                Chấm điểm CV
+              <Link to={`/cv-analysis?jobId=${job.id}&tab=suggestions`} className="btn btn-outline btn-sm">
+                Gợi ý sửa CV theo tin này
               </Link>
             </div>
           )}

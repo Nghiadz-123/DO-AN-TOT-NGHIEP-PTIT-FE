@@ -6,7 +6,10 @@ export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
 // Module AI (chấm điểm CV, gợi ý việc làm, sàng lọc hồ sơ) chưa có ở backend nên mặc định ẩn.
 // Bật bằng VITE_FEATURE_AI=true khi backend đã có các API AI.
 export const FEATURES = {
-  ai: import.meta.env.VITE_FEATURE_AI === 'true',
+  // AI cho ứng viên (backend apps/ai): chấm điểm CV, gợi ý sửa CV, gợi ý việc làm. Ẩn bằng VITE_FEATURE_AI=false
+  candidateAi: import.meta.env.VITE_FEATURE_AI !== 'false',
+  // Backend chưa có nên luôn ẩn: AI sàng lọc / xếp hạng hồ sơ (nhà tuyển dụng), AI đánh giá nhanh CV khi ứng tuyển
+  ai: false,
 }
 
 export const ROLES = {

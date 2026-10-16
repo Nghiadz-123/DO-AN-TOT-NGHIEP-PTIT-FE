@@ -41,32 +41,58 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
         </div>
       </section>}
 
-      {experience.length > 0 && <section>
-        <h4>Kinh nghiệm · {parsed.yearsOfExperience} năm</h4>
-        {experience.map((e) => (
-          <div key={`${e.company}-${e.duration}`} className="timeline-item">
-            <strong>{e.role}</strong> — {e.company}
+      <section>
+        <h4>Kinh nghiệm{parsed.yearsOfExperience != null && ` · ${parsed.yearsOfExperience} năm`}</h4>
+        {experience.length === 0 && <p className="text-muted">Không có.</p>}
+        {experience.map((e, index) => (
+          <div key={`${e.company}-${e.duration}-${index}`} className="timeline-item">
+            <strong>{e.role}</strong>
+            {e.company && ` — ${e.company}`}
             <div className="text-muted">{e.duration}</div>
-            <p>{e.description}</p>
+            {e.description && <p className="pre-line">{e.description}</p>}
           </div>
         ))}
-      </section>}
+      </section>
 
       {education.length > 0 && (
         <section>
           <h4>Học vấn</h4>
-          {parsed.education.map((e) => (
-            <div key={e.school} className="timeline-item">
-              <strong>{e.degree}</strong> — {e.school}
+          {education.map((e, index) => (
+            <div key={`${e.school}-${index}`} className="timeline-item">
+              <strong>{e.degree}</strong>
+              {e.school && ` — ${e.school}`}
               <div className="text-muted">{e.year}</div>
             </div>
           ))}
         </section>
       )}
-      {parsed.rawText && <section>
-        <h4>Nội dung đọc được</h4>
-        <div className="card card-flat pre-line cv-raw-text">{parsed.rawText}</div>
-      </section>}
+
+      {parsed.projects?.length > 0 && (
+        <section>
+          <h4>Dự án / thành tích</h4>
+          {parsed.projects.map((p, index) => (
+            <div key={`${p.name}-${index}`} className="timeline-item">
+              <strong>{p.name}</strong>
+              {p.tech?.length > 0 && <div className="text-muted">{p.tech.join(', ')}</div>}
+              {p.description && <p className="pre-line">{p.description}</p>}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {(parsed.certifications?.length > 0 || parsed.languages?.length > 0) && (
+        <section>
+          <h4>Chứng chỉ & ngoại ngữ</h4>
+          <div className="tags">
+            {[...(parsed.certifications ?? []), ...(parsed.languages ?? [])].map((item, index) => (
+              <span key={`${item}-${index}`} className="tag">
+                {item}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }
+

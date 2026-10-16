@@ -35,8 +35,8 @@ const cvApi = {
   view: (id) => fetchFile(`${BASE}${id}/file/`),
   remove: (id) => axiosClient.delete(`${BASE}${id}/`),
 
-  // AI chấm điểm CV / đánh giá mức độ phù hợp: backend chưa có, chỉ gọi khi FEATURES.ai bật
-  analyze: async (id) => toCV(await axiosClient.post(`${BASE}${id}/analyze/`)),
+  // AI đánh giá nhanh CV khi ứng tuyển: backend chưa có, chỉ gọi khi FEATURES.ai bật
+  // (chấm điểm CV, gợi ý sửa CV, gợi ý việc làm: xem aiApi.js)
   matchJob: (cvId, jobId) => axiosClient.get(`${BASE}${cvId}/match/${jobId}/`),
 }
 
