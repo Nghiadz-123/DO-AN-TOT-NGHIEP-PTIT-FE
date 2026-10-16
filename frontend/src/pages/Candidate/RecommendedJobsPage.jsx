@@ -8,7 +8,6 @@ import CVNotReady from '@/components/cv/CVNotReady'
 import JobCard from '@/components/jobs/JobCard'
 import useFetch from '@/hooks/useFetch'
 import { getErrorMessage } from '@/utils/formatters'
-import { FEATURES } from '@/utils/constants'
 
 const SCORE_FILTERS = [
   { value: 0, label: 'Tất cả' },
@@ -59,17 +58,8 @@ export default function RecommendedJobsPage() {
       setEvaluatingId(null)
     }
   }
-  const { data: cvs, loading: loadingCvs } = useFetch(() => (FEATURES.ai ? cvApi.getMine() : Promise.resolve([])), [])
-
-  const cvId = searchParams.get('cvId') || (cvs?.find((cv) => cv.isDefault) ?? cvs?.[0])?.id
-  const { data: recommendations, loading, error } = useFetch(
-    () => (FEATURES.ai && cvId ? jobApi.getRecommended(cvId) : Promise.resolve([])),
-    [cvId],
-  )
 
   if (loadingCvs) return <Loading />
-
-  if (!FEATURES.ai) return <div className="card"><h1>Gợi ý việc làm chưa khả dụng</h1><p className="text-muted">Backend hiện chưa cung cấp dịch vụ AI gợi ý việc làm. Bạn có thể tìm tin tuyển dụng đang mở tại mục Tìm việc.</p><Link to="/jobs" className="btn btn-primary">Tìm việc làm</Link></div>
 
   if (!cvs?.length) {
     return (

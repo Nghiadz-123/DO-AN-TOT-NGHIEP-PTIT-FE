@@ -1,14 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import CompanyLogo from '@/components/common/CompanyLogo'
-import CountBadge from '@/components/common/CountBadge'
 import Header from '@/components/layout/Header'
 import useAuth from '@/hooks/useAuth'
-import useInbox from '@/hooks/useInbox'
 import { FEATURES } from '@/utils/constants'
 
 export default function RecruiterLayout() {
   const { user } = useAuth()
-  const { summary } = useInbox()
 
   return (
     <>
@@ -27,11 +24,9 @@ export default function RecruiterLayout() {
           </NavLink>
           <NavLink to="/recruiter/jobs/new">➕ Đăng tin mới</NavLink>
           <NavLink to="/recruiter/applicants">👥 {FEATURES.ai ? 'Ứng viên & AI sàng lọc' : 'Ứng viên'}</NavLink>
+          <NavLink to="/recruiter/talent-pool">🔎 Tìm ứng viên</NavLink>
           <NavLink to="/recruiter/talents">🎯 Ứng viên phù hợp</NavLink>
-          <NavLink to="/recruiter/connections">🤝 Kết nối</NavLink>
-          <NavLink to="/recruiter/messages">
-            💬 Tin nhắn <CountBadge count={summary.unreadMessages} label="tin nhắn chưa đọc" />
-          </NavLink>
+          <NavLink to="/recruiter/invitations">✉ Thư mời đã gửi</NavLink>
           <NavLink to="/recruiter/company">🏢 Hồ sơ công ty</NavLink>
           <NavLink to="/recruiter/account">👤 Tài khoản</NavLink>
         </aside>

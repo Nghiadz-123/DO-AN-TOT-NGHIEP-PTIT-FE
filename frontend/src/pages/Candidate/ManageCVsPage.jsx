@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import aiApi from '@/api/aiApi'
+import candidateApi from '@/api/candidateApi'
 import cvApi from '@/api/cvApi'
 import Badge from '@/components/common/Badge'
 import EmptyState from '@/components/common/EmptyState'
@@ -21,9 +22,13 @@ export default function ManageCVsPage() {
   const [actionError, setActionError] = useState('')
   const [busyId, setBusyId] = useState(null)
   const [preview, setPreview] = useState(null) // { cv, url }
+  const [savingPublic, setSavingPublic] = useState(false)
   const previewRef = useRef(null)
 
   const { data: cvs, loading, error, reload } = useFetch(() => cvApi.getMine(), [])
+  const { data: profile, setData: setProfile } = useFetch(() => candidateApi.getProfile(), [])
+  const isPublic = Boolean(profile?.isPublic)
+  const defaultCv = cvs?.find((cv) => cv.isDefault)
   // Điểm AI đã chấm của từng CV (chỉ đọc kết quả đã lưu, không gọi AI); lỗi thì coi như chưa chấm
   const { data: analyses } = useFetch(
     () => (FEATURES.candidateAi ? aiApi.getAnalyses().catch(() => []) : Promise.resolve([])),
@@ -67,6 +72,18 @@ export default function ManageCVsPage() {
       reload()
     })
 
+  const togglePublic = async (value) => {
+    setSavingPublic(true)
+    setActionError('')
+    try {
+      setProfile(await candidateApi.setPublic(value))
+    } catch (err) {
+      setActionError(getErrorMessage(err))
+    } finally {
+      setSavingPublic(false)
+    }
+  }
+
   const handleDelete = (cv) => {
     if (!window.confirm(`Xóa CV "${cv.title}"? Thao tác này không thể hoàn tác.`)) return
     run(cv, async () => {
@@ -92,6 +109,25 @@ export default function ManageCVsPage() {
       {actionError && <div className="alert alert-error">{actionError}</div>}
       {loading && !cvs && <Loading />}
       {error && <div className="alert alert-error">{error}</div>}
+
+      {profile && defaultCv && (
+        <div className="card public-cv-panel">
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              disabled={savingPublic}
+              onChange={(e) => togglePublic(e.target.checked)}
+            />
+            <strong>Công khai CV cho nhà tuyển dụng</strong>
+          </label>
+          <p className="text-muted">
+            {isPublic
+              ? `Nhà tuyển dụng đang tìm thấy và xem được CV chính "${defaultCv.title}" của bạn, có thể gửi thư mời ứng tuyển. Muốn công khai CV khác, hãy đặt CV đó làm CV chính.`
+              : 'Bật để nhà tuyển dụng tìm thấy CV chính của bạn ở mục Tìm ứng viên và gửi thư mời ứng tuyển. Công ty bạn đã ứng tuyển luôn xem được hồ sơ bạn đã nộp.'}
+          </p>
+        </div>
+      )}
 
       {cvs &&
         (cvs.length === 0 ? (
@@ -126,6 +162,7 @@ export default function ManageCVsPage() {
                           <strong>{cv.title}</strong>
                         </Link>
                         {cv.isDefault && <Badge tone="primary">CV chính</Badge>}
+                        {cv.isDefault && isPublic && <Badge tone="success">Đang công khai</Badge>}
                       </div>
                       <div className="text-muted">
                         {cv.fileName} · <span className="nowrap">{formatFileSize(cv.fileSize)}</span>

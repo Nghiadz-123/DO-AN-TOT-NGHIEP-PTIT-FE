@@ -16,7 +16,7 @@ const SHOW_DEMO = import.meta.env.DEV
 const homeOf = (user) => {
   if (user.role === ROLES.RECRUITER) return '/recruiter'
   if (user.role === ROLES.ADMIN) return '/admin'
-  return '/jobs'
+  return '/'
 }
 
 export default function LoginPage() {

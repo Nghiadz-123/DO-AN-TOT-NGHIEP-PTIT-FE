@@ -34,9 +34,6 @@ export function scoreLevel(score) {
   return { label: 'Cần cải thiện', tone: 'danger' }
 }
 
-// Mô tả ngắn tài khoản bên kia (kết bạn, tin nhắn): "Trưởng phòng Nhân sự · Công ty ABC" hoặc tiêu đề hồ sơ ứng viên
-export const participantSubtitle = (user) => [user.headline, user.company?.name].filter(Boolean).join(' · ')
-
 export function isExpired(deadline) {
   return deadline ? new Date(deadline) < new Date(new Date().toDateString()) : false
 }

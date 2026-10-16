@@ -78,7 +78,6 @@ export const fromCandidateProfileForm = (form) => ({
   desired_job_type: form.type,
   desired_work_mode: form.workMode,
   is_open_to_work: form.isOpenToWork,
-  is_public: form.isPublic,
 })
 
 export const toSession = (dto) => ({ access: dto.access, refresh: dto.refresh, user: toUser(dto.user) })
@@ -381,72 +380,79 @@ export const toMyApplication = (dto) => ({
   })),
 })
 
-// ---------------------------------------------------------------- ứng viên phù hợp với tin (nhà tuyển dụng)
+// ---------------------------------------------------------------- tìm ứng viên (nhà tuyển dụng)
+const toTalentCandidate = (dto) => ({
+  id: dto.id,
+  fullName: dto.full_name,
+  headline: dto.headline ?? '',
+  summary: dto.summary ?? '',
+  yearsOfExperience: dto.years_of_experience,
+  level: dto.current_level ?? '',
+  location: dto.location?.name ?? '',
+  desiredPosition: dto.desired_position ?? '',
+  isOpenToWork: Boolean(dto.is_open_to_work),
+})
+
+const toTalentCV = (dto) => ({
+  id: dto.id,
+  title: dto.title,
+  fileName: dto.original_filename,
+  mimeType: dto.mime_type,
+  fileSize: dto.file_size,
+  updatedAt: dto.updated_at,
+})
+
+const toInvitationJob = (dto) => ({ id: dto.id, title: dto.title, status: dto.status })
+
+// Thư mời gần nhất công ty đã gửi cho ứng viên (ở trang Ứng viên phù hợp: thư của chính tin đang xem)
+const toTalentInvitation = (dto) =>
+  dto && { id: dto.id, job: toInvitationJob(dto.job), status: dto.status, readAt: dto.read_at, createdAt: dto.created_at }
+
+// Ứng viên công khai CV (trang Tìm ứng viên)
+export const toTalentProfile = (dto) => ({
+  candidate: toTalentCandidate(dto.candidate),
+  cv: toTalentCV(dto.cv),
+  invitation: toTalentInvitation(dto.invitation),
+})
+
+// Ứng viên phù hợp với một tin (trang Ứng viên phù hợp)
 export const toTalent = (dto) => ({
-  candidate: {
-    id: dto.candidate.id,
-    userId: dto.candidate.user_id,
-    fullName: dto.candidate.full_name,
-    headline: dto.candidate.headline ?? '',
-    summary: dto.candidate.summary ?? '',
-    yearsOfExperience: dto.candidate.years_of_experience,
-    level: dto.candidate.current_level ?? '',
-    location: dto.candidate.location?.name ?? '',
-    desiredPosition: dto.candidate.desired_position ?? '',
-    isOpenToWork: Boolean(dto.candidate.is_open_to_work),
-  },
-  cv: {
-    id: dto.cv.id,
-    title: dto.cv.title,
-    fileName: dto.cv.original_filename,
-    mimeType: dto.cv.mime_type,
-    fileSize: dto.cv.file_size,
-    updatedAt: dto.cv.updated_at,
-  },
+  candidate: toTalentCandidate(dto.candidate),
+  cv: toTalentCV(dto.cv),
   score: dto.score,
   breakdown: dto.breakdown, // { skills, experience, level, location }
   matchedSkills: dto.matched_skills ?? [],
   missingSkills: dto.missing_skills ?? [],
   reasons: dto.reasons ?? [],
   applicationId: dto.application_id ?? null,
-  connection: dto.connection ?? null, // { id, status, direction } | null
+  invitation: toTalentInvitation(dto.invitation),
 })
 
-// ---------------------------------------------------------------- kết bạn & tin nhắn
-const toParticipant = (dto) => ({
+// ---------------------------------------------------------------- thư mời ứng tuyển
+const toInvitationBase = (dto) => ({
   id: dto.id,
-  fullName: dto.full_name,
-  role: dto.role,
-  headline: dto.headline ?? '', // ứng viên: tiêu đề hồ sơ; nhà tuyển dụng: chức danh
-  candidateId: dto.candidate_id ?? null,
-  company: dto.company ? { id: dto.company.id, name: dto.company.name, logoUrl: dto.company.logo_url } : null,
-})
-
-export const toConnection = (dto) => ({
-  id: dto.id,
-  status: dto.status,
-  direction: dto.direction, // sent | received (nhìn từ người đang đăng nhập)
-  user: toParticipant(dto.user),
+  sender: dto.sender && { fullName: dto.sender.full_name, position: dto.sender.position ?? '' },
   message: dto.message ?? '',
-  job: dto.job ?? null, // { id, title } | null
-  createdAt: dto.created_at,
-  respondedAt: dto.responded_at,
-})
-
-export const toConversation = (dto) => ({
-  id: dto.id,
-  user: toParticipant(dto.user),
-  lastMessage: dto.last_message ? { id: dto.last_message.id, body: dto.last_message.body, isMine: dto.last_message.is_mine } : null,
-  unreadCount: dto.unread_count ?? 0,
-  canSend: Boolean(dto.can_send),
-  lastMessageAt: dto.last_message_at,
-})
-
-export const toMessage = (dto) => ({
-  id: dto.id,
-  senderId: dto.sender_id,
-  body: dto.body,
-  createdAt: dto.created_at,
+  status: dto.status, // pending | accepted | declined
   readAt: dto.read_at,
-  isMine: Boolean(dto.is_mine),
+  respondedAt: dto.responded_at,
+  applicationId: dto.application_id ?? null,
+  createdAt: dto.created_at,
+})
+
+// Thư ứng viên nhận được: job theo dạng toJob (công ty, địa điểm, lương...)
+export const toInvitation = (dto) => ({ ...toInvitationBase(dto), job: toJob(dto.job) })
+
+// Thư công ty đã gửi
+export const toSentInvitation = (dto) => ({
+  ...toInvitationBase(dto),
+  job: toInvitationJob(dto.job),
+  candidate: {
+    id: dto.candidate.id,
+    fullName: dto.candidate.full_name,
+    headline: dto.candidate.headline ?? '',
+    level: dto.candidate.current_level ?? '',
+    yearsOfExperience: dto.candidate.years_of_experience,
+    location: dto.candidate.location?.name ?? '',
+  },
 })

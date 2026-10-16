@@ -6,17 +6,16 @@ import RegisterPage from '@/pages/Auth/RegisterPage'
 import CVAnalysisPage from '@/pages/Candidate/CVAnalysisPage'
 import CVFormPage from '@/pages/Candidate/CVFormPage'
 import FavoritesPage from '@/pages/Candidate/FavoritesPage'
+import InvitationsPage from '@/pages/Candidate/InvitationsPage'
 import ManageCVsPage from '@/pages/Candidate/ManageCVsPage'
 import MyApplicationsPage from '@/pages/Candidate/MyApplicationsPage'
 import ProfilePage from '@/pages/Candidate/ProfilePage'
 import RecommendedJobsPage from '@/pages/Candidate/RecommendedJobsPage'
 import CompanyDetailPage from '@/pages/Companies/CompanyDetailPage'
 import CompanyListPage from '@/pages/Companies/CompanyListPage'
-import ConnectionsPage from '@/pages/Connections/ConnectionsPage'
 import HomePage from '@/pages/Home/HomePage'
 import JobDetailPage from '@/pages/Jobs/JobDetailPage'
 import JobListPage from '@/pages/Jobs/JobListPage'
-import MessagesPage from '@/pages/Messages/MessagesPage'
 import NotFoundPage from '@/pages/NotFound/NotFoundPage'
 import AccountPage from '@/pages/Recruiter/AccountPage'
 import ApplicantDetailPage from '@/pages/Recruiter/ApplicantDetailPage'
@@ -29,6 +28,8 @@ import AdminManagePage from '@/pages/Admin/AdminManagePage'
 import CVBuilderPage from '@/pages/Candidate/CVBuilderPage'
 import JobFormPage from '@/pages/Recruiter/JobFormPage'
 import ManageJobsPage from '@/pages/Recruiter/ManageJobsPage'
+import SentInvitationsPage from '@/pages/Recruiter/SentInvitationsPage'
+import TalentPoolPage from '@/pages/Recruiter/TalentPoolPage'
 import TalentsPage from '@/pages/Recruiter/TalentsPage'
 import { FEATURES, ROLES } from '@/utils/constants'
 import ProtectedRoute from './ProtectedRoute'
@@ -54,14 +55,9 @@ export default function AppRoutes() {
           {FEATURES.candidateAi && <Route path="/cv-analysis" element={<CVAnalysisPage />} />}
           {FEATURES.candidateAi && <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />}
           <Route path="/create-cv" element={<CVBuilderPage />} />
-          {/* Trang AI: chỉ có khi backend đã có module AI */}
-          {FEATURES.ai && <Route path="/cv-analysis" element={<CVAnalysisPage />} />}
-          {FEATURES.ai && <Route path="/recommended-jobs" element={<RecommendedJobsPage />} />}
           <Route path="/my-applications" element={<MyApplicationsPage />} />
+          <Route path="/invitations" element={<InvitationsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/connections" element={<ConnectionsPage />} />
-          <Route path="/messages" element={<MessagesPage />} />
-          <Route path="/messages/:conversationId" element={<MessagesPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
@@ -84,10 +80,9 @@ export default function AppRoutes() {
           <Route path="jobs/:id/edit" element={<JobFormPage />} />
           <Route path="applicants" element={<ApplicantsPage />} />
           <Route path="applicants/:id" element={<ApplicantDetailPage />} />
+          <Route path="talent-pool" element={<TalentPoolPage />} />
           <Route path="talents" element={<TalentsPage />} />
-          <Route path="connections" element={<ConnectionsPage />} />
-          <Route path="messages" element={<MessagesPage />} />
-          <Route path="messages/:conversationId" element={<MessagesPage />} />
+          <Route path="invitations" element={<SentInvitationsPage />} />
           <Route path="company" element={<CompanyProfilePage />} />
           <Route path="account" element={<AccountPage />} />
         </Route>

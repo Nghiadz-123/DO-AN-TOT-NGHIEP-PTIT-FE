@@ -6,27 +6,23 @@ import { FEATURES, ROLES } from '@/utils/constants'
 
 // ai: chỉ hiện khi bật AI cho ứng viên (FEATURES.candidateAi); badge: khóa số đếm trong useInbox().summary
 const CANDIDATE_LINKS = [
-  { to: '/jobs', label: 'Tìm việc' },
   { to: '/companies', label: 'Công ty' },
   { to: '/cv', label: 'CV của tôi' },
   { to: '/create-cv', label: 'Tạo CV' },
   { to: '/cv-analysis', label: 'AI chấm điểm CV', ai: true },
   { to: '/recommended-jobs', label: 'Việc làm phù hợp', ai: true },
   { to: '/my-applications', label: 'Đơn ứng tuyển' },
+  { to: '/invitations', label: '✉ Thư mời', badge: 'newInvitations', badgeLabel: 'thư mời chưa xem' },
   { to: '/favorites', label: '♥ Yêu thích' },
-  { to: '/connections', label: '🤝 Kết nối', badge: 'pendingRequests', badgeLabel: 'lời mời kết bạn đang chờ' },
-  { to: '/messages', label: '💬 Tin nhắn', badge: 'unreadMessages', badgeLabel: 'tin nhắn chưa đọc' },
 ].filter((link) => !link.ai || FEATURES.candidateAi)
 
 const GUEST_LINKS = [
-  { to: '/jobs', label: 'Tìm việc' },
   { to: '/companies', label: 'Công ty' },
 ]
 
 const RECRUITER_LINKS = [
   { to: '/jobs', label: 'Việc làm' },
   { to: '/recruiter', label: 'Trang tuyển dụng' },
-  { to: '/recruiter/messages', label: '💬 Tin nhắn', badge: 'unreadMessages', badgeLabel: 'tin nhắn chưa đọc' },
 ]
 
 const ADMIN_LINKS = [

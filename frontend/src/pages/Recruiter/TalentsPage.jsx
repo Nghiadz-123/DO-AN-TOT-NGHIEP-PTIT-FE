@@ -1,19 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import connectionApi from '@/api/connectionApi'
 import jobApi from '@/api/jobApi'
 import talentApi from '@/api/talentApi'
 import Badge, { JobStatusBadge } from '@/components/common/Badge'
 import EmptyState from '@/components/common/EmptyState'
 import Loading from '@/components/common/Loading'
-import Modal from '@/components/common/Modal'
 import Pagination from '@/components/common/Pagination'
 import ScoreCircle from '@/components/common/ScoreCircle'
-import InviteModal from '@/components/connections/InviteModal'
+import InvitationBadge from '@/components/invitations/InvitationBadge'
+import InviteModal from '@/components/invitations/InviteModal'
+import TalentCVModal from '@/components/talents/TalentCVModal'
 import useFetch from '@/hooks/useFetch'
-import useOpenChat from '@/hooks/useOpenChat'
 import { JOB_LEVELS, PAGE_SIZE } from '@/utils/constants'
-import { formatDate, formatFileSize, getErrorMessage, labelOf, saveBlob } from '@/utils/formatters'
+import { formatDate, formatFileSize, labelOf } from '@/utils/formatters'
 
 const SCORE_FILTERS = [
   { value: '', label: 'Mọi mức điểm' },
@@ -30,39 +29,25 @@ const CRITERIA = [
   { key: 'location', label: 'Địa điểm', max: 10 },
 ]
 
-const VIEWABLE_TYPES = ['application/pdf']
-
-// Nút kết bạn / nhắn tin theo trạng thái quan hệ với ứng viên
-function ConnectAction({ talent, busy, onInvite, onCancel, onChat }) {
-  const { connection } = talent
-  if (!connection || (connection.status === 'declined' && connection.direction === 'sent')) {
+// Thư mời ứng tuyển tin đang xem: đã gửi thì hiện trạng thái; ứng viên đã nộp hồ sơ vào tin thì không cần mời
+function InviteAction({ talent, onInvite }) {
+  if (talent.invitation) {
     return (
       <>
-        {connection && <Badge>Ứng viên đã từ chối lời mời</Badge>}
-        <button className="btn btn-primary btn-sm" disabled={busy} onClick={onInvite}>
-          🤝 {connection ? 'Gửi lại lời mời' : 'Kết bạn'}
-        </button>
+        <span className="text-muted small">Đã gửi thư mời</span>
+        <InvitationBadge invitation={talent.invitation} />
       </>
     )
   }
-  if (connection.status === 'accepted') {
-    return (
-      <button className="btn btn-primary btn-sm" disabled={busy} onClick={onChat}>
-        💬 Nhắn tin
-      </button>
-    )
-  }
+  if (talent.applicationId) return null
   return (
-    <>
-      <Badge tone="warning">Đã gửi lời mời, chờ ứng viên phản hồi</Badge>
-      <button className="btn btn-ghost btn-sm text-danger" disabled={busy} onClick={onCancel}>
-        Hủy lời mời
-      </button>
-    </>
+    <button className="btn btn-primary btn-sm" onClick={onInvite}>
+      ✉ Gửi thư mời
+    </button>
   )
 }
 
-function TalentCard({ talent, rank, busy, onViewCv, onDownloadCv, onInvite, onCancel, onChat }) {
+function TalentCard({ talent, rank, onViewCv, onInvite }) {
   const { candidate, cv } = talent
   const meta = [
     candidate.yearsOfExperience != null && `${candidate.yearsOfExperience} năm kinh nghiệm`,
@@ -71,7 +56,7 @@ function TalentCard({ talent, rank, busy, onViewCv, onDownloadCv, onInvite, onCa
   ].filter(Boolean)
 
   return (
-    <article className={`card talent-card ${busy ? 'row-busy' : ''}`}>
+    <article className="card talent-card">
       <div className="talent-card-head">
         <span className="avatar avatar-lg">{candidate.fullName.charAt(0)}</span>
         <div className="talent-card-info">
@@ -134,18 +119,15 @@ function TalentCard({ talent, rank, busy, onViewCv, onDownloadCv, onInvite, onCa
 
       <div className="talent-card-foot">
         <div className="actions">
-          <button className="btn btn-outline btn-sm" disabled={busy} onClick={onViewCv}>
+          <button className="btn btn-outline btn-sm" onClick={onViewCv}>
             📄 Xem CV
-          </button>
-          <button className="btn btn-ghost btn-sm" disabled={busy} onClick={onDownloadCv}>
-            ⬇ Tải CV
           </button>
           <span className="text-muted small">
             {cv.title} · {formatFileSize(cv.fileSize)} · cập nhật {formatDate(cv.updatedAt)}
           </span>
         </div>
         <div className="actions">
-          <ConnectAction talent={talent} busy={busy} onInvite={onInvite} onCancel={onCancel} onChat={onChat} />
+          <InviteAction talent={talent} onInvite={onInvite} />
         </div>
       </div>
     </article>
@@ -159,11 +141,9 @@ export default function TalentsPage() {
   const hideApplied = searchParams.get('hideApplied') === '1'
   const page = Number(searchParams.get('page') ?? 1)
   const [search, setSearch] = useState(keyword)
-  const [inviting, setInviting] = useState(null) // talent đang mở hộp mời kết bạn
-  const [preview, setPreview] = useState(null) // { talent, url }
-  const [busyId, setBusyId] = useState(null)
-  const [actionError, setActionError] = useState('')
-  const openChat = useOpenChat()
+  const [viewing, setViewing] = useState(null) // ứng viên đang xem CV
+  const [inviting, setInviting] = useState(null) // ứng viên đang mở hộp gửi thư mời
+  const [notice, setNotice] = useState('')
 
   const { data: jobsPage, loading: loadingJobs } = useFetch(() => jobApi.getMine({ pageSize: 100 }), [])
   const jobs = jobsPage?.results ?? []
@@ -179,9 +159,6 @@ export default function TalentsPage() {
     [jobId, keyword, minScore, hideApplied, page],
   )
 
-  // Giải phóng object URL của bản xem trước CV
-  useEffect(() => () => preview && URL.revokeObjectURL(preview.url), [preview])
-
   const setParams = (changes) => {
     const next = new URLSearchParams(searchParams)
     Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)))
@@ -189,38 +166,16 @@ export default function TalentsPage() {
     setSearchParams(next)
   }
 
-  const setConnection = (talent, connection) =>
-    setData((current) => ({
-      ...current,
-      results: current.results.map((t) => (t.candidate.id === talent.candidate.id ? { ...t, connection } : t)),
-    }))
-
-  const run = async (talent, task) => {
-    setBusyId(talent.candidate.id)
-    setActionError('')
-    try {
-      await task()
-    } catch (err) {
-      setActionError(getErrorMessage(err))
-    } finally {
-      setBusyId(null)
+  const onSent = (invitation) => {
+    // Hộp gửi thư cho chọn tin khác: chỉ gắn vào thẻ khi thư thuộc tin đang xem
+    if (invitation.job.id === jobId) {
+      setData((current) => ({
+        ...current,
+        results: current.results.map((t) => (t.candidate.id === inviting.candidate.id ? { ...t, invitation } : t)),
+      }))
     }
-  }
-
-  const openCv = (talent, download = false) =>
-    run(talent, async () => {
-      const viewable = !download && VIEWABLE_TYPES.includes(talent.cv.mimeType)
-      const { blob, fileName } = await (viewable ? talentApi.viewCv : talentApi.downloadCv)(talent.candidate.id)
-      if (!viewable) return saveBlob(blob, fileName)
-      setPreview({ talent, url: URL.createObjectURL(blob) })
-    })
-
-  const cancelInvite = (talent) => {
-    if (!window.confirm(`Hủy lời mời kết bạn đã gửi tới ${talent.candidate.fullName}?`)) return
-    run(talent, async () => {
-      await connectionApi.remove(talent.connection.id)
-      setConnection(talent, null)
-    })
+    setNotice(`Đã gửi thư mời ứng tuyển vị trí "${invitation.job.title}" tới ${inviting.candidate.fullName}.`)
+    setInviting(null)
   }
 
   if (loadingJobs) return <Loading />
@@ -244,8 +199,8 @@ export default function TalentsPage() {
         <div>
           <h1>🎯 Ứng viên phù hợp</h1>
           <p className="text-muted">
-            CV của ứng viên khớp với yêu cầu tin tuyển dụng, xếp theo điểm phù hợp. Gửi lời mời kết bạn để nhắn tin trực
-            tiếp với ứng viên.
+            CV của ứng viên khớp với yêu cầu tin tuyển dụng, xếp theo điểm phù hợp. Gửi thư mời để ứng viên nộp hồ sơ vào
+            tin.
           </p>
         </div>
       </div>
@@ -309,11 +264,11 @@ export default function TalentsPage() {
       )}
 
       <div className="alert alert-info">
-        Chỉ hiển thị ứng viên cho phép nhà tuyển dụng tìm thấy hồ sơ hoặc đã ứng tuyển vào công ty. Điểm được tính từ CV
-        chính và hồ sơ của ứng viên: kỹ năng (60), kinh nghiệm (20), cấp bậc (10), địa điểm (10).
+        Chỉ hiển thị ứng viên công khai CV hoặc đã ứng tuyển vào công ty. Điểm được tính từ CV chính và hồ sơ của ứng
+        viên: kỹ năng (60), kinh nghiệm (20), cấp bậc (10), địa điểm (10).
       </div>
 
-      {actionError && <div className="alert alert-error">{actionError}</div>}
+      {notice && <div className="alert alert-success">{notice}</div>}
       {loading && !data && <Loading text="Đang so khớp CV với yêu cầu tuyển dụng..." />}
       {error && <div className="alert alert-error">{error}</div>}
 
@@ -334,12 +289,11 @@ export default function TalentsPage() {
                 key={talent.candidate.id}
                 talent={talent}
                 rank={(data.page - 1) * PAGE_SIZE + index + 1}
-                busy={busyId === talent.candidate.id}
-                onViewCv={() => openCv(talent)}
-                onDownloadCv={() => openCv(talent, true)}
-                onInvite={() => setInviting(talent)}
-                onCancel={() => cancelInvite(talent)}
-                onChat={() => run(talent, () => openChat(talent.candidate.userId))}
+                onViewCv={() => setViewing(talent.candidate)}
+                onInvite={() => {
+                  setNotice('')
+                  setInviting(talent)
+                }}
               />
             ))}
           </div>
@@ -354,37 +308,9 @@ export default function TalentsPage() {
         />
       )}
 
+      {viewing && <TalentCVModal candidate={viewing} onClose={() => setViewing(null)} />}
       {inviting && (
-        <InviteModal
-          candidate={inviting.candidate}
-          job={job}
-          onClose={() => setInviting(null)}
-          onSent={(connection) => {
-            setConnection(inviting, { id: connection.id, status: connection.status, direction: connection.direction })
-            setInviting(null)
-          }}
-        />
-      )}
-
-      {preview && (
-        <Modal
-          open
-          size="lg"
-          title={`CV: ${preview.talent.candidate.fullName}`}
-          onClose={() => setPreview(null)}
-          footer={
-            <>
-              <button className="btn btn-outline" onClick={() => openCv(preview.talent, true)}>
-                ⬇ Tải về
-              </button>
-              <button className="btn btn-ghost" onClick={() => setPreview(null)}>
-                Đóng
-              </button>
-            </>
-          }
-        >
-          <iframe className="cv-viewer" src={preview.url} title={`CV ${preview.talent.candidate.fullName}`} />
-        </Modal>
+        <InviteModal candidate={inviting.candidate} jobId={jobId} onClose={() => setInviting(null)} onSent={onSent} />
       )}
     </>
   )

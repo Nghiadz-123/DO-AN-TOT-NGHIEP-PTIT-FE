@@ -1,4 +1,4 @@
-// Số đếm nhỏ cạnh mục menu (tin nhắn chưa đọc, lời mời đang chờ); 0 thì không hiển thị
+// Số đếm nhỏ cạnh mục menu (thư mời chưa xem); 0 thì không hiển thị
 export default function CountBadge({ count, label = 'mới' }) {
   if (!count) return null
   return (
