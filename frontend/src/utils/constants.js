@@ -1,8 +1,5 @@
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1'
 
-// Dùng cho các tính năng mới có thể chạy độc lập bằng dữ liệu local khi backend chưa hỗ trợ.
-export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
-
 // Module AI (chấm điểm CV, gợi ý việc làm, sàng lọc hồ sơ) chưa có ở backend nên mặc định ẩn.
 // Bật bằng VITE_FEATURE_AI=true khi backend đã có các API AI.
 export const FEATURES = {

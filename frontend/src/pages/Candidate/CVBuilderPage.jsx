@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import cvBuilderApi from '@/api/cvBuilderApi'
 import useAuth from '@/hooks/useAuth'
 import { getErrorMessage } from '@/utils/formatters'
@@ -26,12 +27,16 @@ export default function CVBuilderPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState(null)
+  const [savedCV, setSavedCV] = useState(null) // CV thật trong "CV của tôi" được dựng từ nội dung đã lưu
   const skills = useMemo(() => cv.skills.split(',').map((skill) => skill.trim()).filter(Boolean), [cv.skills])
 
   useEffect(() => {
     let active = true
-    cvBuilderApi.getMine(user?.id || user?.email).then((document) => {
-      if (active && document?.content) setCV({ ...initialCV(user), ...document.content })
+    cvBuilderApi.getMine().then((document) => {
+      if (active && document?.content) {
+        setCV({ ...initialCV(user), ...document.content })
+        setSavedCV(document.cv ?? null)
+      }
     }).catch((error) => {
       if (active) setSaveMessage({ type: 'error', text: getErrorMessage(error) })
     }).finally(() => { if (active) setLoading(false) })
@@ -53,7 +58,8 @@ export default function CVBuilderPage() {
     setSaving(true)
     setSaveMessage(null)
     try {
-      await cvBuilderApi.save(user?.id || user?.email, cv)
+      const document = await cvBuilderApi.save(cv)
+      setSavedCV(document.cv ?? null)
       setSaveMessage({ type: 'success', text: 'CV đã được lưu thành công.' })
     } catch (error) {
       setSaveMessage({ type: 'error', text: getErrorMessage(error) })
@@ -65,11 +71,25 @@ export default function CVBuilderPage() {
   return (
     <div className="cv-builder-page">
       <div className="page-header cv-builder-heading">
-        <div><span className="cv-builder-kicker">HỒ SƠ CHUYÊN NGHIỆP</span><h1>Tạo CV của bạn</h1><p className="text-muted">Điền thông tin, xem trước CV và nhấn Lưu để lưu vào tài khoản.</p></div>
+        <div><span className="cv-builder-kicker">HỒ SƠ CHUYÊN NGHIỆP</span><h1>Tạo CV của bạn</h1><p className="text-muted">Điền thông tin, xem trước CV và nhấn Lưu để thêm CV vào danh sách CV của bạn (dùng để ứng tuyển và cho AI chấm điểm).</p></div>
         <div className="actions"><button className="btn btn-outline" type="button" onClick={saveCV} disabled={saving || loading}>{saving ? 'Đang lưu…' : 'Lưu'}</button><button className="btn btn-primary" type="button" onClick={() => window.print()}>↓ Tải CV dạng PDF</button></div>
       </div>
 
       {saveMessage && <div className={`alert alert-${saveMessage.type}`}>{saveMessage.text}</div>}
+      {savedCV && (
+        <div className={`alert ${savedCV.parseStatus === 'failed' ? 'alert-error' : 'alert-info'}`}>
+          <strong>CV "{savedCV.title}" đã có trong danh sách CV của bạn.</strong>{' '}
+          {savedCV.parseStatus === 'failed' ? (
+            <>Chưa đọc được nội dung CV: {savedCV.parseError || 'vui lòng thử lưu lại.'}</>
+          ) : (
+            <>
+              Dùng được để ứng tuyển, <Link to={`/cv-analysis?cvId=${savedCV.id}`}>chấm điểm bằng AI</Link>,{' '}
+              <Link to={`/recommended-jobs?cvId=${savedCV.id}`}>xem việc làm phù hợp</Link> hoặc{' '}
+              <Link to="/cv">quản lý CV</Link>. Sửa nội dung rồi nhấn Lưu để cập nhật CV này.
+            </>
+          )}
+        </div>
+      )}
       {loading && <div className="cv-builder-loading">Đang tải CV đã lưu…</div>}
 
       <div className="cv-builder-layout">
