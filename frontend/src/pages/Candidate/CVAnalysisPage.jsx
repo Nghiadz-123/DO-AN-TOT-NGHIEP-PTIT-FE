@@ -96,7 +96,7 @@ export default function CVAnalysisPage() {
   if (error) return <div className="alert alert-error">{error}</div>
 
   const isBusy = Boolean(busy)
-  const running = busy?.cvId === selected?.id ? busy.action : null
+  const running = busy && busy.cvId === selected?.id ? busy.action : null
   const ready = selected?.parseStatus === 'completed'
   // Gợi ý đã lưu được tạo theo tin mục tiêu khác với tin đang chọn
   const staleTarget = analysis?.suggestions && (analysis.suggestions.targetJobId ?? '') !== targetJobId
