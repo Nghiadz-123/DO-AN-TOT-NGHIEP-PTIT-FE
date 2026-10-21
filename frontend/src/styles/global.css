@@ -1938,6 +1938,7 @@ textarea.input {
   .pipeline {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
 .admin-table td:first-child {
   width: 160px;
@@ -2032,6 +2033,11 @@ textarea.input {
 
 .modal-lg {
   max-width: 960px;
+}
+
+/* Hộp thoại xem CV: bớt lề để PDF chiếm gần hết chiều ngang */
+.modal-lg .modal-body {
+  padding: 8px;
 }
 
 /* Số đếm cạnh mục menu (tin nhắn chưa đọc, lời mời kết bạn đang chờ) */

@@ -222,7 +222,7 @@ export default function ApplicantDetailPage() {
                 ⬇ Tải xuống
               </button>
             </div>
-            {cvPreview && <iframe className="cv-viewer" src={cvPreview.url} title={`CV ${candidate.fullName}`} />}
+            {cvPreview && <iframe className="cv-viewer" src={`${cvPreview.url}#toolbar=0&navpanes=0&view=FitH&zoom=page-width`} title={`CV ${candidate.fullName}`} />}
             {FEATURES.ai && cv.parsed && (
               <div className="cv-parsed-box">
                 <h3>Thông tin AI bóc tách từ CV</h3>

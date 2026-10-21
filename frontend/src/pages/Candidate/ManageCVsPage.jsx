@@ -214,7 +214,7 @@ export default function ManageCVsPage() {
               </button>
             </div>
           </div>
-          <iframe className="cv-viewer" src={preview.url} title={`Xem CV ${preview.cv.title}`} />
+          <iframe className="cv-viewer" src={`${preview.url}#toolbar=0&navpanes=0&view=FitH&zoom=page-width`} title={`Xem CV ${preview.cv.title}`} />
         </section>
       )}
     </>

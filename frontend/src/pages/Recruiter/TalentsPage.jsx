@@ -383,7 +383,7 @@ export default function TalentsPage() {
             </>
           }
         >
-          <iframe className="cv-viewer" src={preview.url} title={`CV ${preview.talent.candidate.fullName}`} />
+          <iframe className="cv-viewer" src={`${preview.url}#toolbar=0&navpanes=0&view=FitH&zoom=page-width`} title={`CV ${preview.talent.candidate.fullName}`} />
         </Modal>
       )}
     </>
