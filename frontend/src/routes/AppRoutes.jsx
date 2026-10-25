@@ -40,8 +40,7 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/jobs" element={<JobListPage />} />
+        <Route path="/register" element={<RegisterPage />} />        <Route path="/jobs" element={<JobListPage />} />
         <Route path="/jobs/:id" element={<JobDetailPage />} />
         <Route path="/companies" element={<CompanyListPage />} />
         <Route path="/companies/:id" element={<CompanyDetailPage />} />

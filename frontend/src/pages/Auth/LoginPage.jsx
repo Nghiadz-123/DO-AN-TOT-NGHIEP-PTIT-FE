@@ -4,15 +4,6 @@ import useAuth from '@/hooks/useAuth'
 import { ROLES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
 
-// Tài khoản demo có sau khi chạy `python manage.py seed_demo` ở backend; chỉ hiện khi chạy dev.
-// Admin: tạo bằng `python manage.py createsuperuser`.
-const DEMO_ACCOUNTS = [
-  { label: 'Ứng viên demo', email: 'candidate@demo.com' },
-  { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
-  { label: 'Quản trị viên demo', email: 'admin@demo.com' },
-]
-const SHOW_DEMO = import.meta.env.DEV
-
 const homeOf = (user) => {
   if (user.role === ROLES.RECRUITER) return '/recruiter'
   if (user.role === ROLES.ADMIN) return '/admin'
@@ -71,24 +62,6 @@ export default function LoginPage() {
         <button className="btn btn-primary btn-block" disabled={submitting}>
           {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
-
-        {SHOW_DEMO && (
-          <div className="demo-accounts">
-            <small className="text-muted">
-              Tài khoản demo từ seed_demo (mật khẩu 123456):
-            </small>
-            {DEMO_ACCOUNTS.map((a) => (
-              <button
-                key={a.email}
-                type="button"
-                className="btn btn-outline btn-sm"
-                onClick={() => setForm({ email: a.email, password: '123456' })}
-              >
-                {a.label}
-              </button>
-            ))}
-          </div>
-        )}
 
         <p className="text-center">
           Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>

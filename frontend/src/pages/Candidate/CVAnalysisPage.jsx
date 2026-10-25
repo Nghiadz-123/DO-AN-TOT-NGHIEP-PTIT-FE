@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import aiApi from '@/api/aiApi'
 import cvApi from '@/api/cvApi'
-import jobApi from '@/api/jobApi'
 import EmptyState from '@/components/common/EmptyState'
 import FileDropzone from '@/components/common/FileDropzone'
 import Loading from '@/components/common/Loading'
@@ -27,12 +26,6 @@ export default function CVAnalysisPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: cvs, loading, error, setData: setCvs } = useFetch(() => cvApi.getMine(), [])
   const { data: analyses, setData: setAnalyses } = useFetch(async () => byCv(await aiApi.getAnalyses()), [])
-  // Tin tuyển dụng mục tiêu cho phần gợi ý sửa CV (?jobId=..., từ trang chi tiết tin hoặc việc làm phù hợp)
-  const targetJobId = searchParams.get('jobId') ?? ''
-  const { data: targetJob } = useFetch(
-    () => (targetJobId ? jobApi.getById(targetJobId) : Promise.resolve(null)),
-    [targetJobId],
-  )
   const [busy, setBusy] = useState(null) // { cvId, action: 'score' | 'suggestions' }
   const [uploading, setUploading] = useState(false)
   const [actionError, setActionError] = useState('')
@@ -41,7 +34,7 @@ export default function CVAnalysisPage() {
   const selected = cvs?.find((c) => c.id === searchParams.get('cvId')) ?? cvs?.find((c) => c.isDefault) ?? cvs?.[0]
   const analysis = selected ? analyses?.[selected.id] : null
 
-  // CV / tab / tin mục tiêu nằm trên URL để trang khác dẫn link tới đúng chỗ
+  // CV / tab nằm trên URL để trang khác dẫn link tới đúng chỗ
   const updateParams = (changes) => {
     const next = new URLSearchParams(searchParams)
     Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)))
@@ -52,7 +45,7 @@ export default function CVAnalysisPage() {
     setBusy({ cvId: cv.id, action })
     setActionError('')
     try {
-      const result = action === 'score' ? await aiApi.scoreCv(cv.id) : await aiApi.suggestCv(cv.id, targetJobId)
+      const result = action === 'score' ? await aiApi.scoreCv(cv.id) : await aiApi.suggestCv(cv.id)
       setAnalyses((map) => ({ ...map, [cv.id]: result }))
     } catch (err) {
       setActionError(getErrorMessage(err))
@@ -98,8 +91,6 @@ export default function CVAnalysisPage() {
   const isBusy = Boolean(busy)
   const running = busy && busy.cvId === selected?.id ? busy.action : null
   const ready = selected?.parseStatus === 'completed'
-  // Gợi ý đã lưu được tạo theo tin mục tiêu khác với tin đang chọn
-  const staleTarget = analysis?.suggestions && (analysis.suggestions.targetJobId ?? '') !== targetJobId
 
   return (
     <>
@@ -235,21 +226,6 @@ export default function CVAnalysisPage() {
               {tab === 'suggestions' && (
                 <>
                   <div className="ai-panel-head">
-                    {targetJobId && (
-                      <p>
-                        🎯 Tin mục tiêu:{' '}
-                        {targetJob ? (
-                          <>
-                            <Link to={`/jobs/${targetJob.id}`}>{targetJob.title}</Link> · {targetJob.company}
-                          </>
-                        ) : (
-                          'đang tải...'
-                        )}{' '}
-                        <button className="btn btn-ghost btn-sm" onClick={() => updateParams({ jobId: '' })}>
-                          Bỏ chọn
-                        </button>
-                      </p>
-                    )}
                     {running !== 'suggestions' && (
                       <button
                         className={analysis?.suggestions ? 'btn btn-outline btn-sm' : 'btn btn-primary'}
@@ -263,12 +239,7 @@ export default function CVAnalysisPage() {
                   {running === 'suggestions' ? (
                     <Loading text="AI đang đối chiếu CV với các tin tuyển dụng, thường mất 5-15 giây..." />
                   ) : analysis?.suggestions ? (
-                    <>
-                      {staleTarget && (
-                        <div className="alert alert-info">Gợi ý bên dưới chưa theo tin mục tiêu đang chọn.</div>
-                      )}
-                      <CVSuggestionList suggestions={analysis.suggestions} />
-                    </>
+                    <CVSuggestionList suggestions={analysis.suggestions} />
                   ) : (
                     <EmptyState title="Chưa có gợi ý" />
                   )}

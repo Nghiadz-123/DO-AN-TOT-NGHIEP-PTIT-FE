@@ -1661,17 +1661,6 @@ textarea.input {
   margin-bottom: 12px;
 }
 
-.demo-accounts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0;
-  padding: 12px;
-  background: var(--bg);
-  border-radius: 8px;
-}
-
 .role-picker {
   display: grid;
   grid-template-columns: 1fr 1fr;

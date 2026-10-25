@@ -321,15 +321,13 @@ export const toCVAnalysis = (dto) => ({
       jobIds: s.job_ids ?? [],
     })),
     missingKeywords: dto.suggestions.missing_keywords ?? [],
-    // Tin mục tiêu (nếu có) + các việc làm được gợi ý cho CV, đã gửi kèm cho AI làm căn cứ
+    // Các việc làm được gợi ý cho CV, đã gửi kèm cho AI làm căn cứ
     referenceJobs: (dto.suggestions.reference_jobs ?? []).map((j) => ({
       id: j.id,
       title: j.title,
       company: j.company,
       score: j.score ?? null,
-      isTarget: Boolean(j.is_target),
     })),
-    targetJobId: dto.suggestions.target_job_id,
     suggestedAt: dto.suggestions.suggested_at,
   },
 })

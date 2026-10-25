@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import candidateApi from '@/api/candidateApi'
+import ChangePasswordForm from '@/components/common/ChangePasswordForm'
 import Loading from '@/components/common/Loading'
 import useAuth from '@/hooks/useAuth'
 import { useLocations } from '@/hooks/useCatalog'
@@ -171,7 +172,7 @@ export default function ProfilePage() {
   const { data: profile, loading, error } = useFetch(() => candidateApi.getProfile(), [])
 
   return (
-    <div className="narrow">
+    <div className="narrow stack">
       <div className="page-header">
         <div>
           <h1>Hồ sơ cá nhân</h1>
@@ -181,6 +182,7 @@ export default function ProfilePage() {
       {loading && <Loading />}
       {error && <div className="alert alert-error">{error}</div>}
       {profile && <ProfileForm initial={profile} />}
+      <ChangePasswordForm />
     </div>
   )
 }

@@ -134,9 +134,6 @@ export default function RecommendedJobsPage() {
                         {evaluatingId === job.id ? 'AI đang đánh giá...' : '✨ AI đánh giá chi tiết'}
                       </button>
                     )}
-                    <Link to={`/cv-analysis?cvId=${cv.id}&jobId=${job.id}&tab=suggestions`} className="btn btn-ghost btn-sm">
-                      💡 Gợi ý sửa CV theo tin này
-                    </Link>
                   </div>
                 </JobCard>
               ))}

@@ -9,7 +9,7 @@ import Loading from '@/components/common/Loading'
 import ApplyModal from '@/components/jobs/ApplyModal'
 import useAuth from '@/hooks/useAuth'
 import useFetch from '@/hooks/useFetch'
-import { FEATURES, JOB_LEVELS, JOB_TYPES, ROLES, WORK_MODES } from '@/utils/constants'
+import { JOB_LEVELS, JOB_TYPES, ROLES, WORK_MODES } from '@/utils/constants'
 import { formatDate, formatSalary, labelOf } from '@/utils/formatters'
 
 export default function JobDetailPage() {
@@ -163,17 +163,6 @@ export default function JobDetailPage() {
               <dd>{job.applicantCount}</dd>
             </dl>
           </div>
-          {FEATURES.candidateAi && isCandidate && !application && (
-            <div className="card ai-box">
-              <div className="ai-box-title">✨ Mẹo từ AI</div>
-              <p className="text-muted">
-                Nhờ AI đối chiếu CV với yêu cầu của tin này và gợi ý cần sửa gì trước khi ứng tuyển.
-              </p>
-              <Link to={`/cv-analysis?jobId=${job.id}&tab=suggestions`} className="btn btn-outline btn-sm">
-                Gợi ý sửa CV theo tin này
-              </Link>
-            </div>
-          )}
         </aside>
       </div>
 

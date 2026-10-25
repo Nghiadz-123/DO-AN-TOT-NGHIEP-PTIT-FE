@@ -68,7 +68,6 @@ export function CVSuggestionList({ suggestions }) {
                   {' '}
                   · {job.company}
                   {job.score != null && ` · ${job.score} điểm`}
-                  {job.isTarget && ' · tin mục tiêu'}
                 </span>
               </li>
             ))}
