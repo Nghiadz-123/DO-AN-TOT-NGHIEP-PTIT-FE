@@ -15,6 +15,12 @@ export const ROLES = {
   ADMIN: 'admin',
 }
 
+export const ROLE_LABELS = {
+  [ROLES.CANDIDATE]: 'Ứng viên',
+  [ROLES.RECRUITER]: 'Nhà tuyển dụng',
+  [ROLES.ADMIN]: 'Quản trị viên',
+}
+
 export const TOKEN_KEY = 'access_token'
 export const REFRESH_TOKEN_KEY = 'refresh_token'
 

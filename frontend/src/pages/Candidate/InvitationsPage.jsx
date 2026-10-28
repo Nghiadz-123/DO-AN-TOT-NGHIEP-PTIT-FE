@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { ChevronDown, CircleCheck, Eye, Mail, MapPin, Send, TriangleAlert, Wallet, X } from 'lucide-react'
 import candidateApi from '@/api/candidateApi'
 import invitationApi from '@/api/invitationApi'
 import Badge from '@/components/common/Badge'
 import CompanyLogo from '@/components/common/CompanyLogo'
+import ConfirmDialog from '@/components/common/ConfirmDialog'
 import EmptyState from '@/components/common/EmptyState'
-import Loading from '@/components/common/Loading'
+import ErrorState from '@/components/common/ErrorState'
 import Pagination from '@/components/common/Pagination'
+import { SkeletonCards } from '@/components/common/Skeleton'
 import ApplyModal from '@/components/jobs/ApplyModal'
 import useFetch from '@/hooks/useFetch'
 import useInbox from '@/hooks/useInbox'
@@ -26,6 +29,7 @@ function InvitationCard({ item, open, busy, onToggle, onApply, onDecline }) {
   const accepting = job.status === 'published'
   const unread = pending && !item.readAt
   const status = INVITATION_STATUS[item.status]
+  const messageId = `invitation-message-${item.id}`
 
   return (
     <article className={`card invitation-card ${unread ? 'invitation-unread' : ''} ${busy ? 'row-busy' : ''}`}>
@@ -33,40 +37,58 @@ function InvitationCard({ item, open, busy, onToggle, onApply, onDecline }) {
         <CompanyLogo name={job.company} src={job.companyLogo} />
         <div className="invitation-info">
           <div className="invitation-title">
-            <Link to={`/jobs/${job.id}`}>
-              <strong>{job.title}</strong>
-            </Link>
+            <h2>
+              <Link to={`/jobs/${job.id}`}>{job.title}</Link>
+            </h2>
             {unread && <Badge tone="danger">Mới</Badge>}
           </div>
           <span className="text-muted">{job.company}</span>
-          <div className="job-meta text-muted small">
-            {job.location && <span>📍 {job.location}</span>}
-            <span>💰 {formatSalary(job.salaryMin, job.salaryMax, job.isSalaryNegotiable)}</span>
-            <span>
-              ✉ Nhận ngày {formatDate(item.createdAt)}
+          <ul className="job-meta">
+            {job.location && (
+              <li>
+                <MapPin />
+                {job.location}
+              </li>
+            )}
+            <li>
+              <Wallet />
+              {formatSalary(job.salaryMin, job.salaryMax, job.isSalaryNegotiable)}
+            </li>
+            <li>
+              <Mail />
+              Nhận ngày {formatDate(item.createdAt)}
               {sender && ` · ${sender.fullName}${sender.position ? ` (${sender.position})` : ''}`}
-            </span>
-          </div>
+            </li>
+          </ul>
         </div>
         <Badge tone={status.tone}>{status.label}</Badge>
       </div>
 
-      <div className="invitation-message">
+      <div id={messageId} className="invitation-message">
         <p className={`pre-line ${open ? '' : 'clamp-2'}`}>{item.message}</p>
       </div>
 
       <div className="actions">
-        <button className="btn btn-ghost btn-sm" onClick={onToggle}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm invitation-toggle"
+          aria-expanded={open}
+          aria-controls={messageId}
+          onClick={onToggle}
+        >
+          <ChevronDown />
           {open ? 'Thu gọn' : 'Đọc thư'}
         </button>
         {pending && accepting && (
-          <button className="btn btn-primary btn-sm" disabled={busy} onClick={onApply}>
+          <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={onApply}>
+            <Send />
             Ứng tuyển ngay
           </button>
         )}
         {pending && !accepting && <Badge>Tin đã ngừng nhận hồ sơ</Badge>}
         {pending && (
-          <button className="btn btn-ghost btn-sm text-danger" disabled={busy} onClick={onDecline}>
+          <button type="button" className="btn btn-ghost btn-sm text-danger" disabled={busy} onClick={onDecline}>
+            <X />
             Từ chối
           </button>
         )}
@@ -88,6 +110,7 @@ export default function InvitationsPage() {
   const [openId, setOpenId] = useState(null)
   const [busyId, setBusyId] = useState(null)
   const [applying, setApplying] = useState(null) // thư đang mở hộp nộp hồ sơ
+  const [declining, setDeclining] = useState(null) // thư đang chờ xác nhận từ chối
   const [actionError, setActionError] = useState('')
   const [notice, setNotice] = useState('')
 
@@ -123,8 +146,9 @@ export default function InvitationsPage() {
     }
   }
 
-  const decline = (item) => {
-    if (!window.confirm(`Từ chối thư mời ứng tuyển vị trí "${item.job.title}" của ${item.job.company}?`)) return
+  const confirmDecline = () => {
+    const item = declining
+    setDeclining(null)
     run(item, async () => {
       replace(await invitationApi.decline(item.id))
       refreshInbox()
@@ -140,10 +164,10 @@ export default function InvitationsPage() {
   }
 
   return (
-    <div className="narrow">
+    <div className="narrow stack">
       <div className="page-header">
         <div>
-          <h1>✉ Thư mời ứng tuyển</h1>
+          <h1>Thư mời ứng tuyển</h1>
           <p className="text-muted">
             Nhà tuyển dụng xem CV công khai của bạn và mời bạn ứng tuyển vào tin đang tuyển. Nộp hồ sơ ngay từ thư mời,
             hoặc từ chối nếu vị trí chưa phù hợp.
@@ -153,16 +177,20 @@ export default function InvitationsPage() {
 
       {profile && !profile.isPublic && (
         <div className="alert alert-info">
-          Bạn chưa công khai CV nên nhà tuyển dụng chỉ thấy hồ sơ của bạn khi bạn ứng tuyển.{' '}
-          <Link to="/cv">Công khai CV</Link> để nhận thêm thư mời.
+          <Eye />
+          <div className="alert-content">
+            Bạn chưa công khai CV nên nhà tuyển dụng chỉ thấy hồ sơ của bạn khi bạn ứng tuyển.{' '}
+            <Link to="/cv">Công khai CV</Link> để nhận thêm thư mời.
+          </div>
         </div>
       )}
 
-      <div className="segmented">
+      <div className="segmented" role="group" aria-label="Lọc thư mời">
         {TABS.map((t) => (
           <button
             key={t.value}
-            className={status === t.value ? 'active' : ''}
+            type="button"
+            aria-pressed={status === t.value}
             onClick={() => setSearchParams(t.value ? { status: t.value } : {})}
           >
             {t.label}
@@ -170,14 +198,25 @@ export default function InvitationsPage() {
         ))}
       </div>
 
-      {notice && <div className="alert alert-success">{notice}</div>}
-      {actionError && <div className="alert alert-error">{actionError}</div>}
-      {loading && !data && <Loading />}
-      {error && <div className="alert alert-error">{error}</div>}
+      {notice && (
+        <div className="alert alert-success" role="status">
+          <CircleCheck />
+          <div className="alert-content">{notice}</div>
+        </div>
+      )}
+      {actionError && (
+        <div className="alert alert-error" role="alert">
+          <TriangleAlert />
+          <div className="alert-content">{actionError}</div>
+        </div>
+      )}
+      {loading && !data && <SkeletonCards count={2} className="stack" label="Đang tải thư mời" />}
+      {error && <ErrorState message={error} onRetry={reload} />}
 
       {data &&
         (data.results.length === 0 ? (
           <EmptyState
+            icon={Mail}
             title={status ? 'Không có thư mời nào ở mục này' : 'Bạn chưa nhận được thư mời nào'}
             description="Công khai CV và cập nhật CV chính để nhà tuyển dụng dễ tìm thấy bạn."
             action={
@@ -187,7 +226,7 @@ export default function InvitationsPage() {
             }
           />
         ) : (
-          <div className="stack">
+          <div className={`stack ${loading ? 'is-refreshing' : ''}`}>
             {data.results.map((item) => (
               <InvitationCard
                 key={item.id}
@@ -199,7 +238,7 @@ export default function InvitationsPage() {
                   setNotice('')
                   setApplying(item)
                 }}
-                onDecline={() => decline(item)}
+                onDecline={() => setDeclining(item)}
               />
             ))}
           </div>
@@ -215,6 +254,15 @@ export default function InvitationsPage() {
       )}
 
       {applying && <ApplyModal job={applying.job} open onClose={() => setApplying(null)} onApplied={onApplied} />}
+
+      <ConfirmDialog
+        open={Boolean(declining)}
+        title="Từ chối thư mời?"
+        message={declining && `Từ chối thư mời ứng tuyển vị trí "${declining.job.title}" của ${declining.job.company}?`}
+        confirmLabel="Từ chối thư mời"
+        onConfirm={confirmDecline}
+        onCancel={() => setDeclining(null)}
+      />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Info, Send, TriangleAlert } from 'lucide-react'
 import invitationApi from '@/api/invitationApi'
 import jobApi from '@/api/jobApi'
 import Loading from '@/components/common/Loading'
@@ -48,29 +49,43 @@ export default function InviteModal({ candidate, jobId: initialJobId, onClose, o
       onClose={onClose}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>
+          <button type="button" className="btn btn-ghost" onClick={onClose} disabled={sending}>
             Hủy
           </button>
-          <button className="btn btn-primary" disabled={sending || !job || !text.trim()} onClick={send}>
-            {sending ? 'Đang gửi...' : '✉ Gửi thư mời'}
+          <button type="button" className="btn btn-primary" disabled={sending || !job || !text.trim()} onClick={send}>
+            {sending ? <span className="spinner" aria-hidden="true" /> : <Send />}
+            {sending ? 'Đang gửi...' : 'Gửi thư mời'}
           </button>
         </>
       }
     >
       {loading && <Loading />}
-      {loadError && <div className="alert alert-error">{loadError}</div>}
+      {loadError && (
+        <div className="alert alert-error" role="alert">
+          <TriangleAlert />
+          <div className="alert-content">{loadError}</div>
+        </div>
+      )}
       {jobsPage && !job && (
         <div className="alert alert-info">
-          Công ty chưa có tin đang tuyển. <Link to="/recruiter/jobs/new">Đăng tin mới</Link> để gửi thư mời ứng tuyển.
+          <Info />
+          <div className="alert-content">
+            Công ty chưa có tin đang tuyển. <Link to="/recruiter/jobs/new">Đăng tin mới</Link> để gửi thư mời ứng tuyển.
+          </div>
         </div>
       )}
       {job && (
         <>
-          <p className="text-muted">
+          <p className="text-muted modal-intro">
             Ứng viên nhận thư ở trang Thư mời và có thể nộp hồ sơ ngay vào tin bạn chọn. Mỗi tin chỉ gửi được một thư
             cho một ứng viên.
           </p>
-          {error && <div className="alert alert-error">{error}</div>}
+          {error && (
+            <div className="alert alert-error form-alert" role="alert">
+              <TriangleAlert />
+              <div className="alert-content">{error}</div>
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="invite-job">Mời ứng tuyển vị trí</label>
             <select id="invite-job" className="input" value={job.id} onChange={(e) => setJobId(e.target.value)}>
@@ -82,17 +97,19 @@ export default function InviteModal({ candidate, jobId: initialJobId, onClose, o
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="invite-message">
-              Nội dung thư ({text.length}/{MESSAGE_MAX})
-            </label>
+            <label htmlFor="invite-message">Nội dung thư</label>
             <textarea
               id="invite-message"
               className="input"
               rows={6}
               maxLength={MESSAGE_MAX}
+              aria-describedby="invite-message-count"
               value={text}
               onChange={(e) => setMessage(e.target.value)}
             />
+            <small id="invite-message-count" className="field-hint field-count">
+              {text.length}/{MESSAGE_MAX} ký tự
+            </small>
           </div>
         </>
       )}

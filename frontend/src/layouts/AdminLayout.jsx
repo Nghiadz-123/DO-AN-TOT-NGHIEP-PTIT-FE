@@ -1,35 +1,34 @@
-import { NavLink, Outlet } from 'react-router-dom'
-import Header from '@/components/layout/Header'
+import { BriefcaseBusiness, Building, LayoutDashboard, ShieldCheck, Users } from 'lucide-react'
+import WorkspaceShell from '@/components/layout/WorkspaceShell'
 
-const LINKS = [
-  { to: '/admin', end: true, icon: '▦', label: 'Tổng quan' },
-  { to: '/admin/users', icon: '♙', label: 'Người dùng' },
-  { to: '/admin/companies', icon: '▤', label: 'Doanh nghiệp' },
-  { to: '/admin/jobs', icon: '▣', label: 'Tin tuyển dụng' },
+const SECTIONS = [
+  { links: [{ to: '/admin', end: true, label: 'Tổng quan', icon: LayoutDashboard }] },
+  {
+    title: 'Quản lý',
+    links: [
+      { to: '/admin/users', label: 'Người dùng', icon: Users },
+      { to: '/admin/companies', label: 'Doanh nghiệp', icon: Building },
+      { to: '/admin/jobs', label: 'Tin tuyển dụng', icon: BriefcaseBusiness },
+    ],
+  },
 ]
 
 export default function AdminLayout() {
   return (
-    <>
-      <Header />
-      <div className="admin-layout">
-        <aside className="admin-sidebar">
-          <div className="admin-sidebar-title">
-            <span className="admin-mark">A</span>
-            <div><strong>Quản trị hệ thống</strong><small>SMART ATS</small></div>
+    <WorkspaceShell
+      navLabel="Điều hướng quản trị"
+      sections={SECTIONS}
+      brand={
+        <>
+          <span className="workspace-mark" aria-hidden="true">
+            <ShieldCheck />
+          </span>
+          <div>
+            <strong>Quản trị hệ thống</strong>
+            <small>Smart ATS</small>
           </div>
-          <span className="admin-nav-caption">KHÔNG GIAN QUẢN TRỊ</span>
-          <nav className="admin-nav">
-            {LINKS.map((link) => (
-              <NavLink key={link.to} to={link.to} end={link.end}>
-                <span className="admin-nav-icon">{link.icon}</span>{link.label}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="admin-sidebar-note"><span className="admin-online-dot" /> Hệ thống đang hoạt động</div>
-        </aside>
-        <main className="admin-content"><Outlet /></main>
-      </div>
-    </>
+        </>
+      }
+    />
   )
 }

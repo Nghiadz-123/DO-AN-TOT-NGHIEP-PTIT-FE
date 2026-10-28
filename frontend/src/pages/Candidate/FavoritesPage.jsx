@@ -1,8 +1,10 @@
 import { Link, useSearchParams } from 'react-router-dom'
+import { Heart } from 'lucide-react'
 import favoriteApi from '@/api/favoriteApi'
 import EmptyState from '@/components/common/EmptyState'
-import Loading from '@/components/common/Loading'
+import ErrorState from '@/components/common/ErrorState'
 import Pagination from '@/components/common/Pagination'
+import { SkeletonCards } from '@/components/common/Skeleton'
 import CompanyCard from '@/components/companies/CompanyCard'
 import JobCard from '@/components/jobs/JobCard'
 import useFavorites from '@/hooks/useFavorites'
@@ -32,7 +34,7 @@ export default function FavoritesPage() {
   const { loaded, isFavorite, count } = useFavorites()
   const current = TABS[tab]
 
-  const { data, loading, error } = useFetch(() => current.fetch({ page, pageSize: PAGE_SIZE }), [tab, page])
+  const { data, loading, error, reload } = useFetch(() => current.fetch({ page, pageSize: PAGE_SIZE }), [tab, page])
 
   // Bỏ yêu thích ngay trên trang thì mục đó ẩn đi, không cần tải lại
   const items = data && (loaded ? data.results.filter((item) => isFavorite(current.type, item.id)) : data.results)
@@ -46,20 +48,25 @@ export default function FavoritesPage() {
         </div>
       </div>
 
-      <div className="segmented">
+      <div className="segmented" role="group" aria-label="Loại mục yêu thích">
         {Object.entries(TABS).map(([key, meta]) => {
           const total = count(meta.type)
           return (
-            <button key={key} className={tab === key ? 'active' : ''} onClick={() => setSearchParams({ tab: key })}>
+            <button
+              key={key}
+              type="button"
+              aria-pressed={tab === key}
+              onClick={() => setSearchParams({ tab: key })}
+            >
               {meta.label}
-              {total !== null && ` (${total})`}
+              {total !== null && <span className="segmented-count">({total})</span>}
             </button>
           )
         })}
       </div>
 
-      {loading && <Loading />}
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <ErrorState message={error} onRetry={reload} />}
+      {loading && <SkeletonCards count={3} label="Đang tải danh sách yêu thích" />}
       {items && !loading && (
         <>
           {items.length ? (
@@ -70,8 +77,9 @@ export default function FavoritesPage() {
             </div>
           ) : (
             <EmptyState
+              icon={Heart}
               title={current.empty.title}
-              description="Bấm ♡ trên việc làm hoặc công ty để thêm vào đây."
+              description="Bấm biểu tượng trái tim trên việc làm hoặc công ty để thêm vào đây."
               action={
                 <Link to={current.empty.action.to} className="btn btn-primary">
                   {current.empty.action.label}

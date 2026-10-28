@@ -1,7 +1,11 @@
-import { useRef, useState } from 'react'
+import { useId, useState } from 'react'
+import { Upload } from 'lucide-react'
 
+// Vùng chọn file: là <label> bọc input file (ẩn bằng visually-hidden, không phải display:none)
+// nên bấm chuột, Tab + Enter / Space đều mở hộp chọn file; kéo thả là cách phụ.
 export default function FileDropzone({ accept, onFile, disabled, hint }) {
-  const inputRef = useRef(null)
+  const inputId = useId()
+  const hintId = useId()
   const [dragging, setDragging] = useState(false)
 
   const handleFiles = (files) => {
@@ -9,12 +13,12 @@ export default function FileDropzone({ accept, onFile, disabled, hint }) {
   }
 
   return (
-    <div
+    <label
+      htmlFor={inputId}
       className={`dropzone ${dragging ? 'dropzone-active' : ''} ${disabled ? 'dropzone-disabled' : ''}`}
-      onClick={() => !disabled && inputRef.current.click()}
       onDragOver={(e) => {
         e.preventDefault()
-        setDragging(true)
+        if (!disabled) setDragging(true)
       }}
       onDragLeave={() => setDragging(false)}
       onDrop={(e) => {
@@ -24,18 +28,28 @@ export default function FileDropzone({ accept, onFile, disabled, hint }) {
       }}
     >
       <input
-        ref={inputRef}
+        id={inputId}
         type="file"
         accept={accept}
-        hidden
+        className="visually-hidden"
+        disabled={disabled}
+        aria-describedby={hint ? hintId : undefined}
         onChange={(e) => {
           handleFiles(e.target.files)
           e.target.value = ''
         }}
       />
-      <div className="dropzone-icon">⬆</div>
-      <strong>Kéo thả file vào đây hoặc bấm để chọn</strong>
-      {hint && <p className="text-muted">{hint}</p>}
-    </div>
+      <span className="dropzone-icon">
+        <Upload />
+      </span>
+      <strong>
+        Kéo thả file vào đây hoặc <span className="dropzone-link">chọn file từ máy</span>
+      </strong>
+      {hint && (
+        <span id={hintId} className="dropzone-hint">
+          {hint}
+        </span>
+      )}
+    </label>
   )
 }
