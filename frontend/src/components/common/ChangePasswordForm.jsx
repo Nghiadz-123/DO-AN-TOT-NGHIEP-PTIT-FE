@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { CircleCheck, KeyRound, TriangleAlert } from 'lucide-react'
+import PasswordInput from '@/components/common/PasswordInput'
 import useAuth from '@/hooks/useAuth'
 import { getErrorMessage } from '@/utils/formatters'
 
@@ -33,14 +35,20 @@ export default function ChangePasswordForm() {
 
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>Đổi mật khẩu</h2>
-      {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
+      <h2 className="card-section-title">
+        <KeyRound />
+        Đổi mật khẩu
+      </h2>
+      {message && (
+        <div className={`alert alert-${message.type}`} role={message.type === 'error' ? 'alert' : 'status'}>
+          {message.type === 'error' ? <TriangleAlert /> : <CircleCheck />}
+          <div className="alert-content">{message.text}</div>
+        </div>
+      )}
       <div className="form-group">
         <label htmlFor="currentPassword">Mật khẩu hiện tại</label>
-        <input
+        <PasswordInput
           id="currentPassword"
-          type="password"
-          className="input"
           required
           autoComplete="current-password"
           value={form.currentPassword}
@@ -50,22 +58,22 @@ export default function ChangePasswordForm() {
       <div className="form-row">
         <div className="form-group">
           <label htmlFor="newPassword">Mật khẩu mới</label>
-          <input
+          <PasswordInput
             id="newPassword"
-            type="password"
-            className="input"
             required
             autoComplete="new-password"
+            aria-describedby="newPassword-hint"
             value={form.newPassword}
             onChange={set('newPassword')}
           />
+          <small id="newPassword-hint" className="field-hint">
+            Tối thiểu 8 ký tự.
+          </small>
         </div>
         <div className="form-group">
           <label htmlFor="confirmPassword">Xác nhận mật khẩu mới</label>
-          <input
+          <PasswordInput
             id="confirmPassword"
-            type="password"
-            className="input"
             required
             autoComplete="new-password"
             value={form.confirmPassword}
@@ -73,9 +81,12 @@ export default function ChangePasswordForm() {
           />
         </div>
       </div>
-      <button className="btn btn-primary" disabled={saving}>
-        {saving ? 'Đang lưu...' : 'Đổi mật khẩu'}
-      </button>
+      <div className="form-footer">
+        <button type="submit" className="btn btn-primary" disabled={saving}>
+          {saving && <span className="spinner" aria-hidden="true" />}
+          {saving ? 'Đang lưu...' : 'Đổi mật khẩu'}
+        </button>
+      </div>
     </form>
   )
 }

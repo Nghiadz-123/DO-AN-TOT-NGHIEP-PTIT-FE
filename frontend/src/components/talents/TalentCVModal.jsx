@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Download, ExternalLink, FileText, TriangleAlert } from 'lucide-react'
 import talentApi from '@/api/talentApi'
 import Loading from '@/components/common/Loading'
 import Modal from '@/components/common/Modal'
@@ -33,27 +34,42 @@ export default function TalentCVModal({ candidate, onClose }) {
   return (
     <Modal
       open
-      size="lg"
+      size="xl"
       title={`CV: ${candidate.fullName}`}
       onClose={onClose}
       footer={
         <>
-          <button className="btn btn-outline" disabled={!file} onClick={() => saveBlob(file.blob, file.fileName)}>
-            ⬇ Tải về
+          {viewable && (
+            <a className="btn btn-outline" href={file.url} target="_blank" rel="noreferrer">
+              <ExternalLink />
+              Mở tab mới
+            </a>
+          )}
+          <button type="button" className="btn btn-outline" disabled={!file} onClick={() => saveBlob(file.blob, file.fileName)}>
+            <Download />
+            Tải về
           </button>
-          <button className="btn btn-ghost" onClick={onClose}>
+          <button type="button" className="btn btn-ghost" onClick={onClose}>
             Đóng
           </button>
         </>
       }
     >
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && (
+        <div className="alert alert-error" role="alert">
+          <TriangleAlert />
+          <div className="alert-content">{error}</div>
+        </div>
+      )}
       {!file && !error && <Loading text="Đang tải CV..." />}
       {viewable && <iframe className="cv-viewer" src={file.url} title={`CV ${candidate.fullName}`} />}
       {file && !viewable && (
-        <p className="text-muted">
-          CV “{file.fileName}” là file Word, trình duyệt không xem trực tiếp được. Bấm “Tải về” để mở bằng Word.
-        </p>
+        <div className="empty-state">
+          <span className="empty-state-icon">
+            <FileText />
+          </span>
+          <p>CV “{file.fileName}” là file Word, trình duyệt không xem trực tiếp được. Bấm “Tải về” để mở bằng Word.</p>
+        </div>
       )}
     </Modal>
   )

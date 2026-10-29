@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Building, CircleCheck, TriangleAlert, UserPlus, UserRound } from 'lucide-react'
+import PasswordInput from '@/components/common/PasswordInput'
+import AuthAside from '@/components/layout/AuthAside'
 import useAuth from '@/hooks/useAuth'
 import { FEATURES, ROLES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
@@ -10,11 +13,13 @@ const ROLE_OPTIONS = [
     value: ROLES.CANDIDATE,
     title: 'Ứng viên',
     text: FEATURES.candidateAi ? 'Tìm việc, chấm điểm CV bằng AI' : 'Tải CV, tìm việc và ứng tuyển',
+    icon: UserRound,
   },
   {
     value: ROLES.RECRUITER,
     title: 'Nhà tuyển dụng',
     text: FEATURES.ai ? 'Đăng tin, AI sàng lọc hồ sơ' : 'Đăng tin, quản lý hồ sơ ứng viên',
+    icon: Building,
   },
 ]
 
@@ -63,85 +68,115 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
-      <form className="card auth-card" onSubmit={handleSubmit}>
-        <h1>Tạo tài khoản</h1>
+      <div className="auth-shell">
+        <AuthAside title="Bắt đầu hành trình nghề nghiệp mới" />
+        <form className="auth-card" onSubmit={handleSubmit}>
+          <h1>Tạo tài khoản</h1>
+          <p className="text-muted">Miễn phí, chỉ mất chưa đến một phút</p>
 
-        <div className="role-picker">
-          {ROLE_OPTIONS.map((r) => (
-            <label
-              key={r.value}
-              className={`role-option ${form.role === r.value ? 'selected' : ''} ${r.disabled ? 'disabled' : ''}`}
-            >
+          <fieldset className="field-group">
+            <legend className="field-label">Bạn là</legend>
+            <div className="role-picker">
+              {ROLE_OPTIONS.map((r) => (
+                <label key={r.value} className={`role-option ${form.role === r.value ? 'selected' : ''}`}>
+                  {/* Ẩn kiểu visually-hidden (không phải display:none) để vẫn chọn được bằng bàn phím */}
+                  <input
+                    type="radio"
+                    name="role"
+                    className="visually-hidden"
+                    value={r.value}
+                    checked={form.role === r.value}
+                    onChange={set('role')}
+                  />
+                  <span className="role-option-icon" aria-hidden="true">
+                    <r.icon />
+                  </span>
+                  <strong>{r.title}</strong>
+                  <small>{r.text}</small>
+                  {form.role === r.value && <CircleCheck className="role-option-check" aria-hidden="true" />}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {error && (
+            <div className="alert alert-error" role="alert">
+              <TriangleAlert />
+              <div className="alert-content">{error}</div>
+            </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="fullName">Họ và tên</label>
+            <input
+              id="fullName"
+              className="input"
+              required
+              autoComplete="name"
+              value={form.fullName}
+              onChange={set('fullName')}
+            />
+          </div>
+          {isRecruiter && (
+            <div className="form-group">
+              <label htmlFor="companyName">Tên công ty</label>
               <input
-                type="radio"
-                name="role"
-                value={r.value}
-                checked={form.role === r.value}
-                disabled={r.disabled}
-                onChange={set('role')}
+                id="companyName"
+                className="input"
+                required
+                autoComplete="organization"
+                value={form.companyName}
+                onChange={set('companyName')}
               />
-              <strong>{r.title}</strong>
-              <small className="text-muted">{r.text}</small>
-            </label>
-          ))}
-        </div>
-
-        {error && <div className="alert alert-error">{error}</div>}
-
-        <div className="form-group">
-          <label htmlFor="fullName">Họ và tên</label>
-          <input id="fullName" className="input" required value={form.fullName} onChange={set('fullName')} />
-        </div>
-        {isRecruiter && (
+            </div>
+          )}
           <div className="form-group">
-            <label htmlFor="companyName">Tên công ty</label>
+            <label htmlFor="email">Email</label>
             <input
-              id="companyName"
+              id="email"
+              type="email"
               className="input"
               required
-              value={form.companyName}
-              onChange={set('companyName')}
+              autoComplete="email"
+              value={form.email}
+              onChange={set('email')}
             />
           </div>
-        )}
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" className="input" required value={form.email} onChange={set('email')} />
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="password">Mật khẩu</label>
-            <input
-              id="password"
-              type="password"
-              className="input"
-              required
-              autoComplete="new-password"
-              value={form.password}
-              onChange={set('password')}
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="password">Mật khẩu</label>
+              <PasswordInput
+                id="password"
+                required
+                autoComplete="new-password"
+                aria-describedby="password-hint"
+                value={form.password}
+                onChange={set('password')}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
+              <PasswordInput
+                id="confirmPassword"
+                required
+                autoComplete="new-password"
+                value={form.confirmPassword}
+                onChange={set('confirmPassword')}
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              className="input"
-              required
-              autoComplete="new-password"
-              value={form.confirmPassword}
-              onChange={set('confirmPassword')}
-            />
-          </div>
-        </div>
-        <small className="text-muted">Mật khẩu tối thiểu 8 ký tự, không quá đơn giản hoặc chỉ gồm chữ số.</small>
-        <button className="btn btn-primary btn-block" disabled={submitting}>
-          {submitting ? 'Đang tạo tài khoản...' : 'Đăng ký'}
-        </button>
-        <p className="text-center">
-          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
-        </p>
-      </form>
+          <p id="password-hint" className="field-hint auth-password-hint">
+            Mật khẩu tối thiểu 8 ký tự, không quá đơn giản hoặc chỉ gồm chữ số.
+          </p>
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={submitting}>
+            {submitting ? <span className="spinner" aria-hidden="true" /> : <UserPlus />}
+            {submitting ? 'Đang tạo tài khoản...' : 'Đăng ký'}
+          </button>
+          <p className="auth-switch">
+            Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+          </p>
+        </form>
+      </div>
     </div>
   )
 }

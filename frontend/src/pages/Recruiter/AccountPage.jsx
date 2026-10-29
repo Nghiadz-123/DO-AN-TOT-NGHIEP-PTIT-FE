@@ -1,7 +1,11 @@
 import { useState } from 'react'
+import { Save, UserRound } from 'lucide-react'
 import employerApi from '@/api/employerApi'
+import Badge from '@/components/common/Badge'
 import ChangePasswordForm from '@/components/common/ChangePasswordForm'
-import Loading from '@/components/common/Loading'
+import ErrorState from '@/components/common/ErrorState'
+import FormStatus from '@/components/common/FormStatus'
+import { SkeletonLines } from '@/components/common/Skeleton'
 import useAuth from '@/hooks/useAuth'
 import useFetch from '@/hooks/useFetch'
 import { formatDate, getErrorMessage } from '@/utils/formatters'
@@ -33,22 +37,49 @@ function ProfileForm({ profile }) {
 
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>Thông tin cá nhân</h2>
-      {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
+      <h2 className="card-section-title">
+        <UserRound />
+        Thông tin cá nhân
+      </h2>
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="fullName">Họ và tên *</label>
-          <input id="fullName" className="input" required maxLength={150} value={form.fullName} onChange={set('fullName')} />
+          <label htmlFor="fullName">
+            Họ và tên
+            <span className="required-mark" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <input
+            id="fullName"
+            className="input"
+            required
+            maxLength={150}
+            autoComplete="name"
+            value={form.fullName}
+            onChange={set('fullName')}
+          />
         </div>
         <div className="form-group">
           <label htmlFor="email">Email đăng nhập</label>
-          <input id="email" className="input" value={profile.email} disabled />
+          <input id="email" className="input" value={profile.email} disabled aria-describedby="email-hint" />
+          <small id="email-hint" className="field-hint">
+            Email đăng nhập không đổi được.
+          </small>
         </div>
       </div>
       <div className="form-row">
         <div className="form-group">
           <label htmlFor="phone">Số điện thoại</label>
-          <input id="phone" className="input" maxLength={20} value={form.phone} onChange={set('phone')} />
+          <input
+            id="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            className="input"
+            maxLength={20}
+            value={form.phone}
+            onChange={set('phone')}
+          />
         </div>
         <div className="form-group">
           <label htmlFor="position">Chức danh</label>
@@ -56,25 +87,30 @@ function ProfileForm({ profile }) {
             id="position"
             className="input"
             maxLength={100}
-            placeholder="VD: HR Manager"
+            autoComplete="organization-title"
+            placeholder="VD: Trưởng phòng nhân sự"
             value={form.position}
             onChange={set('position')}
           />
         </div>
       </div>
-      <p className="text-muted small">
-        Vai trò trong công ty: <strong>{COMPANY_ROLES[profile.companyRole] ?? profile.companyRole}</strong>
-        {profile.joinedAt && ` · Tham gia từ ${formatDate(profile.joinedAt)}`}
+      <p className="account-role text-muted small">
+        Vai trò trong công ty: <Badge tone="primary">{COMPANY_ROLES[profile.companyRole] ?? profile.companyRole}</Badge>
+        {profile.joinedAt && <span>Tham gia từ {formatDate(profile.joinedAt)}</span>}
       </p>
-      <button className="btn btn-primary" disabled={saving}>
-        {saving ? 'Đang lưu...' : 'Lưu thông tin'}
-      </button>
+      <div className="form-footer">
+        <FormStatus message={message} />
+        <button type="submit" className="btn btn-primary" disabled={saving}>
+          {saving ? <span className="spinner" aria-hidden="true" /> : <Save />}
+          {saving ? 'Đang lưu...' : 'Lưu thông tin'}
+        </button>
+      </div>
     </form>
   )
 }
 
 export default function AccountPage() {
-  const { data: profile, loading, error } = useFetch(() => employerApi.getProfile(), [])
+  const { data: profile, loading, error, reload } = useFetch(() => employerApi.getProfile(), [])
 
   return (
     <div className="narrow stack">
@@ -84,8 +120,12 @@ export default function AccountPage() {
           <p className="text-muted">Thông tin cá nhân và bảo mật đăng nhập</p>
         </div>
       </div>
-      {loading && <Loading />}
-      {error && <div className="alert alert-error">{error}</div>}
+      {loading && (
+        <div className="card">
+          <SkeletonLines lines={4} label="Đang tải thông tin tài khoản" />
+        </div>
+      )}
+      {error && <ErrorState message={error} onRetry={reload} />}
       {profile && <ProfileForm profile={profile} />}
       <ChangePasswordForm />
     </div>
