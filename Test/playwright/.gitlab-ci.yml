@@ -1,0 +1,81 @@
+# GitLab CI/CD – Playwright + Pytest
+# Biến bí mật (APP_USERNAME, APP_PASSWORD, API_TOKEN) khai báo tại Settings > CI/CD > Variables (Masked).
+
+stages:
+  - healthcheck
+  - test
+
+variables:
+  TEST_ENV: "dev"
+  BROWSER: "chromium"
+  PYTEST_MARKERS: "not manual"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  # Image phải cùng phiên bản với playwright trong requirements.txt
+  PLAYWRIGHT_IMAGE: "mcr.microsoft.com/playwright/python:v1.64.1-noble"
+
+default:
+  image: $PLAYWRIGHT_IMAGE
+  cache:
+    key:
+      files: [requirements.txt]
+    paths: [.cache/pip]
+
+# Job 1: kiểm tra môi trường. Fail ở đây = LỖI MÔI TRƯỜNG (AUT/API không truy cập được),
+# không phải lỗi test. Pipeline dừng sớm, không chạy test.
+env_healthcheck:
+  stage: healthcheck
+  script:
+    - pip install -q PyYAML python-dotenv
+    - |
+      python - <<'EOF'
+      import sys, urllib.request
+      from config.settings import load_settings
+      s = load_settings()
+      failed = False
+      for name, url in (("BASE_URL", s.base_url), ("API_URL", s.api_url)):
+          try:
+              code = urllib.request.urlopen(url, timeout=20).status
+              print(f"[OK] {name} {url} -> {code}")
+          except urllib.error.HTTPError as e:
+              # Server có phản hồi (vd 401/404 ở root) => môi trường vẫn sống
+              print(f"[OK] {name} {url} -> HTTP {e.code}")
+          except Exception as e:
+              print(f"[ENV ERROR] {name} {url} không truy cập được: {e}")
+              failed = True
+      sys.exit(1 if failed else 0)
+      EOF
+
+# Job 2: chạy test. Exit code pytest: 1 = có test FAIL (lỗi test/AUT);
+# 2-5 = lỗi cấu hình/collect/môi trường thực thi.
+ui_api_tests:
+  stage: test
+  needs: [env_healthcheck]
+  script:
+    - python -m pip install -q -r requirements.txt
+    # Image Playwright đã có browser; dòng dưới đảm bảo khớp phiên bản nếu dùng image khác
+    - python -m playwright install $BROWSER
+    - set +e
+    - python -m pytest -m "$PYTEST_MARKERS" --env="$TEST_ENV" --browser="$BROWSER"
+    - EXIT_CODE=$?
+    - set -e
+    - |
+      case $EXIT_CODE in
+        0) MSG="PASSED: tất cả test đạt" ;;
+        1) MSG="TEST FAILURE: có test fail – xem reports/report.html (lỗi automation hoặc bug AUT)" ;;
+        2) MSG="INTERRUPTED: quá trình chạy bị ngắt" ;;
+        3) MSG="INTERNAL ERROR: lỗi nội bộ pytest/plugin – kiểm tra môi trường thực thi" ;;
+        4) MSG="USAGE ERROR: sai tham số/cấu hình pytest" ;;
+        5) MSG="NO TESTS: không collect được test nào – kiểm tra marker/đường dẫn" ;;
+        *) MSG="UNKNOWN EXIT CODE $EXIT_CODE" ;;
+      esac
+    - echo "$MSG" | tee reports/run_summary.txt
+    - exit $EXIT_CODE
+  artifacts:
+    when: always
+    expire_in: 14 days
+    paths:
+      - reports/
+      - screenshots/
+      - test-results/
+    reports:
+      junit: reports/junit.xml

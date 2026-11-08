@@ -30,7 +30,34 @@ import { CV_PARSE_STATUS, FEATURES } from '@/utils/constants'
 import { fileExtension } from '@/utils/file'
 import { formatDate, formatFileSize, getErrorMessage, saveBlob } from '@/utils/formatters'
 
-const VIEWABLE_TYPES = ['application/pdf']
+const PDF_MIME = 'application/pdf'
+const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+const VIEWABLE_TYPES = [PDF_MIME, DOCX_MIME]
+
+// Hiển thị DOCX ngay trên trang (thư viện chỉ tải khi cần xem)
+function DocxViewer({ blob, title }) {
+  const containerRef = useRef(null)
+  const [failedBlob, setFailedBlob] = useState(null) // lỗi gắn với đúng file đang xem
+
+  useEffect(() => {
+    let active = true
+    const container = containerRef.current
+    import('docx-preview')
+      .then(({ renderAsync }) => active && renderAsync(blob, container, undefined, { inWrapper: true, ignoreLastRenderedPageBreak: true }))
+      .catch(() => active && setFailedBlob(blob))
+    return () => {
+      active = false
+      if (container) container.innerHTML = ''
+    }
+  }, [blob])
+
+  return (
+    <>
+      {failedBlob === blob && <div className="alert alert-error">Không hiển thị được file DOCX này. Hãy tải về để xem.</div>}
+      <div className="cv-viewer cv-viewer-docx" ref={containerRef} aria-label={`Xem CV ${title}`} />
+    </>
+  )
+}
 
 const scrollBehavior = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth')
 
@@ -61,7 +88,7 @@ export default function ManageCVsPage() {
     if (location.state?.message) navigate(location.pathname, { replace: true })
   }, [location, navigate])
 
-  useEffect(() => () => preview && URL.revokeObjectURL(preview.url), [preview])
+  useEffect(() => () => preview?.url && URL.revokeObjectURL(preview.url), [preview])
   useEffect(() => {
     if (preview) previewRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
   }, [preview])
@@ -83,7 +110,7 @@ export default function ManageCVsPage() {
       const viewable = !download && VIEWABLE_TYPES.includes(cv.mimeType)
       const { blob, fileName } = await (viewable ? cvApi.view(cv.id) : cvApi.download(cv.id))
       if (!viewable) return saveBlob(blob, fileName)
-      setPreview({ cv, url: URL.createObjectURL(blob) })
+      setPreview(cv.mimeType === PDF_MIME ? { cv, url: URL.createObjectURL(blob) } : { cv, blob })
     })
 
   const setDefault = (cv) =>
@@ -291,7 +318,11 @@ export default function ManageCVsPage() {
               </button>
             </div>
           </div>
-          <iframe className="cv-viewer" src={preview.url} title={`Xem CV ${preview.cv.title}`} />
+          {preview.url ? (
+            <iframe className="cv-viewer" src={`${preview.url}#view=FitH`} title={`Xem CV ${preview.cv.title}`} />
+          ) : (
+            <DocxViewer blob={preview.blob} title={preview.cv.title} />
+          )}
         </section>
       )}
 

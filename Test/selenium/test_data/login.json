@@ -1,0 +1,120 @@
+{
+  "_comment": "Test data màn hình Đăng nhập (KBKTCN_ATS_WEB_v1.0.xlsx - sheet 'Đăng nhập, Đăng ký', Login_1..Login_57). Mật khẩu tài khoản thật đọc từ .env, không ghi ở đây.",
+  "messages": {
+    "_comment": "Expected Result theo KBKTCN_ATS_WEB_v1.0.xlsx (bản cập nhật 04/11/2026 10:25).",
+    "required_field": "Vui lòng điền vào trường này.",
+    "blank_field": "Trường này không được bỏ trống.",
+    "invalid_credentials": "Email hoặc mật khẩu không đúng.",
+    "email_required": "Vui lòng điền vào trường này.",
+    "password_required": "Vui lòng điền vào trường này."
+  },
+  "maxlength": 255,
+  "email_formats": [
+    {
+      "tc_id": "Login_11",
+      "desc": "chu_thuong",
+      "value": "nguyenvanan"
+    },
+    {
+      "tc_id": "Login_12",
+      "desc": "chu_in_hoa",
+      "value": "NGUYENVANAN"
+    },
+    {
+      "tc_id": "Login_13",
+      "desc": "khong_dau",
+      "value": "nguyen van an"
+    },
+    {
+      "tc_id": "Login_14",
+      "desc": "tieng_viet_co_dau",
+      "value": "Nguyễn Văn Ân"
+    },
+    {
+      "tc_id": "Login_15",
+      "desc": "chu_so",
+      "value": "0123456789"
+    },
+    {
+      "tc_id": "Login_16",
+      "desc": "ky_tu_dac_biet",
+      "value": "!#$%&'*+-/=?^_`{|}~"
+    },
+    {
+      "tc_id": "Login_17",
+      "desc": "html_encode",
+      "value": "<b>test</b>&lt;script&gt;alert(1)&lt;/script&gt;"
+    },
+    {
+      "tc_id": "Login_18",
+      "desc": "emoji",
+      "value": "test😀🎉"
+    }
+  ],
+  "password_formats": [
+    {
+      "tc_id": "Login_28",
+      "desc": "chu_thuong",
+      "value": "matkhau"
+    },
+    {
+      "tc_id": "Login_29",
+      "desc": "chu_in_hoa",
+      "value": "MATKHAU"
+    },
+    {
+      "tc_id": "Login_30",
+      "desc": "khong_dau",
+      "value": "mat khau"
+    },
+    {
+      "tc_id": "Login_31",
+      "desc": "tieng_viet_co_dau",
+      "value": "Mật khẩu có dấu"
+    },
+    {
+      "tc_id": "Login_32",
+      "desc": "chu_so",
+      "value": "0123456789"
+    },
+    {
+      "tc_id": "Login_33",
+      "desc": "ky_tu_dac_biet",
+      "value": "!@#$%^&*()_+-=[]{};':\",./<>?"
+    },
+    {
+      "tc_id": "Login_34",
+      "desc": "html_encode",
+      "value": "<b>test</b>&lt;script&gt;"
+    },
+    {
+      "tc_id": "Login_35",
+      "desc": "emoji",
+      "value": "pass😀🎉"
+    }
+  ],
+  "wrong_email": "khongtontai.auto@example.com",
+  "wrong_password": "SaiMatKhau@999",
+  "change_password": {
+    "_comment": "Tài khoản ứng viên tạo mới mỗi lần chạy (email duy nhất) để không đụng tài khoản demo",
+    "old_password": "OldPass@2026xy",
+    "new_password": "NewPass@2026zq"
+  },
+  "role_home": [
+    {
+      "tc_id": "Login_49",
+      "role": "candidate",
+      "path": "/"
+    },
+    {
+      "tc_id": "Login_49",
+      "role": "recruiter",
+      "path": "/recruiter"
+    },
+    {
+      "tc_id": "Login_49",
+      "role": "admin",
+      "path": "/admin"
+    }
+  ]
+}
