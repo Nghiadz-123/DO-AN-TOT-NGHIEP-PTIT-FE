@@ -1,19 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import connectionApi from '@/api/connectionApi'
+import { ArrowRight, BriefcaseBusiness, Check, CircleCheck, Info, Pencil, Plus, Search, Send, Target } from 'lucide-react'
 import jobApi from '@/api/jobApi'
 import talentApi from '@/api/talentApi'
+import ActiveFilters from '@/components/common/ActiveFilters'
 import Badge, { JobStatusBadge } from '@/components/common/Badge'
 import EmptyState from '@/components/common/EmptyState'
-import Loading from '@/components/common/Loading'
-import Modal from '@/components/common/Modal'
+import ErrorState from '@/components/common/ErrorState'
 import Pagination from '@/components/common/Pagination'
 import ScoreCircle from '@/components/common/ScoreCircle'
-import InviteModal from '@/components/connections/InviteModal'
+import { SkeletonCards, SkeletonLines } from '@/components/common/Skeleton'
+import InvitationBadge from '@/components/invitations/InvitationBadge'
+import InviteModal from '@/components/invitations/InviteModal'
+import TalentCard from '@/components/talents/TalentCard'
+import TalentCVModal from '@/components/talents/TalentCVModal'
 import useFetch from '@/hooks/useFetch'
-import useOpenChat from '@/hooks/useOpenChat'
-import { JOB_LEVELS, PAGE_SIZE } from '@/utils/constants'
-import { formatDate, formatFileSize, getErrorMessage, labelOf, saveBlob } from '@/utils/formatters'
+import { PAGE_SIZE } from '@/utils/constants'
 
 const SCORE_FILTERS = [
   { value: '', label: 'Mọi mức điểm' },
@@ -30,125 +32,82 @@ const CRITERIA = [
   { key: 'location', label: 'Địa điểm', max: 10 },
 ]
 
-const VIEWABLE_TYPES = ['application/pdf']
-
-// Nút kết bạn / nhắn tin theo trạng thái quan hệ với ứng viên
-function ConnectAction({ talent, busy, onInvite, onCancel, onChat }) {
-  const { connection } = talent
-  if (!connection || (connection.status === 'declined' && connection.direction === 'sent')) {
+// Thư mời ứng tuyển tin đang xem: đã gửi thì hiện trạng thái; ứng viên đã nộp hồ sơ vào tin thì không cần mời
+function InviteAction({ talent, onInvite }) {
+  if (talent.invitation) {
     return (
       <>
-        {connection && <Badge>Ứng viên đã từ chối lời mời</Badge>}
-        <button className="btn btn-primary btn-sm" disabled={busy} onClick={onInvite}>
-          🤝 {connection ? 'Gửi lại lời mời' : 'Kết bạn'}
-        </button>
+        <span className="text-muted small">Đã gửi thư mời</span>
+        <InvitationBadge invitation={talent.invitation} />
       </>
     )
   }
-  if (connection.status === 'accepted') {
-    return (
-      <button className="btn btn-primary btn-sm" disabled={busy} onClick={onChat}>
-        💬 Nhắn tin
-      </button>
-    )
-  }
+  if (talent.applicationId) return null
   return (
-    <>
-      <Badge tone="warning">Đã gửi lời mời, chờ ứng viên phản hồi</Badge>
-      <button className="btn btn-ghost btn-sm text-danger" disabled={busy} onClick={onCancel}>
-        Hủy lời mời
-      </button>
-    </>
+    <button type="button" className="btn btn-primary btn-sm" onClick={onInvite}>
+      <Send />
+      Gửi thư mời
+    </button>
   )
 }
 
-function TalentCard({ talent, rank, busy, onViewCv, onDownloadCv, onInvite, onCancel, onChat }) {
-  const { candidate, cv } = talent
-  const meta = [
-    candidate.yearsOfExperience != null && `${candidate.yearsOfExperience} năm kinh nghiệm`,
-    candidate.level && labelOf(JOB_LEVELS, candidate.level),
-    candidate.location && `📍 ${candidate.location}`,
-  ].filter(Boolean)
-
+function MatchDetails({ talent }) {
   return (
-    <article className={`card talent-card ${busy ? 'row-busy' : ''}`}>
-      <div className="talent-card-head">
-        <span className="avatar avatar-lg">{candidate.fullName.charAt(0)}</span>
-        <div className="talent-card-info">
-          <h3>
-            <span className="text-muted">#{rank}</span> {candidate.fullName}
-          </h3>
-          {candidate.headline && <p className="text-primary">{candidate.headline}</p>}
-          <div className="job-meta text-muted">
-            {meta.map((m) => (
-              <span key={m}>{m}</span>
-            ))}
-          </div>
-          <div className="actions talent-badges">
-            {candidate.isOpenToWork && <Badge tone="success">Đang tìm việc</Badge>}
-            {talent.applicationId && (
-              <Link to={`/recruiter/applicants/${talent.applicationId}`}>
-                <Badge tone="info">Đã ứng tuyển tin này →</Badge>
-              </Link>
-            )}
-          </div>
-        </div>
-        <ScoreCircle score={talent.score} size={84} />
-      </div>
-
+    <>
       <div className="talent-breakdown">
         {CRITERIA.map((c) => (
           <div key={c.key} className="analysis-section">
             <div className="analysis-section-head">
               <span>{c.label}</span>
-              <strong>
+              <strong className="tabular-nums">
                 {talent.breakdown[c.key]}/{c.max}
               </strong>
             </div>
-            <div className="progress">
-              <div className="progress-bar progress-bar-primary" style={{ width: `${(talent.breakdown[c.key] / c.max) * 100}%` }} />
+            <div className="progress" aria-hidden="true">
+              <div className="progress-bar" style={{ width: `${(talent.breakdown[c.key] / c.max) * 100}%` }} />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="tags">
-        {talent.matchedSkills.map((s) => (
-          <span key={s} className="tag tag-success">
-            ✓ {s}
-          </span>
-        ))}
-        {talent.missingSkills.map((s) => (
-          <span key={s} className="tag tag-muted" title="Chưa thấy trong CV / hồ sơ">
-            {s}
-          </span>
-        ))}
-      </div>
-
-      <ul className="match-reasons">
-        {talent.reasons.map((r) => (
-          <li key={r}>{r}</li>
-        ))}
-      </ul>
-      {candidate.summary && <p className="talent-summary">{candidate.summary}</p>}
-
-      <div className="talent-card-foot">
-        <div className="actions">
-          <button className="btn btn-outline btn-sm" disabled={busy} onClick={onViewCv}>
-            📄 Xem CV
-          </button>
-          <button className="btn btn-ghost btn-sm" disabled={busy} onClick={onDownloadCv}>
-            ⬇ Tải CV
-          </button>
-          <span className="text-muted small">
-            {cv.title} · {formatFileSize(cv.fileSize)} · cập nhật {formatDate(cv.updatedAt)}
-          </span>
+      {(talent.matchedSkills.length > 0 || talent.missingSkills.length > 0) && (
+        <div className="talent-skills">
+          {talent.matchedSkills.length > 0 && (
+            <div className="talent-skill-row">
+              <span className="talent-skill-label">Khớp yêu cầu</span>
+              <ul className="tags">
+                {talent.matchedSkills.map((s) => (
+                  <li key={s} className="tag tag-success">
+                    <Check />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {talent.missingSkills.length > 0 && (
+            <div className="talent-skill-row">
+              <span className="talent-skill-label">Chưa thấy trong CV</span>
+              <ul className="tags">
+                {talent.missingSkills.map((s) => (
+                  <li key={s} className="tag tag-muted">
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-        <div className="actions">
-          <ConnectAction talent={talent} busy={busy} onInvite={onInvite} onCancel={onCancel} onChat={onChat} />
-        </div>
-      </div>
-    </article>
+      )}
+
+      {talent.reasons.length > 0 && (
+        <ul className="match-reasons">
+          {talent.reasons.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
+      )}
+    </>
   )
 }
 
@@ -159,28 +118,26 @@ export default function TalentsPage() {
   const hideApplied = searchParams.get('hideApplied') === '1'
   const page = Number(searchParams.get('page') ?? 1)
   const [search, setSearch] = useState(keyword)
-  const [inviting, setInviting] = useState(null) // talent đang mở hộp mời kết bạn
-  const [preview, setPreview] = useState(null) // { talent, url }
-  const [busyId, setBusyId] = useState(null)
-  const [actionError, setActionError] = useState('')
-  const openChat = useOpenChat()
+  const [viewing, setViewing] = useState(null) // ứng viên đang xem CV
+  const [inviting, setInviting] = useState(null) // ứng viên đang mở hộp gửi thư mời
+  const [notice, setNotice] = useState('')
 
-  const { data: jobsPage, loading: loadingJobs } = useFetch(() => jobApi.getMine({ pageSize: 100 }), [])
+  const { data: jobsPage, loading: loadingJobs, error: jobsError, reload: reloadJobs } = useFetch(
+    () => jobApi.getMine({ pageSize: 100 }),
+    [],
+  )
   const jobs = jobsPage?.results ?? []
   // Mặc định: tin đang tuyển mới nhất
   const jobId = searchParams.get('jobId') || (jobs.find((j) => j.status === 'published') ?? jobs[0])?.id || ''
   const job = jobs.find((j) => j.id === jobId)
 
-  const { data, loading, error, setData } = useFetch(
+  const { data, loading, error, setData, reload } = useFetch(
     () =>
       jobId
         ? talentApi.getSuggested(jobId, { keyword, minScore, hideApplied, page, pageSize: PAGE_SIZE })
         : Promise.resolve(null),
     [jobId, keyword, minScore, hideApplied, page],
   )
-
-  // Giải phóng object URL của bản xem trước CV
-  useEffect(() => () => preview && URL.revokeObjectURL(preview.url), [preview])
 
   const setParams = (changes) => {
     const next = new URLSearchParams(searchParams)
@@ -189,158 +146,251 @@ export default function TalentsPage() {
     setSearchParams(next)
   }
 
-  const setConnection = (talent, connection) =>
-    setData((current) => ({
-      ...current,
-      results: current.results.map((t) => (t.candidate.id === talent.candidate.id ? { ...t, connection } : t)),
-    }))
-
-  const run = async (talent, task) => {
-    setBusyId(talent.candidate.id)
-    setActionError('')
-    try {
-      await task()
-    } catch (err) {
-      setActionError(getErrorMessage(err))
-    } finally {
-      setBusyId(null)
+  const onSent = (invitation) => {
+    // Hộp gửi thư cho chọn tin khác: chỉ gắn vào thẻ khi thư thuộc tin đang xem
+    if (invitation.job.id === jobId) {
+      setData((current) => ({
+        ...current,
+        results: current.results.map((t) => (t.candidate.id === inviting.candidate.id ? { ...t, invitation } : t)),
+      }))
     }
+    setNotice(`Đã gửi thư mời ứng tuyển vị trí "${invitation.job.title}" tới ${inviting.candidate.fullName}.`)
+    setInviting(null)
   }
 
-  const openCv = (talent, download = false) =>
-    run(talent, async () => {
-      const viewable = !download && VIEWABLE_TYPES.includes(talent.cv.mimeType)
-      const { blob, fileName } = await (viewable ? talentApi.viewCv : talentApi.downloadCv)(talent.candidate.id)
-      if (!viewable) return saveBlob(blob, fileName)
-      setPreview({ talent, url: URL.createObjectURL(blob) })
-    })
+  const header = (
+    <div className="page-header">
+      <div>
+        <h1>Ứng viên phù hợp</h1>
+        <p className="text-muted">
+          CV của ứng viên khớp với yêu cầu tin tuyển dụng, xếp theo điểm phù hợp. Gửi thư mời để ứng viên nộp hồ sơ vào
+          tin.
+        </p>
+      </div>
+    </div>
+  )
 
-  const cancelInvite = (talent) => {
-    if (!window.confirm(`Hủy lời mời kết bạn đã gửi tới ${talent.candidate.fullName}?`)) return
-    run(talent, async () => {
-      await connectionApi.remove(talent.connection.id)
-      setConnection(talent, null)
-    })
+  if (loadingJobs) {
+    return (
+      <>
+        {header}
+        <div className="card">
+          <SkeletonLines lines={3} label="Đang tải tin tuyển dụng" />
+        </div>
+      </>
+    )
   }
-
-  if (loadingJobs) return <Loading />
+  if (jobsError) {
+    return (
+      <>
+        {header}
+        <ErrorState message={jobsError} onRetry={reloadJobs} />
+      </>
+    )
+  }
   if (!jobs.length) {
     return (
-      <EmptyState
-        title="Chưa có tin tuyển dụng"
-        description="Đăng tin kèm kỹ năng yêu cầu để hệ thống tìm ứng viên có CV phù hợp."
-        action={
-          <Link to="/recruiter/jobs/new" className="btn btn-primary">
-            Đăng tin mới
-          </Link>
-        }
-      />
+      <>
+        {header}
+        <EmptyState
+          icon={BriefcaseBusiness}
+          title="Chưa có tin tuyển dụng"
+          description="Đăng tin kèm kỹ năng yêu cầu để hệ thống tìm ứng viên có CV phù hợp."
+          action={
+            <Link to="/recruiter/jobs/new" className="btn btn-primary">
+              <Plus />
+              Đăng tin mới
+            </Link>
+          }
+        />
+      </>
     )
+  }
+
+  const activeFilters = [
+    keyword && { key: 'q', label: 'Từ khóa', value: keyword },
+    minScore && { key: 'minScore', label: 'Điểm', value: SCORE_FILTERS.find((f) => f.value === minScore)?.label ?? minScore },
+    hideApplied && { key: 'hideApplied', label: 'Ẩn', value: 'ứng viên đã ứng tuyển' },
+  ].filter(Boolean)
+
+  const clearFilters = () => {
+    setSearch('')
+    setParams({ q: '', minScore: '', hideApplied: '' })
   }
 
   return (
     <>
-      <div className="page-header">
-        <div>
-          <h1>🎯 Ứng viên phù hợp</h1>
-          <p className="text-muted">
-            CV của ứng viên khớp với yêu cầu tin tuyển dụng, xếp theo điểm phù hợp. Gửi lời mời kết bạn để nhắn tin trực
-            tiếp với ứng viên.
-          </p>
-        </div>
-      </div>
+      {header}
 
-      <div className="card filter-bar">
-        <label className="inline-field">
-          <span>Tin tuyển dụng:</span>
-          <select className="input" value={jobId} onChange={(e) => setParams({ jobId: e.target.value })}>
-            {jobs.map((j) => (
-              <option key={j.id} value={j.id}>
-                {j.title}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="card toolbar">
+        <div className="toolbar-fields">
+          <div className="form-group toolbar-field-wide">
+            <label htmlFor="talent-job">Tin tuyển dụng</label>
+            <select id="talent-job" className="input" value={jobId} onChange={(e) => setParams({ jobId: e.target.value })}>
+              {jobs.map((j) => (
+                <option key={j.id} value={j.id}>
+                  {j.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="talent-score">Điểm phù hợp</label>
+            <select
+              id="talent-score"
+              className="input"
+              value={minScore}
+              onChange={(e) => setParams({ minScore: e.target.value })}
+            >
+              {SCORE_FILTERS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <form
-          className="inline-field filter-keyword"
+          className="toolbar-search"
+          role="search"
           onSubmit={(e) => {
             e.preventDefault()
             setParams({ q: search.trim() })
           }}
         >
-          <input
-            className="input"
-            placeholder="Tìm theo tên, tiêu đề hồ sơ..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button className="btn btn-outline">Tìm</button>
+          <label className="input-icon">
+            <Search />
+            <span className="visually-hidden">Tìm theo tên, tiêu đề hồ sơ</span>
+            <input
+              type="search"
+              className="input"
+              placeholder="Tìm theo tên, tiêu đề hồ sơ..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+          <button type="submit" className="btn btn-outline">
+            Tìm
+          </button>
         </form>
-        <select className="input" value={minScore} onChange={(e) => setParams({ minScore: e.target.value })}>
-          {SCORE_FILTERS.map((f) => (
-            <option key={f.value} value={f.value}>
-              {f.label}
-            </option>
-          ))}
-        </select>
-        <label className="checkbox">
+        <label className="switch">
           <input
             type="checkbox"
+            role="switch"
             checked={hideApplied}
             onChange={(e) => setParams({ hideApplied: e.target.checked ? '1' : '' })}
           />
-          Ẩn ứng viên đã ứng tuyển
+          <span>Ẩn ứng viên đã ứng tuyển</span>
         </label>
       </div>
 
       {job && (
-        <div className="text-muted job-meta">
+        <div className="skill-summary">
           <JobStatusBadge status={job.status} />
-          <span>Kỹ năng yêu cầu:</span>
-          <span className="tags">
-            {job.skills.map((s) => (
-              <span key={s} className="tag">
-                {s}
-              </span>
-            ))}
-          </span>
-          <Link to={`/recruiter/jobs/${job.id}/edit`}>Sửa kỹ năng</Link>
+          <span className="text-muted small">Kỹ năng yêu cầu:</span>
+          {job.skills.length ? (
+            <ul className="tags">
+              {job.skills.map((s) => (
+                <li key={s} className="tag">
+                  {s}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className="text-muted small">Tin chưa có kỹ năng yêu cầu.</span>
+          )}
+          <Link to={`/recruiter/jobs/${job.id}/edit`} className="btn btn-ghost btn-sm">
+            <Pencil />
+            Sửa kỹ năng
+          </Link>
         </div>
       )}
 
       <div className="alert alert-info">
-        Chỉ hiển thị ứng viên cho phép nhà tuyển dụng tìm thấy hồ sơ hoặc đã ứng tuyển vào công ty. Điểm được tính từ CV
-        chính và hồ sơ của ứng viên: kỹ năng (60), kinh nghiệm (20), cấp bậc (10), địa điểm (10).
+        <Info />
+        <div className="alert-content">
+          Chỉ hiển thị ứng viên công khai CV hoặc đã ứng tuyển vào công ty. Điểm được tính từ CV chính và hồ sơ của ứng
+          viên: kỹ năng (60), kinh nghiệm (20), cấp bậc (10), địa điểm (10).
+        </div>
       </div>
 
-      {actionError && <div className="alert alert-error">{actionError}</div>}
-      {loading && !data && <Loading text="Đang so khớp CV với yêu cầu tuyển dụng..." />}
-      {error && <div className="alert alert-error">{error}</div>}
+      <ActiveFilters
+        items={activeFilters}
+        onRemove={(key) => {
+          if (key === 'q') setSearch('')
+          setParams({ [key]: '' })
+        }}
+        onClear={clearFilters}
+      />
+
+      {notice && (
+        <div className="alert alert-success" role="status">
+          <CircleCheck />
+          <div className="alert-content">{notice}</div>
+        </div>
+      )}
+      {loading && !data && (
+        <SkeletonCards count={3} className="talent-list" label="Đang so khớp CV với yêu cầu tuyển dụng" />
+      )}
+      {error && <ErrorState message={error} onRetry={reload} />}
 
       {data &&
         (data.results.length === 0 ? (
           <EmptyState
+            icon={Target}
             title="Chưa tìm thấy ứng viên phù hợp"
             description={
-              keyword || minScore || hideApplied
+              activeFilters.length
                 ? 'Thử bỏ bớt bộ lọc.'
                 : 'Chưa có CV nào khớp kỹ năng yêu cầu của tin này. Thử bổ sung kỹ năng hoặc tên gọi khác của kỹ năng.'
             }
+            action={
+              activeFilters.length > 0 ? (
+                <button type="button" className="btn btn-outline" onClick={clearFilters}>
+                  Xóa bộ lọc
+                </button>
+              ) : (
+                <Link to={`/recruiter/jobs/${jobId}/edit`} className="btn btn-outline">
+                  <Pencil />
+                  Sửa kỹ năng của tin
+                </Link>
+              )
+            }
           />
         ) : (
-          <div className="talent-list">
+          <div className={`talent-list ${loading ? 'is-refreshing' : ''}`}>
             {data.results.map((talent, index) => (
               <TalentCard
                 key={talent.candidate.id}
                 talent={talent}
                 rank={(data.page - 1) * PAGE_SIZE + index + 1}
-                busy={busyId === talent.candidate.id}
-                onViewCv={() => openCv(talent)}
-                onDownloadCv={() => openCv(talent, true)}
-                onInvite={() => setInviting(talent)}
-                onCancel={() => cancelInvite(talent)}
-                onChat={() => run(talent, () => openChat(talent.candidate.userId))}
-              />
+                onViewCv={() => setViewing(talent.candidate)}
+                aside={<ScoreCircle score={talent.score} size={84} />}
+                badges={
+                  (talent.candidate.isOpenToWork || talent.applicationId) && (
+                    <>
+                      {talent.candidate.isOpenToWork && <Badge tone="success">Đang tìm việc</Badge>}
+                      {talent.applicationId && (
+                        <Link to={`/recruiter/applicants/${talent.applicationId}`} className="badge badge-info badge-link">
+                          Đã ứng tuyển tin này
+                          <ArrowRight />
+                        </Link>
+                      )}
+                    </>
+                  )
+                }
+                actions={
+                  <InviteAction
+                    talent={talent}
+                    onInvite={() => {
+                      setNotice('')
+                      setInviting(talent)
+                    }}
+                  />
+                }
+              >
+                <MatchDetails talent={talent} />
+              </TalentCard>
             ))}
           </div>
         ))}
@@ -354,37 +404,9 @@ export default function TalentsPage() {
         />
       )}
 
+      {viewing && <TalentCVModal candidate={viewing} onClose={() => setViewing(null)} />}
       {inviting && (
-        <InviteModal
-          candidate={inviting.candidate}
-          job={job}
-          onClose={() => setInviting(null)}
-          onSent={(connection) => {
-            setConnection(inviting, { id: connection.id, status: connection.status, direction: connection.direction })
-            setInviting(null)
-          }}
-        />
-      )}
-
-      {preview && (
-        <Modal
-          open
-          size="lg"
-          title={`CV: ${preview.talent.candidate.fullName}`}
-          onClose={() => setPreview(null)}
-          footer={
-            <>
-              <button className="btn btn-outline" onClick={() => openCv(preview.talent, true)}>
-                ⬇ Tải về
-              </button>
-              <button className="btn btn-ghost" onClick={() => setPreview(null)}>
-                Đóng
-              </button>
-            </>
-          }
-        >
-          <iframe className="cv-viewer" src={`${preview.url}#toolbar=0&navpanes=0&view=FitH&zoom=page-width`} title={`CV ${preview.talent.candidate.fullName}`} />
-        </Modal>
+        <InviteModal candidate={inviting.candidate} jobId={jobId} onClose={() => setInviting(null)} onSent={onSent} />
       )}
     </>
   )

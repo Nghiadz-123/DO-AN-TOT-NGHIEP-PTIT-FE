@@ -73,16 +73,20 @@ VITE_API_URL=http://localhost:8000/api/v1
 | Chung | `/jobs`, `/jobs/:id` | Tìm kiếm, lọc việc làm; xem chi tiết & ứng tuyển |
 | Chung | `/companies`, `/companies/:id` | Tìm công ty theo tên, lọc ngành nghề / tỉnh; hồ sơ công ty và các tin đang tuyển |
 | Ứng viên | `/favorites` | Việc làm và công ty yêu thích (bấm ♡ trên thẻ việc làm, công ty hoặc trang chi tiết) |
-| Ứng viên | `/cv` | Quản lý CV: xem PDF, tải về, đổi tên, đặt CV chính, xóa (CV đã dùng ứng tuyển thì không xóa được) |
+| Ứng viên | `/cv` | Quản lý CV: xem PDF, tải về, đổi tên, đặt CV chính, xóa (CV đã dùng ứng tuyển thì không xóa được); bật / tắt công khai CV chính cho nhà tuyển dụng |
 | Ứng viên | `/cv/new`, `/cv/:id/edit` | Tải CV (PDF/DOCX ≤ 5MB), đổi tên, xem kết quả đọc nội dung CV |
 | Ứng viên | `/cv-analysis` | AI chấm điểm CV (5 tiêu chí), gợi ý sửa CV (theo tin mục tiêu `?jobId=` hoặc các tin gần CV nhất), thông tin AI trích xuất |
 | Ứng viên | `/recommended-jobs` | Việc làm phù hợp theo CV (điểm, kỹ năng đã có / còn thiếu); AI đánh giá chi tiết từng tin |
 | Ứng viên | `/my-applications` | Theo dõi trạng thái đơn ứng tuyển, rút hồ sơ |
+| Ứng viên | `/invitations` | Thư mời ứng tuyển từ nhà tuyển dụng (huy hiệu số thư chưa xem trên menu): đọc thư, ứng tuyển ngay, từ chối |
 | Ứng viên | `/profile` | Hồ sơ cá nhân và mong muốn công việc (vị trí, nơi làm việc, cấp bậc, lương) |
 | Nhà tuyển dụng | `/recruiter` | Tổng quan, thống kê hồ sơ, pipeline tuyển dụng |
 | Nhà tuyển dụng | `/recruiter/jobs`, `/recruiter/jobs/new` | Quản lý tin (lọc theo trạng thái, tìm kiếm, phân trang); lưu nháp / đăng / tạm dừng / đóng / mở lại / xóa |
 | Nhà tuyển dụng | `/recruiter/applicants` | Lọc hồ sơ theo tin, trạng thái, từ khóa; chuyển trạng thái |
 | Nhà tuyển dụng | `/recruiter/applicants/:id` | Thông tin ứng viên, xem / tải CV, chuyển trạng thái kèm ghi chú, chấm sao, lịch sử xử lý |
+| Nhà tuyển dụng | `/recruiter/talent-pool` | Tìm ứng viên công khai CV (từ khóa cả trong nội dung CV, địa điểm, cấp bậc), xem CV, gửi thư mời ứng tuyển |
+| Nhà tuyển dụng | `/recruiter/talents` | Ứng viên phù hợp với từng tin (điểm, kỹ năng đáp ứng / còn thiếu), gửi thư mời ứng tuyển |
+| Nhà tuyển dụng | `/recruiter/invitations` | Thư mời đã gửi: lọc theo trạng thái / tin / tên ứng viên, xem hồ sơ đã nộp, thu hồi thư chưa phản hồi |
 | Nhà tuyển dụng | `/recruiter/company` | Hồ sơ công ty, logo, trạng thái xác minh |
 | Nhà tuyển dụng | `/recruiter/account` | Thông tin cá nhân, đổi mật khẩu |
 
@@ -98,3 +102,5 @@ Chi tiết xem `DO-AN-TOT-NGHIEP-PTIT-BE/docs/candidate-api.md` (hoặc Swagger 
 | `favoriteApi` | `candidate/favorites/ids/`, `candidate/favorites/jobs/...`, `candidate/favorites/companies/...` |
 | `companyApi` | `companies/`, `companies/{id}/` (công khai); tin của công ty: `jobs/?company={id}` |
 | `aiApi` | `candidate/cv-analyses/`, `candidate/cvs/{id}/analysis/score/`, `.../analysis/suggestions/`, `candidate/cvs/{id}/recommended-jobs/...` (xem `docs/ai-api.md` của backend) |
+| `talentApi` | `employer/talents/` (tìm ứng viên), `employer/jobs/{id}/suggested-candidates/`, `employer/talents/{id}/cv/` |
+| `invitationApi` | `employer/invitations/...` (gửi, danh sách, thu hồi), `candidate/invitations/...` (danh sách, đã xem, từ chối, `summary/`) — xem `docs/talent-invitation-api.md` của backend |

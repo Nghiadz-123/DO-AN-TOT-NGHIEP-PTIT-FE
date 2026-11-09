@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Heart } from 'lucide-react'
 import useAuth from '@/hooks/useAuth'
 import useFavorites from '@/hooks/useFavorites'
 import { ROLES } from '@/utils/constants'
@@ -41,8 +42,8 @@ export default function FavoriteButton({ type, id, withLabel = false }) {
       disabled={busy}
       onClick={handleClick}
     >
-      <span aria-hidden="true">{active ? '♥' : '♡'}</span>
-      {withLabel && ` ${active ? 'Đã yêu thích' : 'Yêu thích'}`}
+      <Heart fill={active ? 'currentColor' : 'none'} />
+      {withLabel && (active ? 'Đã yêu thích' : 'Yêu thích')}
     </button>
   )
 }

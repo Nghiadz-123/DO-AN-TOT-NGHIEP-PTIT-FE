@@ -1,8 +1,5 @@
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1'
 
-// Dùng cho các tính năng mới có thể chạy độc lập bằng dữ liệu local khi backend chưa hỗ trợ.
-export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
-
 // Module AI (chấm điểm CV, gợi ý việc làm, sàng lọc hồ sơ) chưa có ở backend nên mặc định ẩn.
 // Bật bằng VITE_FEATURE_AI=true khi backend đã có các API AI.
 export const FEATURES = {
@@ -16,6 +13,12 @@ export const ROLES = {
   CANDIDATE: 'candidate',
   RECRUITER: 'employer',
   ADMIN: 'admin',
+}
+
+export const ROLE_LABELS = {
+  [ROLES.CANDIDATE]: 'Ứng viên',
+  [ROLES.RECRUITER]: 'Nhà tuyển dụng',
+  [ROLES.ADMIN]: 'Quản trị viên',
 }
 
 export const TOKEN_KEY = 'access_token'
@@ -134,19 +137,12 @@ export const GENDERS = [
   { value: 'other', label: 'Khác' },
 ]
 
-// Kết bạn giữa nhà tuyển dụng và ứng viên (backend connections.ConnectionStatus)
-export const CONNECTION_STATUS = {
+// Thư mời ứng tuyển (backend invitations.InvitationStatus)
+export const INVITATION_STATUS = {
   pending: { label: 'Chờ phản hồi', tone: 'warning' },
-  accepted: { label: 'Đã kết bạn', tone: 'success' },
+  accepted: { label: 'Đã ứng tuyển', tone: 'success' },
   declined: { label: 'Đã từ chối', tone: 'neutral' },
 }
-
-// Vai trò dùng được kết bạn & tin nhắn
-export const CHAT_ROLES = [ROLES.CANDIDATE, ROLES.RECRUITER]
-
-// Trang tin nhắn của từng vai trò (nhà tuyển dụng nằm trong RecruiterLayout)
-export const messagesPath = (role, conversationId) =>
-  `${role === ROLES.RECRUITER ? '/recruiter/messages' : '/messages'}${conversationId ? `/${conversationId}` : ''}`
 
 export const LOGO_ACCEPT = '.jpg,.jpeg,.png,.webp'
 export const LOGO_MAX_SIZE = 2 * 1024 * 1024

@@ -1,8 +1,14 @@
 import { useEffect, useId, useState } from 'react'
+import { X } from 'lucide-react'
 import catalogApi from '@/api/catalogApi'
 
-// Nhập kỹ năng dạng tag, dùng chung cho form đăng tin (nhà tuyển dụng) và form CV (ứng viên)
-export default function SkillInput({ value, onChange, placeholder = 'Nhập kỹ năng rồi nhấn Enter (VD: Bán hàng, Excel, Tiếng Anh)' }) {
+// Nhập kỹ năng dạng tag (form đăng tin của nhà tuyển dụng). inputProps (id, aria-*) gắn vào ô nhập để nối với nhãn / lỗi
+export default function SkillInput({
+  value,
+  onChange,
+  placeholder = 'Nhập kỹ năng rồi nhấn Enter (VD: Bán hàng, Excel, Tiếng Anh)',
+  ...inputProps
+}) {
   const listId = useId()
   const [text, setText] = useState('')
   const [suggestions, setSuggestions] = useState([])
@@ -31,17 +37,20 @@ export default function SkillInput({ value, onChange, placeholder = 'Nhập kỹ
 
   return (
     <div className="skill-input">
-      <div className="tags">
-        {value.map((s) => (
-          <span key={s} className="tag">
-            {s}
-            <button type="button" onClick={() => onChange(value.filter((x) => x !== s))} aria-label={`Xóa ${s}`}>
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
+      {value.length > 0 && (
+        <ul className="tags" aria-label="Kỹ năng đã thêm">
+          {value.map((s) => (
+            <li key={s} className="tag">
+              {s}
+              <button type="button" onClick={() => onChange(value.filter((x) => x !== s))} aria-label={`Xóa kỹ năng ${s}`}>
+                <X />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <input
+        {...inputProps}
         className="input"
         list={listId}
         placeholder={placeholder}

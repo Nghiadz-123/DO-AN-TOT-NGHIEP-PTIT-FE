@@ -1,0 +1,22 @@
+# Cấu hình theo môi trường. Chọn bằng: pytest --env=staging  hoặc  TEST_ENV=staging
+# KHÔNG ghi mật khẩu/token ở đây – dùng .env hoặc CI/CD Variables.
+
+default:
+  timeout_ms: 15000            # timeout mặc định cho action (click, fill...)
+  navigation_timeout_ms: 30000 # timeout cho goto / chuyển trang
+  expect_timeout_ms: 10000     # timeout cho expect(...) web-first assertion
+  viewport: { width: 1366, height: 768 }
+  locale: vi-VN                # để thông báo validation của trình duyệt hiển thị tiếng Việt
+  ignore_https_errors: false
+  # Backend giới hạn 20 request/phút cho API auth (login + register). Để 18 cho an toàn; 0 = tắt điều tiết
+  auth_rate_limit_per_min: 18
+
+# Smart ATS chạy local: FE (Vite, cổng 3000) + BE (Django, cổng 8000)
+dev:
+  base_url: http://localhost:3000
+  api_url: http://localhost:8000/api/v1
+
+staging:
+  base_url: https://staging.example.com
+  api_url: https://staging.example.com/api/v1
+  ignore_https_errors: true

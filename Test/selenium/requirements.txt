@@ -1,0 +1,12 @@
+# Selenium >= 4.11 tự tải chromedriver/msedgedriver khớp phiên bản trình duyệt (Selenium Manager)
+selenium==4.38.0
+requests==2.32.5
+pytest==9.2.0
+pytest-html==4.2.0
+pytest-metadata==3.1.1
+pytest-xdist==3.8.0
+pytest-rerunfailures==16.7
+PyYAML==6.0.3
+python-dotenv==1.2.4
+openpyxl==3.1.5
+Pillow==11.3.0        # openpyxl cần để chèn ảnh screenshot vào báo cáo Excel

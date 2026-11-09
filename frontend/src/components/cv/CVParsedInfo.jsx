@@ -1,3 +1,5 @@
+import { Link as LinkIcon } from 'lucide-react'
+
 // Hiển thị thông tin được AI bóc tách từ file CV
 export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
   const highlight = new Set(highlightSkills)
@@ -13,7 +15,12 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
         <p className="text-muted">
           {[parsed.email, parsed.phone, parsed.location].filter(Boolean).join(' · ')}
         </p>
-        {parsed.links?.length > 0 && <p className="text-muted">🔗 {parsed.links.join(' · ')}</p>}
+        {parsed.links?.length > 0 && (
+          <p className="text-muted cv-parsed-links">
+            <LinkIcon />
+            {parsed.links.join(' · ')}
+          </p>
+        )}
       </div>
 
       {parsed.stats && (
@@ -46,9 +53,13 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
         {experience.length === 0 && <p className="text-muted">Không có.</p>}
         {experience.map((e, index) => (
           <div key={`${e.company}-${e.duration}-${index}`} className="timeline-item">
-            <strong>{e.role}</strong>
-            {e.company && ` — ${e.company}`}
-            <div className="text-muted">{e.duration}</div>
+            <div className="timeline-head">
+              <div>
+                <strong>{e.role}</strong>
+                {e.company && <div className="text-muted">{e.company}</div>}
+              </div>
+              {e.duration && <span className="timeline-date">{e.duration}</span>}
+            </div>
             {e.description && <p className="pre-line">{e.description}</p>}
           </div>
         ))}
@@ -59,9 +70,13 @@ export default function CVParsedInfo({ parsed, highlightSkills = [] }) {
           <h4>Học vấn</h4>
           {education.map((e, index) => (
             <div key={`${e.school}-${index}`} className="timeline-item">
-              <strong>{e.degree}</strong>
-              {e.school && ` — ${e.school}`}
-              <div className="text-muted">{e.year}</div>
+              <div className="timeline-head">
+                <div>
+                  <strong>{e.degree}</strong>
+                  {e.school && <div className="text-muted">{e.school}</div>}
+                </div>
+                {e.year && <span className="timeline-date">{e.year}</span>}
+              </div>
             </div>
           ))}
         </section>

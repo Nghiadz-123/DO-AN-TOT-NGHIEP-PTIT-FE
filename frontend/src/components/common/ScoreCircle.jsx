@@ -1,5 +1,6 @@
 import { scoreLevel } from '@/utils/formatters'
 
+// Màu vòng / thanh dùng tông đậm (-text) để đạt tương phản ≥ 3:1 trên nền nhạt
 export default function ScoreCircle({ score, size = 96, showLabel = true }) {
   const level = scoreLevel(score)
   const stroke = size > 70 ? 8 : 5
@@ -8,14 +9,14 @@ export default function ScoreCircle({ score, size = 96, showLabel = true }) {
 
   return (
     <div className="score-circle" style={{ width: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`${score}/100 điểm, ${level.label}`}>
         <circle cx={size / 2} cy={size / 2} r={radius} className="score-circle-track" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           strokeWidth={stroke}
-          stroke={`var(--${level.tone})`}
+          stroke={`var(--color-${level.tone}-text)`}
           fill="none"
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -34,8 +35,8 @@ export default function ScoreCircle({ score, size = 96, showLabel = true }) {
 export function ProgressBar({ value }) {
   const { tone } = scoreLevel(value)
   return (
-    <div className="progress">
-      <div className="progress-bar" style={{ width: `${value}%`, background: `var(--${tone})` }} />
+    <div className="progress" aria-hidden="true">
+      <div className="progress-bar" style={{ width: `${value}%`, background: `var(--color-${tone}-text)` }} />
     </div>
   )
 }

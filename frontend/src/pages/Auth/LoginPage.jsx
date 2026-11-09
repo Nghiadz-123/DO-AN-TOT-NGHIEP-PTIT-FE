@@ -1,22 +1,16 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { LogIn, TriangleAlert } from 'lucide-react'
+import PasswordInput from '@/components/common/PasswordInput'
+import AuthAside from '@/components/layout/AuthAside'
 import useAuth from '@/hooks/useAuth'
 import { ROLES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/formatters'
 
-// Tài khoản demo có sau khi chạy `python manage.py seed_demo` ở backend; chỉ hiện khi chạy dev.
-// Admin: tạo bằng `python manage.py createsuperuser`.
-const DEMO_ACCOUNTS = [
-  { label: 'Ứng viên demo', email: 'candidate@demo.com' },
-  { label: 'Nhà tuyển dụng demo', email: 'recruiter@demo.com' },
-  { label: 'Quản trị viên demo', email: 'admin@demo.com' },
-]
-const SHOW_DEMO = import.meta.env.DEV
-
 const homeOf = (user) => {
   if (user.role === ROLES.RECRUITER) return '/recruiter'
   if (user.role === ROLES.ADMIN) return '/admin'
-  return '/jobs'
+  return '/'
 }
 
 export default function LoginPage() {
@@ -47,53 +41,51 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <form className="card auth-card" onSubmit={handleSubmit}>
-        <h1>Đăng nhập</h1>
-        <p className="text-muted">Chào mừng bạn quay lại Smart ATS</p>
+      <div className="auth-shell">
+        <AuthAside title="Chào mừng bạn quay lại" />
+        <form className="auth-card" onSubmit={handleSubmit}>
+          <h1>Đăng nhập</h1>
+          <p className="text-muted">Đăng nhập để ứng tuyển và theo dõi hồ sơ của bạn trên Smart ATS</p>
 
-        {error && <div className="alert alert-error">{error}</div>}
+          {error && (
+            <div className="alert alert-error" role="alert">
+              <TriangleAlert />
+              <div className="alert-content">{error}</div>
+            </div>
+          )}
 
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" className="input" required value={form.email} onChange={set('email')} />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Mật khẩu</label>
-          <input
-            id="password"
-            type="password"
-            className="input"
-            required
-            value={form.password}
-            onChange={set('password')}
-          />
-        </div>
-        <button className="btn btn-primary btn-block" disabled={submitting}>
-          {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
-        </button>
-
-        {SHOW_DEMO && (
-          <div className="demo-accounts">
-            <small className="text-muted">
-              Tài khoản demo từ seed_demo (mật khẩu 123456):
-            </small>
-            {DEMO_ACCOUNTS.map((a) => (
-              <button
-                key={a.email}
-                type="button"
-                className="btn btn-outline btn-sm"
-                onClick={() => setForm({ email: a.email, password: '123456' })}
-              >
-                {a.label}
-              </button>
-            ))}
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              className="input"
+              required
+              autoComplete="email"
+              value={form.email}
+              onChange={set('email')}
+            />
           </div>
-        )}
+          <div className="form-group">
+            <label htmlFor="password">Mật khẩu</label>
+            <PasswordInput
+              id="password"
+              required
+              autoComplete="current-password"
+              value={form.password}
+              onChange={set('password')}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={submitting}>
+            {submitting ? <span className="spinner" aria-hidden="true" /> : <LogIn />}
+            {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          </button>
 
-        <p className="text-center">
-          Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
-        </p>
-      </form>
+          <p className="auth-switch">
+            Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
+          </p>
+        </form>
+      </div>
     </div>
   )
 }

@@ -1,43 +1,30 @@
-import { USE_MOCK } from '@/utils/constants'
+import { toCV } from './adapters'
 import axiosClient from './axiosClient'
 
-const storageKey = (userId) => `smartats-cv-builder:${userId || 'candidate'}`
+const BASE = '/candidate/cv-builder/'
+const NOT_FOUND_MESSAGE = 'Không tìm thấy API lưu CV. Hãy khởi động lại Django từ thư mục BE/backend rồi chạy migrate.'
 
-const mockApi = {
-  async getMine(userId) {
-    try { return JSON.parse(localStorage.getItem(storageKey(userId)) || 'null') }
-    catch { return null }
-  },
-  async save(userId, content) {
-    const document = { content, updatedAt: new Date().toISOString() }
-    localStorage.setItem(storageKey(userId), JSON.stringify(document))
-    return document
-  },
+// cv: CV thật trong "CV của tôi" được backend dựng từ nội dung (dùng để ứng tuyển, AI chấm điểm...)
+const toDocument = (dto) => ({ content: dto.content, updatedAt: dto.updated_at, cv: dto.cv ? toCV(dto.cv) : null })
+
+const withNotFoundMessage = async (request) => {
+  try {
+    return await request()
+  } catch (error) {
+    if (error.response?.status === 404) error.message = NOT_FOUND_MESSAGE
+    throw error
+  }
 }
 
-const backendApi = {
-  async getMine() {
-    try {
-      const result = await axiosClient.get('/candidate/cv-builder/')
-      return result.content ? { content: result.content, updatedAt: result.updated_at } : null
-    } catch (error) {
-      if (error.response?.status === 404) {
-        error.message = 'Backend chưa có API lưu CV mới. Hãy khởi động lại Django từ thư mục BE/backend rồi chạy migrate.'
-      }
-      throw error
-    }
-  },
-  async save(_userId, content) {
-    try {
-      const result = await axiosClient.put('/candidate/cv-builder/', { content })
-      return { content: result.content, updatedAt: result.updated_at }
-    } catch (error) {
-      if (error.response?.status === 404) {
-        error.message = 'Không tìm thấy API lưu CV. Hãy khởi động lại Django từ thư mục BE/backend rồi chạy migrate.'
-      }
-      throw error
-    }
-  },
+const cvBuilderApi = {
+  // Nội dung đã lưu (null nếu chưa lưu lần nào)
+  getMine: () =>
+    withNotFoundMessage(async () => {
+      const result = await axiosClient.get(BASE)
+      return result.content ? toDocument(result) : null
+    }),
+  // Lưu nội dung: backend dựng thành file CV và thêm / cập nhật trong "CV của tôi"
+  save: (content) => withNotFoundMessage(async () => toDocument(await axiosClient.put(BASE, { content }))),
 }
 
-export default USE_MOCK ? mockApi : backendApi
+export default cvBuilderApi

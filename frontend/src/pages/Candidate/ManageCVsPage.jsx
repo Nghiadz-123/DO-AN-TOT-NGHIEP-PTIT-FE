@@ -1,16 +1,63 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  CircleCheck,
+  Download,
+  Ellipsis,
+  Eye,
+  FilePen,
+  FileText,
+  FileUp,
+  Gauge,
+  Pencil,
+  Star,
+  Trash,
+  TriangleAlert,
+  X,
+} from 'lucide-react'
 import aiApi from '@/api/aiApi'
+import candidateApi from '@/api/candidateApi'
 import cvApi from '@/api/cvApi'
 import Badge from '@/components/common/Badge'
+import ConfirmDialog from '@/components/common/ConfirmDialog'
+import DropdownMenu from '@/components/common/DropdownMenu'
 import EmptyState from '@/components/common/EmptyState'
-import Loading from '@/components/common/Loading'
+import ErrorState from '@/components/common/ErrorState'
 import ScoreCircle from '@/components/common/ScoreCircle'
+import { SkeletonCards } from '@/components/common/Skeleton'
 import useFetch from '@/hooks/useFetch'
 import { CV_PARSE_STATUS, FEATURES } from '@/utils/constants'
+import { fileExtension } from '@/utils/file'
 import { formatDate, formatFileSize, getErrorMessage, saveBlob } from '@/utils/formatters'
 
-const VIEWABLE_TYPES = ['application/pdf']
+const PDF_MIME = 'application/pdf'
+const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+const VIEWABLE_TYPES = [PDF_MIME, DOCX_MIME]
+
+// Hiển thị DOCX ngay trên trang (thư viện chỉ tải khi cần xem)
+function DocxViewer({ blob, title }) {
+  const containerRef = useRef(null)
+  const [failedBlob, setFailedBlob] = useState(null) // lỗi gắn với đúng file đang xem
+
+  useEffect(() => {
+    let active = true
+    const container = containerRef.current
+    import('docx-preview')
+      .then(({ renderAsync }) => active && renderAsync(blob, container, undefined, { inWrapper: true, ignoreLastRenderedPageBreak: true }))
+      .catch(() => active && setFailedBlob(blob))
+    return () => {
+      active = false
+      if (container) container.innerHTML = ''
+    }
+  }, [blob])
+
+  return (
+    <>
+      {failedBlob === blob && <div className="alert alert-error">Không hiển thị được file DOCX này. Hãy tải về để xem.</div>}
+      <div className="cv-viewer cv-viewer-docx" ref={containerRef} aria-label={`Xem CV ${title}`} />
+    </>
+  )
+}
 
 const scrollBehavior = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth')
 
@@ -21,9 +68,14 @@ export default function ManageCVsPage() {
   const [actionError, setActionError] = useState('')
   const [busyId, setBusyId] = useState(null)
   const [preview, setPreview] = useState(null) // { cv, url }
+  const [savingPublic, setSavingPublic] = useState(false)
+  const [deleting, setDeleting] = useState(null) // CV đang chờ xác nhận xóa
   const previewRef = useRef(null)
 
   const { data: cvs, loading, error, reload } = useFetch(() => cvApi.getMine(), [])
+  const { data: profile, setData: setProfile } = useFetch(() => candidateApi.getProfile(), [])
+  const isPublic = Boolean(profile?.isPublic)
+  const defaultCv = cvs?.find((cv) => cv.isDefault)
   // Điểm AI đã chấm của từng CV (chỉ đọc kết quả đã lưu, không gọi AI); lỗi thì coi như chưa chấm
   const { data: analyses } = useFetch(
     () => (FEATURES.candidateAi ? aiApi.getAnalyses().catch(() => []) : Promise.resolve([])),
@@ -36,7 +88,7 @@ export default function ManageCVsPage() {
     if (location.state?.message) navigate(location.pathname, { replace: true })
   }, [location, navigate])
 
-  useEffect(() => () => preview && URL.revokeObjectURL(preview.url), [preview])
+  useEffect(() => () => preview?.url && URL.revokeObjectURL(preview.url), [preview])
   useEffect(() => {
     if (preview) previewRef.current?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
   }, [preview])
@@ -58,7 +110,7 @@ export default function ManageCVsPage() {
       const viewable = !download && VIEWABLE_TYPES.includes(cv.mimeType)
       const { blob, fileName } = await (viewable ? cvApi.view(cv.id) : cvApi.download(cv.id))
       if (!viewable) return saveBlob(blob, fileName)
-      setPreview({ cv, url: URL.createObjectURL(blob) })
+      setPreview(cv.mimeType === PDF_MIME ? { cv, url: URL.createObjectURL(blob) } : { cv, blob })
     })
 
   const setDefault = (cv) =>
@@ -67,8 +119,21 @@ export default function ManageCVsPage() {
       reload()
     })
 
-  const handleDelete = (cv) => {
-    if (!window.confirm(`Xóa CV "${cv.title}"? Thao tác này không thể hoàn tác.`)) return
+  const togglePublic = async (value) => {
+    setSavingPublic(true)
+    setActionError('')
+    try {
+      setProfile(await candidateApi.setPublic(value))
+    } catch (err) {
+      setActionError(getErrorMessage(err))
+    } finally {
+      setSavingPublic(false)
+    }
+  }
+
+  const confirmDelete = () => {
+    const cv = deleting
+    setDeleting(null)
     run(cv, async () => {
       await cvApi.remove(cv.id)
       if (preview?.cv.id === cv.id) setPreview(null)
@@ -83,140 +148,192 @@ export default function ManageCVsPage() {
           <h1>CV của tôi</h1>
           <p className="text-muted">Quản lý các CV dùng để ứng tuyển. CV chính được chọn sẵn mỗi khi bạn nộp hồ sơ.</p>
         </div>
-        <Link to="/cv/new" className="btn btn-primary">
-          + Tải CV mới
-        </Link>
+        <div className="actions">
+          <Link to="/create-cv" className="btn btn-outline">
+            <FilePen />
+            Tạo CV
+          </Link>
+          <Link to="/cv/new" className="btn btn-primary">
+            <FileUp />
+            Tải CV mới
+          </Link>
+        </div>
       </div>
 
-      {flash && <div className="alert alert-success">{flash}</div>}
-      {actionError && <div className="alert alert-error">{actionError}</div>}
-      {loading && !cvs && <Loading />}
-      {error && <div className="alert alert-error">{error}</div>}
+      {flash && (
+        <div className="alert alert-success" role="status">
+          <CircleCheck />
+          <div className="alert-content">{flash}</div>
+        </div>
+      )}
+      {actionError && (
+        <div className="alert alert-error" role="alert">
+          <TriangleAlert />
+          <div className="alert-content">{actionError}</div>
+        </div>
+      )}
+      {loading && !cvs && <SkeletonCards count={2} className="cv-list" label="Đang tải danh sách CV" />}
+      {error && <ErrorState message={error} onRetry={reload} />}
+
+      {profile && defaultCv && (
+        <section className="card public-cv-panel">
+          <div className="public-cv-text">
+            <h2 id="public-cv-title">Công khai CV cho nhà tuyển dụng</h2>
+            <p className="text-muted">
+              {isPublic
+                ? `Nhà tuyển dụng đang tìm thấy và xem được CV chính "${defaultCv.title}" của bạn, có thể gửi thư mời ứng tuyển. Muốn công khai CV khác, hãy đặt CV đó làm CV chính.`
+                : 'Bật để nhà tuyển dụng tìm thấy CV chính của bạn ở mục Tìm ứng viên và gửi thư mời ứng tuyển. Công ty bạn đã ứng tuyển luôn xem được hồ sơ bạn đã nộp.'}
+            </p>
+          </div>
+          <label className="switch">
+            <input
+              type="checkbox"
+              role="switch"
+              aria-labelledby="public-cv-title"
+              checked={isPublic}
+              disabled={savingPublic}
+              onChange={(e) => togglePublic(e.target.checked)}
+            />
+            <span className="switch-text">{isPublic ? 'Đang bật' : 'Đang tắt'}</span>
+          </label>
+        </section>
+      )}
 
       {cvs &&
         (cvs.length === 0 ? (
           <EmptyState
+            icon={FileText}
             title="Bạn chưa có CV nào"
-            description="Tải CV lên để ứng tuyển nhanh và để nhà tuyển dụng xem được hồ sơ của bạn."
+            description="Tải CV lên hoặc tạo CV trực tuyến để ứng tuyển nhanh và để nhà tuyển dụng xem được hồ sơ của bạn."
             action={
-              <Link to="/cv/new" className="btn btn-primary">
-                Tải CV đầu tiên
-              </Link>
+              <div className="actions">
+                <Link to="/cv/new" className="btn btn-primary">
+                  <FileUp />
+                  Tải CV đầu tiên
+                </Link>
+                <Link to="/create-cv" className="btn btn-outline">
+                  <FilePen />
+                  Tạo CV trực tuyến
+                </Link>
+              </div>
             }
           />
         ) : (
-          <div className="card table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>CV</th>
-                  <th>Nội dung</th>
-                  {FEATURES.candidateAi && <th>Điểm AI</th>}
-                  <th>Cập nhật</th>
-                  <th>Ứng tuyển</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cvs.map((cv) => (
-                  <tr key={cv.id} className={busyId === cv.id ? 'row-busy' : ''}>
-                    <td>
-                      <div className="cv-title">
-                        <Link to={`/cv/${cv.id}/edit`}>
-                          <strong>{cv.title}</strong>
-                        </Link>
-                        {cv.isDefault && <Badge tone="primary">CV chính</Badge>}
-                      </div>
-                      <div className="text-muted">
-                        {cv.fileName} · <span className="nowrap">{formatFileSize(cv.fileSize)}</span>
-                      </div>
-                    </td>
-                    <td>
-                      {CV_PARSE_STATUS[cv.parseStatus] && (
-                        <Badge tone={CV_PARSE_STATUS[cv.parseStatus].tone}>{CV_PARSE_STATUS[cv.parseStatus].label}</Badge>
+          <ul className="cv-list" aria-label="Danh sách CV">
+            {cvs.map((cv) => {
+              const status = CV_PARSE_STATUS[cv.parseStatus]
+              const busy = busyId === cv.id
+              const ext = fileExtension(cv.fileName)
+              const score = scores[cv.id]
+              return (
+                <li key={cv.id} className={`card cv-card ${busy ? 'row-busy' : ''}`} aria-busy={busy}>
+                  <span className={`file-icon file-icon-${ext}`} aria-hidden="true">
+                    {ext.toUpperCase() || 'FILE'}
+                  </span>
+                  <div className="cv-card-main">
+                    <div className="cv-title">
+                      <Link to={`/cv/${cv.id}/edit`} className="cv-card-name">
+                        {cv.title}
+                      </Link>
+                      {cv.isDefault && (
+                        <Badge tone="primary">
+                          <Star />
+                          CV chính
+                        </Badge>
                       )}
-                      {cv.parseError && <div className="text-danger small">{cv.parseError}</div>}
-                    </td>
-                    {FEATURES.candidateAi && (
-                      <td className="nowrap">
-                        {scores[cv.id] != null ? (
-                          <Link to={`/cv-analysis?cvId=${cv.id}`} title="Xem kết quả AI chấm điểm">
-                            <ScoreCircle score={scores[cv.id]} size={40} showLabel={false} />
-                          </Link>
-                        ) : (
-                          <Link to={`/cv-analysis?cvId=${cv.id}`} className="text-muted">
-                            Chưa chấm
-                          </Link>
-                        )}
-                      </td>
-                    )}
-                    <td>{formatDate(cv.updatedAt)}</td>
-                    <td className="nowrap">
+                      {cv.isDefault && isPublic && <Badge tone="success">Đang công khai</Badge>}
+                    </div>
+                    <p className="cv-card-meta">
+                      {cv.fileName} · <span className="nowrap">{formatFileSize(cv.fileSize)}</span> · Cập nhật{' '}
+                      {formatDate(cv.updatedAt)}
+                    </p>
+                    <div className="cv-card-status">
+                      {status && <Badge tone={status.tone}>{status.label}</Badge>}
                       {cv.applicationCount > 0 ? (
-                        <Link to="/my-applications">
-                          <strong>{cv.applicationCount}</strong> đơn
+                        <Link to="/my-applications" className="inline-link">
+                          Đã dùng cho {cv.applicationCount} đơn
                         </Link>
                       ) : (
-                        <span className="text-muted">Chưa dùng</span>
+                        <span className="text-muted small">Chưa dùng để ứng tuyển</span>
                       )}
-                    </td>
-                    <td>
-                      <div className="actions">
-                        <button className="btn btn-outline btn-sm" disabled={busyId === cv.id} onClick={() => openFile(cv)}>
-                          Xem
-                        </button>
-                        <button
-                          className="btn btn-ghost btn-sm"
-                          disabled={busyId === cv.id}
-                          onClick={() => openFile(cv, { download: true })}
-                        >
-                          Tải về
-                        </button>
-                        <Link to={`/cv/${cv.id}/edit`} className="btn btn-ghost btn-sm">
-                          Sửa
-                        </Link>
-                        {!cv.isDefault && (
-                          <button className="btn btn-ghost btn-sm" disabled={busyId === cv.id} onClick={() => setDefault(cv)}>
-                            Đặt làm CV chính
-                          </button>
-                        )}
-                        {cv.applicationCount === 0 && (
-                          <button
-                            className="btn btn-ghost btn-sm text-danger"
-                            disabled={busyId === cv.id}
-                            onClick={() => handleDelete(cv)}
-                          >
-                            Xóa
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                    {cv.parseError && <p className="field-error">{cv.parseError}</p>}
+                  </div>
+                  {FEATURES.candidateAi && (
+                    <Link to={`/cv-analysis?cvId=${cv.id}`} className="cv-card-score">
+                      {score != null ? (
+                        <ScoreCircle score={score} size={48} showLabel={false} />
+                      ) : (
+                        <span className="cv-card-score-empty" aria-hidden="true">
+                          <Gauge />
+                        </span>
+                      )}
+                      <span>{score != null ? 'Xem điểm AI' : 'Chấm điểm AI'}</span>
+                    </Link>
+                  )}
+                  <div className="cv-card-actions">
+                    <button type="button" className="btn btn-outline btn-sm" disabled={busy} onClick={() => openFile(cv)}>
+                      <Eye />
+                      Xem
+                    </button>
+                    <DropdownMenu
+                      label={`Thao tác khác với CV ${cv.title}`}
+                      trigger={<Ellipsis />}
+                      items={[
+                        { label: 'Tải về', icon: Download, onClick: () => openFile(cv, { download: true }), disabled: busy },
+                        { label: 'Sửa thông tin', icon: Pencil, to: `/cv/${cv.id}/edit` },
+                        ...(cv.isDefault
+                          ? []
+                          : [{ label: 'Đặt làm CV chính', icon: Star, onClick: () => setDefault(cv), disabled: busy }]),
+                        ...(cv.applicationCount === 0
+                          ? [
+                              { divider: true },
+                              { label: 'Xóa CV', icon: Trash, onClick: () => setDeleting(cv), danger: true, disabled: busy },
+                            ]
+                          : []),
+                      ]}
+                    />
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
         ))}
 
       {preview && (
-        <section className="card" ref={previewRef}>
-          <div className="page-header">
+        <section className="card" ref={previewRef} aria-labelledby="cv-preview-title">
+          <div className="cv-panel-head">
             <div>
-              <h2>{preview.cv.title}</h2>
+              <h2 id="cv-preview-title">{preview.cv.title}</h2>
               <p className="text-muted">{preview.cv.fileName}</p>
             </div>
             <div className="actions">
-              <button className="btn btn-outline btn-sm" onClick={() => openFile(preview.cv, { download: true })}>
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => openFile(preview.cv, { download: true })}>
+                <Download />
                 Tải về
               </button>
-              <button className="btn btn-ghost btn-sm" onClick={() => setPreview(null)}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPreview(null)}>
+                <X />
                 Đóng
               </button>
             </div>
           </div>
-          <iframe className="cv-viewer" src={`${preview.url}#toolbar=0&navpanes=0&view=FitH&zoom=page-width`} title={`Xem CV ${preview.cv.title}`} />
+          {preview.url ? (
+            <iframe className="cv-viewer" src={`${preview.url}#toolbar=0&navpanes=0&view=FitH&zoom=page-width`} title={`Xem CV ${preview.cv.title}`} />
+          ) : (
+            <DocxViewer blob={preview.blob} title={preview.cv.title} />
+          )}
         </section>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleting)}
+        title="Xóa CV?"
+        message={deleting && `CV "${deleting.title}" sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.`}
+        confirmLabel="Xóa CV"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleting(null)}
+      />
     </>
   )
 }

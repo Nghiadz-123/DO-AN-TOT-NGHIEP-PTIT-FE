@@ -1,0 +1,425 @@
+{
+  "_comment": "Test data Đăng ký (KBKTCN_ATS_WEB_v1.0.xlsx - sheet 'Đăng nhập, Đăng ký'). Ứng viên: Login_58..148, Nhà tuyển dụng: Login_149..256. Mã TC sinh theo đúng bố cục từng khối trường trong tài liệu.",
+  "messages": {
+    "_comment": "Expected Result theo KBKTCN_ATS_WEB_v1.0.xlsx (bản cập nhật 04/11/2026 10:25).",
+    "required_field": "Vui lòng điền vào trường này.",
+    "blank_field": "Trường này không được bỏ trống.",
+    "invalid_email_server": "Nhập một địa chỉ email hợp lệ.",
+    "password_min": "Mật khẩu phải có ít nhất 8 ký tự.",
+    "password_no_letter": "Mật khẩu này hoàn toàn là số.",
+    "confirm_mismatch_field": "Mật khẩu xác nhận không khớp.",
+    "confirm_mismatch_function": "Mật khẩu xác nhận không khớp.",
+    "email_exists": "Email đã được sử dụng."
+  },
+  "maxlength": 255,
+  "minlength": 8,
+  "valid_password": "Kh0ngTrung#Xy9",
+  "format_values": [
+    {
+      "desc": "chu_thuong",
+      "value": "nguyenvanan"
+    },
+    {
+      "desc": "chu_in_hoa",
+      "value": "NGUYENVANAN"
+    },
+    {
+      "desc": "khong_dau",
+      "value": "nguyen van an"
+    },
+    {
+      "desc": "tieng_viet_co_dau",
+      "value": "Nguyễn Văn Ân"
+    },
+    {
+      "desc": "chu_so",
+      "value": "0123456789"
+    },
+    {
+      "desc": "ky_tu_dac_biet",
+      "value": "!#$%&'*+-/=?^_`{|}~"
+    },
+    {
+      "desc": "html_encode",
+      "value": "<b>test</b>&lt;script&gt;alert(1)&lt;/script&gt;"
+    },
+    {
+      "desc": "emoji",
+      "value": "test😀🎉"
+    }
+  ],
+  "valid_emails": [
+    "firstname@viettel.com.vn",
+    "firstname.lastname@domain.com",
+    "email@subdomain.domain.com",
+    "email@domain-one.com",
+    "firstname-lastname@domain.com",
+    "email@domain.co.jp"
+  ],
+  "invalid_emails": {
+    "_comment": "Login_98/206. browser: trình duyệt chặn submit, hiện thông báo định dạng email (message = câu chính xác nếu tài liệu có ví dụ). server: trình duyệt chấp nhận, sau khi nhấn Đăng ký hiện 'Nhập một địa chỉ email hợp lệ.'. Giá trị 'abc@xyz.xxx' là giá trị tài liệu ghi ở bước thực hiện ({uniq} = chuỗi duy nhất mỗi lần chạy).",
+    "values": [
+      {
+        "value": "abc",
+        "expect": "browser",
+        "message": "Vui lòng bao gồm '@' trong địa chỉ email. 'abc' bị thiếu '@'."
+      },
+      {
+        "value": "abc@",
+        "expect": "browser"
+      },
+      {
+        "value": "@xyz.com",
+        "expect": "browser"
+      },
+      {
+        "value": "abc@xyz",
+        "expect": "server"
+      },
+      {
+        "value": "abc{uniq}@xyz.xxx",
+        "expect": "server"
+      }
+    ]
+  },
+  "passwords": {
+    "no_letter": "20262027202820",
+    "no_digit": "Abcdefgh!xyz",
+    "valid_letters_digits": "Abc12345xyz"
+  },
+  "duplicate_email_role": "candidate",
+  "home_after_register": {
+    "_comment": "Tài liệu ghi 'Trang chủ tương ứng với tài khoản'. FE thiết kế: ứng viên mới -> trang tải/chấm CV, NTD -> /recruiter (RegisterPage.jsx: homeOf).",
+    "candidate": "/(cv-analysis|cv/new)",
+    "recruiter": "/recruiter"
+  },
+  "roles": {
+    "candidate": {
+      "general": {
+        "default_layout": "Login_58",
+        "overall_layout": "Login_59",
+        "zoom": "Login_60",
+        "tab": "Login_61",
+        "shift_tab": "Login_62"
+      },
+      "fields": {
+        "full_name": {
+          "display": "Login_63",
+          "default": "Login_64",
+          "placeholder": "Login_65",
+          "required": "Login_66",
+          "spaces": "Login_67",
+          "formats": [
+            "Login_68",
+            "Login_69",
+            "Login_70",
+            "Login_71",
+            "Login_72",
+            "Login_73",
+            "Login_74",
+            "Login_75"
+          ],
+          "copy_paste": "Login_76",
+          "maxlength": [
+            "Login_77",
+            "Login_78",
+            "Login_79"
+          ]
+        },
+        "email": {
+          "display": "Login_80",
+          "default": "Login_81",
+          "placeholder": "Login_82",
+          "required": "Login_83",
+          "spaces": "Login_84",
+          "formats": [
+            "Login_85",
+            "Login_86",
+            "Login_87",
+            "Login_88",
+            "Login_89",
+            "Login_90",
+            "Login_91",
+            "Login_92"
+          ],
+          "copy_paste": "Login_93",
+          "maxlength": [
+            "Login_94",
+            "Login_95",
+            "Login_96"
+          ],
+          "valid_format": "Login_97",
+          "invalid_format": "Login_98"
+        },
+        "password": {
+          "display": "Login_99",
+          "default": "Login_100",
+          "placeholder": "Login_101",
+          "required": "Login_102",
+          "spaces": "Login_103",
+          "formats": [
+            "Login_104",
+            "Login_105",
+            "Login_106",
+            "Login_107",
+            "Login_108",
+            "Login_109",
+            "Login_110",
+            "Login_111"
+          ],
+          "copy_paste": "Login_112",
+          "minlength": [
+            "Login_113",
+            "Login_114",
+            "Login_115"
+          ],
+          "maxlength": [
+            "Login_116",
+            "Login_117",
+            "Login_118"
+          ],
+          "format_valid": "Login_119",
+          "no_letter": "Login_120",
+          "no_digit": "Login_121"
+        },
+        "confirm_password": {
+          "display": "Login_122",
+          "default": "Login_123",
+          "placeholder": "Login_124",
+          "required": "Login_125",
+          "spaces": "Login_126",
+          "formats": [
+            "Login_127",
+            "Login_128",
+            "Login_129",
+            "Login_130",
+            "Login_131",
+            "Login_132",
+            "Login_133",
+            "Login_134"
+          ],
+          "copy_paste": "Login_135",
+          "match": "Login_136",
+          "mismatch": "Login_137"
+        }
+      },
+      "submit": {
+        "label": "Login_138",
+        "click": "Login_139"
+      },
+      "login_link": {
+        "label": "Login_140",
+        "click": "Login_141"
+      },
+      "function": {
+        "full_fields": "Login_142",
+        "required_only": "Login_143",
+        "empty_required": "Login_144",
+        "similar_email": "Login_145",
+        "duplicate_email": "Login_146",
+        "confirm_match": "Login_147",
+        "confirm_mismatch": "Login_148"
+      }
+    },
+    "recruiter": {
+      "general": {
+        "default_layout": "Login_149",
+        "overall_layout": "Login_150",
+        "zoom": "Login_151",
+        "tab": "Login_152",
+        "shift_tab": "Login_153"
+      },
+      "fields": {
+        "full_name": {
+          "display": "Login_154",
+          "default": "Login_155",
+          "placeholder": "Login_156",
+          "required": "Login_157",
+          "spaces": "Login_158",
+          "formats": [
+            "Login_159",
+            "Login_160",
+            "Login_161",
+            "Login_162",
+            "Login_163",
+            "Login_164",
+            "Login_165",
+            "Login_166"
+          ],
+          "copy_paste": "Login_167",
+          "maxlength": [
+            "Login_168",
+            "Login_169",
+            "Login_170"
+          ]
+        },
+        "company_name": {
+          "display": "Login_171",
+          "default": "Login_172",
+          "placeholder": "Login_173",
+          "required": "Login_174",
+          "spaces": "Login_175",
+          "formats": [
+            "Login_176",
+            "Login_177",
+            "Login_178",
+            "Login_179",
+            "Login_180",
+            "Login_181",
+            "Login_182",
+            "Login_183"
+          ],
+          "copy_paste": "Login_184",
+          "maxlength": [
+            "Login_185",
+            "Login_186",
+            "Login_187"
+          ]
+        },
+        "email": {
+          "display": "Login_188",
+          "default": "Login_189",
+          "placeholder": "Login_190",
+          "required": "Login_191",
+          "spaces": "Login_192",
+          "formats": [
+            "Login_193",
+            "Login_194",
+            "Login_195",
+            "Login_196",
+            "Login_197",
+            "Login_198",
+            "Login_199",
+            "Login_200"
+          ],
+          "copy_paste": "Login_201",
+          "maxlength": [
+            "Login_202",
+            "Login_203",
+            "Login_204"
+          ],
+          "valid_format": "Login_205",
+          "invalid_format": "Login_206"
+        },
+        "password": {
+          "display": "Login_207",
+          "default": "Login_208",
+          "placeholder": "Login_209",
+          "required": "Login_210",
+          "spaces": "Login_211",
+          "formats": [
+            "Login_212",
+            "Login_213",
+            "Login_214",
+            "Login_215",
+            "Login_216",
+            "Login_217",
+            "Login_218",
+            "Login_219"
+          ],
+          "copy_paste": "Login_220",
+          "minlength": [
+            "Login_221",
+            "Login_222",
+            "Login_223"
+          ],
+          "maxlength": [
+            "Login_224",
+            "Login_225",
+            "Login_226"
+          ],
+          "format_valid": "Login_227",
+          "no_letter": "Login_228",
+          "no_digit": "Login_229"
+        },
+        "confirm_password": {
+          "display": "Login_230",
+          "default": "Login_231",
+          "placeholder": "Login_232",
+          "required": "Login_233",
+          "spaces": "Login_234",
+          "formats": [
+            "Login_235",
+            "Login_236",
+            "Login_237",
+            "Login_238",
+            "Login_239",
+            "Login_240",
+            "Login_241",
+            "Login_242"
+          ],
+          "copy_paste": "Login_243",
+          "match": "Login_244",
+          "mismatch": "Login_245"
+        }
+      },
+      "submit": {
+        "label": "Login_246",
+        "click": "Login_247"
+      },
+      "login_link": {
+        "label": "Login_248",
+        "click": "Login_249"
+      },
+      "function": {
+        "full_fields": "Login_250",
+        "required_only": "Login_251",
+        "empty_required": "Login_252",
+        "similar_email": "Login_253",
+        "duplicate_email": "Login_254",
+        "confirm_match": "Login_255",
+        "confirm_mismatch": "Login_256"
+      }
+    }
+  },
+  "spaces_cases": {
+    "_comment": "Login_67/84/103/126 (Ứng viên), 158/175/192/211/234 (NTD): nhập toàn space rồi nhấn Đăng ký. expect=native: trình duyệt chặn tại trường; alert: thông báo lỗi của form sau khi gửi.",
+    "full_name": [
+      {
+        "desc": "spaces",
+        "value": "     ",
+        "expect": "alert",
+        "message": "blank_field"
+      }
+    ],
+    "company_name": [
+      {
+        "desc": "spaces",
+        "value": "     ",
+        "expect": "alert",
+        "message": "blank_field"
+      }
+    ],
+    "email": [
+      {
+        "desc": "spaces",
+        "value": "     ",
+        "expect": "native",
+        "message": "required_field"
+      }
+    ],
+    "password": [
+      {
+        "desc": "duoi_8_space",
+        "value": "     ",
+        "expect": "alert",
+        "message": "password_min"
+      },
+      {
+        "desc": "tu_8_space_xac_nhan_giong",
+        "value": "        ",
+        "confirm_same": true,
+        "expect": "alert",
+        "message": "blank_field"
+      }
+    ],
+    "confirm_password": [
+      {
+        "desc": "spaces",
+        "value": "     ",
+        "expect": "alert",
+        "message": "confirm_mismatch_field"
+      }
+    ]
+  }
+}

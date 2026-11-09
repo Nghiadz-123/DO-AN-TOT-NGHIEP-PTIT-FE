@@ -10,9 +10,8 @@ const aiApi = {
 
   // AI chấm điểm CV (kèm bóc tách thông tin CV nếu chưa có)
   scoreCv: async (cvId) => toCVAnalysis(await axiosClient.post(`${cvBase(cvId)}/analysis/score/`)),
-  // AI gợi ý sửa CV; jobId: tin tuyển dụng mục tiêu (không bắt buộc)
-  suggestCv: async (cvId, jobId) =>
-    toCVAnalysis(await axiosClient.post(`${cvBase(cvId)}/analysis/suggestions/`, { job_id: jobId || null })),
+  // AI gợi ý sửa CV theo các việc làm phù hợp với CV
+  suggestCv: async (cvId) => toCVAnalysis(await axiosClient.post(`${cvBase(cvId)}/analysis/suggestions/`)),
 
   // Việc làm phù hợp với CV, điểm cao trước: [{ job, match }]
   getRecommendedJobs: async (cvId, { limit } = {}) =>

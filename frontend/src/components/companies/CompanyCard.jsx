@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ArrowRight, BadgeCheck, Layers, MapPin, Users } from 'lucide-react'
 import Badge from '@/components/common/Badge'
 import CompanyLogo from '@/components/common/CompanyLogo'
 import FavoriteButton from '@/components/common/FavoriteButton'
@@ -9,25 +10,47 @@ export default function CompanyCard({ company }) {
   const link = `/companies/${company.id}`
 
   return (
-    <article className="card job-card">
-      <div className="job-card-head">
+    <article className="card card-interactive company-card">
+      <div className="company-card-head">
         <CompanyLogo name={company.name} src={company.logoUrl} />
-        <div className="job-card-title">
-          <Link to={link}>
-            <h3>{company.name}</h3>
-          </Link>
-          {company.isVerified && <Badge tone="success">✓ Đã xác minh</Badge>}
+        <div className="company-card-title">
+          <h3>
+            <Link to={link} className="card-link">
+              {company.name}
+            </Link>
+          </h3>
+          {company.isVerified && (
+            <Badge tone="success">
+              <BadgeCheck />
+              Đã xác minh
+            </Badge>
+          )}
         </div>
         <FavoriteButton type="company" id={company.id} />
       </div>
 
-      <div className="job-meta">
-        {company.industry && <span>🗂️ {company.industry}</span>}
-        {company.location && <span>📍 {company.location}</span>}
-        {company.companySize && <span>👥 {labelOf(COMPANY_SIZES, company.companySize)}</span>}
-      </div>
+      <ul className="job-meta">
+        {company.industry && (
+          <li>
+            <Layers />
+            {company.industry}
+          </li>
+        )}
+        {company.location && (
+          <li>
+            <MapPin />
+            {company.location}
+          </li>
+        )}
+        {company.companySize && (
+          <li>
+            <Users />
+            {labelOf(COMPANY_SIZES, company.companySize)}
+          </li>
+        )}
+      </ul>
 
-      <div className="job-card-foot text-muted">
+      <div className="job-card-foot">
         <span>
           {company.openJobCount > 0 ? (
             <>
@@ -37,9 +60,9 @@ export default function CompanyCard({ company }) {
             'Chưa có tin đang tuyển'
           )}
         </span>
-        <Link to={link} className="btn btn-outline btn-sm">
-          Xem công ty
-        </Link>
+        <span className="job-card-cta" aria-hidden="true">
+          Xem công ty <ArrowRight />
+        </span>
       </div>
     </article>
   )

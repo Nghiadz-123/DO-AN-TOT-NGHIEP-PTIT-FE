@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { FileText, FileUp, Sparkles, TriangleAlert } from 'lucide-react'
 import applicationApi from '@/api/applicationApi'
 import cvApi from '@/api/cvApi'
 import Badge from '@/components/common/Badge'
@@ -60,24 +61,32 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
       footer={
         hasCVs && (
           <>
-            <button className="btn btn-ghost" onClick={onClose}>
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
               Hủy
             </button>
-            <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting || !selectedCvId}>
+            <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={submitting || !selectedCvId}>
+              {submitting && <span className="spinner" aria-hidden="true" />}
               {submitting ? 'Đang gửi...' : 'Nộp hồ sơ'}
             </button>
           </>
         )
       }
     >
-      {loading && <Loading />}
-      {error && <div className="alert alert-error">{error}</div>}
+      {loading && <Loading text="Đang tải danh sách CV..." />}
+      {error && (
+        <div className="alert alert-error" role="alert">
+          <TriangleAlert />
+          <div className="alert-content">{error}</div>
+        </div>
+      )}
       {!loading && !hasCVs && (
         <EmptyState
+          icon={FileText}
           title="Bạn chưa có CV nào"
           description="Hãy tải CV lên để ứng tuyển."
           action={
             <Link to={`/cv/new?redirect=/jobs/${job.id}`} className="btn btn-primary">
+              <FileUp />
               Tải CV lên
             </Link>
           }
@@ -85,8 +94,8 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
       )}
       {hasCVs && (
         <>
-          <div className="form-group">
-            <label>Chọn CV</label>
+          <fieldset className="field-group">
+            <legend className="field-label">Chọn CV để nộp</legend>
             <div className="cv-options">
               {cvs.map((cv) => (
                 <label key={cv.id} className={`cv-option ${cv.id === selectedCvId ? 'selected' : ''}`}>
@@ -96,21 +105,26 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
                     checked={cv.id === selectedCvId}
                     onChange={() => setCvId(cv.id)}
                   />
-                  <span>
-                    <strong>{cv.title || cv.fileName}</strong> {cv.isDefault && <Badge tone="primary">CV chính</Badge>}
-                    <small className="text-muted"> · Cập nhật {formatDate(cv.updatedAt ?? cv.uploadedAt)}</small>
+                  <span className="cv-option-info">
+                    <strong>{cv.title || cv.fileName}</strong>
+                    <small>Cập nhật {formatDate(cv.updatedAt ?? cv.uploadedAt)}</small>
                   </span>
+                  {cv.isDefault && <Badge tone="primary">CV chính</Badge>}
                 </label>
               ))}
             </div>
-            <Link to={`/cv/new?redirect=/jobs/${job.id}`} className="small">
-              + Tải CV khác
+            <Link to={`/cv/new?redirect=/jobs/${job.id}`} className="inline-link">
+              <FileUp />
+              Tải CV khác
             </Link>
-          </div>
+          </fieldset>
 
           {FEATURES.ai && (
             <div className="ai-box">
-              <div className="ai-box-title">✨ AI đánh giá mức độ phù hợp</div>
+              <p className="ai-box-title">
+                <Sparkles />
+                AI đánh giá mức độ phù hợp
+              </p>
               {currentMatch?.failed ? (
                 <p className="text-muted">Không thể đánh giá lúc này, bạn vẫn có thể nộp hồ sơ.</p>
               ) : currentMatch ? (
@@ -144,7 +158,12 @@ export default function ApplyModal({ job, open, onClose, onApplied }) {
               onChange={(e) => setCoverLetter(e.target.value)}
             />
           </div>
-          {submitError && <div className="alert alert-error">{submitError}</div>}
+          {submitError && (
+            <div className="alert alert-error" role="alert">
+              <TriangleAlert />
+              <div className="alert-content">{submitError}</div>
+            </div>
+          )}
         </>
       )}
     </Modal>
