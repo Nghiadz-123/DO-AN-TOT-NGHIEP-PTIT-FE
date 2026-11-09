@@ -8,11 +8,12 @@ import { getErrorMessage } from '@/utils/formatters'
 const blankExperience = () => ({ role: '', company: '', period: '', description: '' })
 const blankEducation = () => ({ degree: '', school: '', period: '', description: '' })
 
+// Điền sẵn từ tài khoản (toUser chỉ có họ tên, email, SĐT, chức danh); các mục còn lại ứng viên tự nhập
 function initialCV(user) {
   return {
-    fullName: user?.fullName || '', title: user?.title || '', email: user?.email || '',
-    phone: user?.phone || '', location: user?.location || '', website: '',
-    summary: user?.about || '', skills: '', experiences: [blankExperience()],
+    fullName: user?.fullName || '', title: user?.headline || '', email: user?.email || '',
+    phone: user?.phone || '', location: '', website: '',
+    summary: '', skills: '', experiences: [blankExperience()],
     educations: [blankEducation()], projects: '',
   }
 }
