@@ -1,0 +1,179 @@
+{
+  "_comment": "Test data chức năng CV (KBKTCN_ATS_WEB_v1.0.xlsx - sheet 'Ứng viên', Candidate_1..Candidate_255). Câu thông báo / giới hạn lấy theo tài liệu; nếu tài liệu cập nhật theo ứng dụng thì chỉ sửa file này.",
+  "account": {
+    "_comment": "Tài khoản ứng viên do test tự tạo qua API (dữ liệu test, không phải tài khoản thật).",
+    "full_name": "Auto CV Tester",
+    "password": "AutoCv@12345"
+  },
+  "seed_titles": {
+    "pdf": "CV PDF Auto {n}",
+    "docx": "CV DOCX Auto {n}"
+  },
+  "messages": {
+    "list_title": "CV của tôi",
+    "list_description": "Quản lý các CV dùng để ứng tuyển. CV chính được chọn sẵn mỗi khi bạn nộp hồ sơ.",
+    "list_empty_title": "Bạn chưa có CV nào",
+    "list_empty_description": "Tải CV lên hoặc tạo CV trực tuyến để ứng tuyển nhanh",
+    "list_loading": "Đang tải danh sách CV",
+    "retry": "Thử lại",
+    "default_badge": "CV chính",
+    "public_badge": "Đang công khai",
+    "unused_label": "Chưa dùng để ứng tuyển",
+    "is_default_label": "Đang là CV chính",
+    "docx_preview_error": "Không hiển thị được file DOCX này. Hãy tải về để xem.",
+    "menu_items": ["Tải về", "Sửa thông tin", "Đặt làm CV chính", "Xóa CV"],
+    "rename_saved": "Đã lưu thay đổi CV",
+    "delete_title": "Xóa CV?",
+    "delete_confirm": "Xóa CV",
+    "cancel": "Hủy",
+    "switch_label": "Công khai CV cho nhà tuyển dụng",
+    "switch_on": "Đang bật",
+    "switch_off": "Đang tắt",
+
+    "upload_title": "Tải CV mới",
+    "upload_hint": "PDF, DOCX · tối đa 5MB",
+    "upload_ready": "Sẵn sàng tải lên",
+    "upload_ai_notice": "xử lý bằng AI",
+    "ai_consent_label": "Đồng ý xử lý dữ liệu bằng AI",
+    "title_placeholder": "VD: CV Nhân viên kinh doanh 2026",
+    "upload_button": "Tải CV lên",
+    "uploading_button": "Đang tải lên...",
+    "upload_no_file": "Vui lòng chọn file CV để tải lên.",
+    "upload_progress": "Đang tải file lên...",
+    "upload_reading": "Đang đọc nội dung CV...",
+    "upload_too_large": "File vượt quá 5MB",
+    "status_analyzing": "Đang phân tích",
+    "status_failed": "Không đọc được",
+    "no_contact": "Không tìm thấy email / số điện thoại trong CV",
+    "reparse_button": "Đọc lại nội dung CV",
+
+    "builder_title": "Tạo CV của bạn",
+    "builder_saved": "CV đã được lưu thành công.",
+    "builder_save_error": "vui lòng thử lưu lại.",
+    "builder_loading": "Đang tải CV đã lưu…",
+    "required_field": "Vui lòng điền vào trường này",
+    "invalid_email": "Vui lòng nhập email hợp lệ",
+    "invalid_phone": "Số điện thoại không hợp lệ",
+    "preview_empty_title": "CV của bạn đang dần hoàn thiện",
+    "preview_empty_description": "Điền các mục bên trái để xem nội dung xuất hiện tại đây.",
+    "print_button": "Tải CV dạng PDF",
+    "save_button": "Lưu CV",
+
+    "analysis_title": "AI chấm điểm & gợi ý sửa CV",
+    "analysis_no_cv": "Bạn chưa tải CV nào.",
+    "analysis_empty_title": "Chưa có CV để phân tích",
+    "analysis_empty_description": "Tải CV lên ở khung bên trái để bắt đầu.",
+    "not_scored_label": "Chưa chấm",
+    "not_scored_title": "CV chưa được chấm điểm",
+    "scoring": "AI đang chấm điểm CV, thường mất 5-15 giây...",
+    "suggesting": "AI đang đối chiếu CV với các tin tuyển dụng, thường mất 5-15 giây...",
+    "cv_processing": "CV đang được phân tích",
+    "cv_parse_failed": "Phân tích thất bại, vui lòng tải lại CV",
+    "no_suggestions": "CV của bạn đã rất tốt",
+    "no_profile_title": "Chưa có thông tin trích xuất",
+    "no_profile_description": "Chấm điểm CV để AI trích xuất thông tin.",
+    "priorities": ["Ưu tiên cao", "Nên sửa", "Gợi ý thêm"],
+    "tabs": ["Chấm điểm", "Gợi ý sửa CV", "Thông tin AI trích xuất"]
+  },
+  "rename_value": "CV Kế toán 2026",
+  "upload_title_field": {
+    "label": "Tên CV",
+    "maxlength": 255,
+    "tc": {
+      "display": "Candidate_61", "default": "Candidate_62", "placeholder": "Candidate_63", "optional": "Candidate_64",
+      "spaces": "Candidate_65", "trim": "Candidate_66", "copy_paste": "Candidate_75",
+      "max_over": "Candidate_76", "max_equal": "Candidate_77", "max_under": "Candidate_78"
+    },
+    "formats": [
+      {"tc_id": "Candidate_67", "desc": "chu_thuong", "value": "cv nhan vien kinh doanh"},
+      {"tc_id": "Candidate_68", "desc": "chu_in_hoa", "value": "CV NHAN VIEN KINH DOANH"},
+      {"tc_id": "Candidate_69", "desc": "khong_dau", "value": "CV Nhan vien kinh doanh"},
+      {"tc_id": "Candidate_70", "desc": "tieng_viet_co_dau", "value": "CV Nhân viên kinh doanh Hà Nội"},
+      {"tc_id": "Candidate_71", "desc": "chu_so", "value": "2026"},
+      {"tc_id": "Candidate_72", "desc": "ky_tu_dac_biet", "value": "CV #1 @Sales & Marketing (2026)!"},
+      {"tc_id": "Candidate_73", "desc": "html", "value": "<b>CV</b><script>window.__xss=1</script>&lt;i&gt;", "save": true},
+      {"tc_id": "Candidate_74", "desc": "emoji", "value": "CV Sales 🚀✨"}
+    ]
+  },
+  "builder_fields": [
+    {
+      "key": "fullName", "label": "Họ và tên", "placeholder": "Nguyễn Minh Anh", "required": true, "maxlength": 150,
+      "tc": {
+        "display": "Candidate_103", "default": "Candidate_104", "placeholder": "Candidate_105", "required": "Candidate_106",
+        "spaces": "Candidate_107", "trim": "Candidate_108", "copy_paste": "Candidate_117",
+        "max_over": "Candidate_118", "max_equal": "Candidate_119", "max_under": "Candidate_120",
+        "formats": ["Candidate_109", "Candidate_110", "Candidate_111", "Candidate_112", "Candidate_113", "Candidate_114", "Candidate_115", "Candidate_116"]
+      }
+    },
+    {
+      "key": "title", "label": "Vị trí ứng tuyển", "placeholder": "Nhân viên kinh doanh", "required": false, "maxlength": 255,
+      "tc": {
+        "display": "Candidate_121", "default": "Candidate_122", "placeholder": "Candidate_123", "optional": "Candidate_124",
+        "spaces": "Candidate_125", "trim": "Candidate_126", "copy_paste": "Candidate_135",
+        "max_over": "Candidate_136", "max_equal": "Candidate_137", "max_under": "Candidate_138",
+        "formats": ["Candidate_127", "Candidate_128", "Candidate_129", "Candidate_130", "Candidate_131", "Candidate_132", "Candidate_133", "Candidate_134"]
+      }
+    },
+    {
+      "key": "email", "label": "Email", "placeholder": "", "required": false, "maxlength": 255,
+      "tc": {
+        "display": "Candidate_139", "default": "Candidate_140", "placeholder": "Candidate_141", "optional": "Candidate_142",
+        "spaces": "Candidate_143", "trim": "Candidate_144", "copy_paste": "Candidate_153",
+        "max_over": "Candidate_154", "max_equal": "Candidate_155", "max_under": "Candidate_156",
+        "formats": ["Candidate_145", "Candidate_146", "Candidate_147", "Candidate_148", "Candidate_149", "Candidate_150", "Candidate_151", "Candidate_152"]
+      }
+    },
+    {
+      "key": "phone", "label": "Số điện thoại", "placeholder": "", "required": false, "maxlength": 20,
+      "tc": {
+        "display": "Candidate_159", "default": "Candidate_160", "placeholder": "Candidate_161", "optional": "Candidate_162",
+        "spaces": "Candidate_163", "trim": "Candidate_164", "copy_paste": "Candidate_165",
+        "max_over": "Candidate_166", "max_equal": "Candidate_167", "max_under": "Candidate_168"
+      }
+    },
+    {
+      "key": "summary", "label": "Tóm tắt nghề nghiệp", "multiline": true,
+      "placeholder": "Mô tả ngắn gọn kinh nghiệm, thế mạnh và mục tiêu nghề nghiệp…", "required": false,
+      "tc": {
+        "display": "Candidate_173", "default": "Candidate_174", "placeholder": "Candidate_175", "optional": "Candidate_176",
+        "spaces": "Candidate_177", "trim": "Candidate_178", "copy_paste": "Candidate_187",
+        "formats": ["Candidate_179", "Candidate_180", "Candidate_181", "Candidate_182", "Candidate_183", "Candidate_184", "Candidate_185", "Candidate_186"]
+      }
+    }
+  ],
+  "text_formats": [
+    {"desc": "chu_thuong", "value": "nguyen minh anh"},
+    {"desc": "chu_in_hoa", "value": "NGUYEN MINH ANH"},
+    {"desc": "khong_dau", "value": "Nguyen Minh Anh"},
+    {"desc": "tieng_viet_co_dau", "value": "Nguyễn Minh Ánh Hồng"},
+    {"desc": "chu_so", "value": "0123456789"},
+    {"desc": "ky_tu_dac_biet", "value": "!@#$%^&*()_+-=[]{};:,./?"},
+    {"desc": "html", "value": "<b>bold</b><img src=x onerror=\"window.__xss=1\">", "save": true},
+    {"desc": "emoji", "value": "Nguyễn 😀🎉"}
+  ],
+  "valid_emails": ["firstname@viettel.com.vn", "firstname.lastname@gmail.com", "email@subdomain.domain.com"],
+  "invalid_emails": ["plainaddress", "@domain.com", "email.domain.com", "email@domain@domain.com", "email@domain"],
+  "valid_phones": ["0912345678", "+84912345678"],
+  "invalid_phones": [
+    {"tc_id": "Candidate_170", "desc": "chu_cai", "value": "abcdefghij"},
+    {"tc_id": "Candidate_171", "desc": "ky_tu_dac_biet", "value": "0912@#$678"},
+    {"tc_id": "Candidate_172", "desc": "qua_ngan", "value": "0912"}
+  ],
+  "builder_full": {
+    "fullName": "Nguyễn Minh Anh",
+    "title": "Nhân viên kinh doanh",
+    "email": "minhanh.auto@example.com",
+    "phone": "0912345678",
+    "location": "Hà Nội, Việt Nam",
+    "summary": "Hơn 3 năm kinh nghiệm bán hàng B2B, luôn vượt chỉ tiêu doanh số quý.",
+    "skills": "Bán hàng, Đàm phán, Excel",
+    "projects": "Dự án mở rộng thị trường miền Bắc — trưởng nhóm, tăng 25% doanh thu.",
+    "experiences": [
+      {"role": "Trưởng nhóm bán hàng", "company": "Công ty ABC", "period": "06/2023 – Hiện tại", "description": "• Quản lý 5 nhân viên\n• Đạt 120% chỉ tiêu"},
+      {"role": "Nhân viên kinh doanh", "company": "Công ty XYZ", "period": "01/2021 – 05/2023", "description": "• Chăm sóc 40 khách hàng doanh nghiệp"}
+    ],
+    "educations": [
+      {"degree": "Cử nhân Quản trị kinh doanh", "school": "Đại học Kinh tế Quốc dân", "period": "2016 – 2020", "description": "GPA 3.4/4"}
+    ]
+  }
+}

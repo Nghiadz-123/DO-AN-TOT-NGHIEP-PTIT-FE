@@ -10,3 +10,4 @@ PyYAML==6.0.3
 python-dotenv==1.2.4
 openpyxl==3.1.5
 Pillow==11.3.0        # openpyxl cần để chèn ảnh screenshot vào báo cáo Excel
+pypdf==6.1.1          # đọc nội dung PDF xuất từ màn hình Tạo CV (Candidate_207, 208)
