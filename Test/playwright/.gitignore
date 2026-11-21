@@ -4,8 +4,6 @@ venv/
 __pycache__/
 *.pyc
 .pytest_cache/
-reports/*
-!reports/.gitkeep
 screenshots/*
 !screenshots/.gitkeep
 test-results/
