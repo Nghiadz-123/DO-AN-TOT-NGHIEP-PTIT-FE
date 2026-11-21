@@ -24,15 +24,35 @@ from openpyxl.utils import get_column_letter
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_KBKTCN = ROOT_DIR.parent / "KBKTCN_ATS_WEB_v1.0.xlsx"
-KBKTCN_SHEETS = ["Đăng nhập, Đăng ký"]
+KBKTCN_SHEETS = ["Đăng nhập, Đăng ký", "Trang chủ", "Hồ sơ cá nhân", "Ứng viên", "Nhà tuyển dụng", "Admin"]
 # Dòng tiêu đề trong sheet KBKTCN đánh dấu bắt đầu 1 chức năng -> tên sheet báo cáo
-FUNCTION_HEADINGS = {"Đăng nhập": "Đăng nhập", "Đăng ký": "Đăng ký"}
+FUNCTION_HEADINGS = {
+    "Đăng nhập": "Đăng nhập", "Đăng ký": "Đăng ký",
+    # Sheet "Ứng viên": mỗi chức năng là 1 sheet báo cáo; chức năng chưa có test sẽ không xuất hiện
+    "CV của tôi": "CV của tôi", "Tải lên CV": "Tải lên CV", "Tạo CV": "Tạo CV",
+    "Chấm điểm & gợi ý sửa CV": "Chấm điểm CV",
+    "Việc làm phù hợp": "Việc làm phù hợp", "Ứng tuyển việc làm": "Ứng tuyển việc làm",
+    "Đơn ứng tuyển của tôi": "Đơn ứng tuyển của tôi", "Thư mời ứng tuyển": "Thư mời ứng tuyển",
+    "Yêu thích": "Yêu thích",
+    # Sheet "Trang chủ", "Hồ sơ cá nhân", "Nhà tuyển dụng", "Admin": mỗi chức năng là 1 sheet báo cáo
+    "Trang chủ": "Trang chủ", "Tìm kiếm và lọc việc làm": "Tìm kiếm việc làm",
+    "Chi tiết tin tuyển dụng": "Chi tiết tin", "Công ty": "Công ty", "Hồ sơ cá nhân": "Hồ sơ cá nhân",
+    "Dashboard nhà tuyển dụng": "NTD - Dashboard", "Hồ sơ công ty": "NTD - Hồ sơ công ty",
+    "Tin tuyển dụng": "NTD - Tin tuyển dụng", "Đăng tin tuyển dụng": "NTD - Đăng tin",
+    "Ứng viên & AI sàng lọc": "NTD - Ứng viên", "Chi tiết hồ sơ ứng viên": "NTD - Chi tiết hồ sơ",
+    "Tìm ứng viên & Thư mời": "NTD - Tìm ứng viên", "Tài khoản nhà tuyển dụng": "NTD - Tài khoản",
+    "Tổng quan hệ thống": "Admin - Tổng quan", "Quản lý người dùng": "Admin - Người dùng",
+    "Quản lý doanh nghiệp": "Admin - Doanh nghiệp", "Quản lý tin tuyển dụng": "Admin - Tin tuyển dụng",
+}
 # Chức năng theo file test (dùng khi mã TC không có trong KBKTCN)
-FUNCTION_BY_MODULE = {"login": "Đăng nhập", "register": "Đăng ký"}
+FUNCTION_BY_MODULE = {
+    "login": "Đăng nhập", "register": "Đăng ký", "cv_list": "CV của tôi", "cv_upload": "Tải lên CV",
+    "cv_builder": "Tạo CV", "cv_analysis": "Chấm điểm CV",
+}
 
 STATUS_P, STATUS_F, STATUS_MANUAL, STATUS_SKIP, STATUS_NONE = "P", "F", "Manual", "Skip", "Chưa tự động"
 
-TC_ID_RE = re.compile(r"Login_\d+")
+TC_ID_RE = re.compile(r"(?:Login|Candidate|Home|Profile|Recruiter|Admin)_\d+")
 
 
 # ---------------------------------------------------------------- đọc tài liệu KBKTCN
@@ -114,7 +134,9 @@ def load_junit(path: Path) -> tuple[list[CaseResult], dict]:
                 break
         ids = [v for k, v in props if k == "testcase_id"]
         if not ids:  # test không parametrize: mã TC nằm trong tên hàm (test_login_9_...) hoặc tham số
-            ids = TC_ID_RE.findall(name) or [f"Login_{m}" for m in re.findall(r"^test_login_(\d+)_", name)]
+            ids = TC_ID_RE.findall(name) or [
+                f"{p.capitalize()}_{m}" for p, m in re.findall(r"^test_(login|candidate)_(\d+)_", name)
+            ]
         cases.append(CaseResult(
             nodeid=f"{classname}::{name}",
             module=classname.rsplit(".", 1)[-1],

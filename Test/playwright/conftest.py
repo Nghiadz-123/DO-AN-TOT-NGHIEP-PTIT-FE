@@ -24,6 +24,9 @@ from config.settings import ROOT_DIR, get_secret, load_settings
 from utils.helpers import safe_filename
 from utils.rate_limit import AuthRateLimiter, is_auth_request
 
+# Fixture của bộ test CV (tài khoản ứng viên tạo qua API, đăng nhập bằng token, NTD, AI)
+pytest_plugins = ["fixtures.cv", "fixtures.screens"]
+
 SCREENSHOT_DIR = ROOT_DIR / "screenshots"
 REPORT_DIR = ROOT_DIR / "reports"
 

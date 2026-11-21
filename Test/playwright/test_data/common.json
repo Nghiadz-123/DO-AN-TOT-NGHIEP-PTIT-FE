@@ -1,0 +1,21 @@
+{
+  "_comment": "Dữ liệu dùng chung cho engine test (tests/generic): giá trị mẫu cho các kiểm tra định dạng / tìm kiếm. Câu thông báo mong đợi đọc trực tiếp từ KBKTCN (cột Kết quả mong muốn).",
+  "formats": {
+    "lower": "nguyen minh anh",
+    "upper": "NGUYEN MINH ANH",
+    "no_accent": "Nguyen Minh Anh",
+    "vietnamese": "Nguyễn Minh Ánh Hồng",
+    "digits": "0123456789",
+    "special": "!@#$%^&*()_+-=[]{};:,./?",
+    "html": "<b>bold</b><img src=x onerror=\"window.__xss=1\">",
+    "emoji": "Nguyễn 😀🎉"
+  },
+  "search_specials": ["%", "_", "'", "\""],
+  "search_missing": "zzqx khong ton tai 9071",
+  "multiline": "Dòng thứ nhất\nDòng thứ hai\nDòng thứ ba",
+  "required_message": "Vui lòng điền vào trường này",
+  "invalid_phone_message": "Số điện thoại không hợp lệ",
+  "error_heading": "Không tải được dữ liệu",
+  "retry": "Thử lại",
+  "cancel": "Hủy"
+}
